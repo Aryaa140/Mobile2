@@ -8,7 +8,7 @@ import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "login.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2; // Tingkatkan versi database
 
     // Tabel pengguna
     public static final String TABLE_USERS = "users";
@@ -50,12 +50,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values2.put(COLUMN_NIP, "0987654321");
         values2.put(COLUMN_PASSWORD, "edppass");
         db.insert(TABLE_USERS, null, values2);
+
+        Log.d("DatabaseHelper", "Database created with sample users");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // Hapus tabel lama jika ada
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
+        // Buat tabel baru
         onCreate(db);
+        Log.d("DatabaseHelper", "Database upgraded from version " + oldVersion + " to " + newVersion);
     }
 
     // Method untuk memeriksa kredensial pengguna
@@ -70,6 +75,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         db.close();
 
+        Log.d("DatabaseHelper", "checkUser: " + username + " result: " + (count > 0));
         return count > 0;
     }
 
@@ -85,6 +91,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         db.close();
 
+        Log.d("DatabaseHelper", "checkUsername: " + username + " exists: " + (count > 0));
         return count > 0;
     }
 
@@ -100,6 +107,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         db.close();
 
+        Log.d("DatabaseHelper", "checkNip: " + nip + " exists: " + (count > 0));
         return count > 0;
     }
 
@@ -126,6 +134,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         long result = db.insert(TABLE_USERS, null, values);
         db.close();
 
+        Log.d("DatabaseHelper", "addUser: " + username + " result: " + (result != -1));
         return result != -1;
     }
 
@@ -145,6 +154,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             user.setUsername(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USERNAME)));
             user.setDivision(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DIVISION)));
             user.setNip(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NIP)));
+            Log.d("DatabaseHelper", "getUserData: Found user " + username);
+        } else {
+            Log.d("DatabaseHelper", "getUserData: User " + username + " not found");
         }
 
         if (cursor != null) {

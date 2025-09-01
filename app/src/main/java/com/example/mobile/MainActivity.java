@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
     private EditText editTextUsername, editTextPassword;
-
     private TextView buatAkun;
     private Button buttonLogin;
     private DatabaseHelper databaseHelper;
@@ -22,14 +21,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Inisialisasi database helper
         databaseHelper = new DatabaseHelper(this);
 
+        // Inisialisasi view
         buatAkun = findViewById(R.id.BuatAkun);
-
         editTextUsername = findViewById(R.id.username);
         editTextPassword = findViewById(R.id.password);
         buttonLogin = findViewById(R.id.btnLogin);
 
+        // Tombol untuk pindah ke halaman sign up
         buatAkun.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Tombol login
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,8 +53,14 @@ public class MainActivity extends AppCompatActivity {
                         // Login berhasil
                         Toast.makeText(MainActivity.this, "Login berhasil!", Toast.LENGTH_SHORT).show();
 
-                        // Pindah ke activity beranda
+                        // Dapatkan data user untuk ditampilkan di beranda
+                        DatabaseHelper.User user = databaseHelper.getUserData(username);
+
+                        // Pindah ke activity beranda dengan membawa data user
                         Intent intent = new Intent(MainActivity.this, BerandaActivity.class);
+                        intent.putExtra("USERNAME", user.getUsername());
+                        intent.putExtra("DIVISION", user.getDivision());
+                        intent.putExtra("NIP", user.getNip());
                         startActivity(intent);
                         finish(); // Menutup activity login
                     } else {
@@ -87,5 +95,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Tutup koneksi database jika perlu
     }
 }
