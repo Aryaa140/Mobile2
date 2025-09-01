@@ -15,7 +15,7 @@ import com.google.android.material.card.MaterialCardView;
 
 public class BerandaActivity extends AppCompatActivity {
 
-    Button button2, button3, button4, button5, button6;
+    Button button2, button3, button4, button5, button6, button7;
     BottomNavigationView bottomNavigationView;
     MaterialCardView cardWelcome;
 
@@ -32,6 +32,7 @@ public class BerandaActivity extends AppCompatActivity {
         button4 = findViewById(R.id.button4);
         button5 = findViewById(R.id.button5);
         button6 = findViewById(R.id.button6);
+        button7 = findViewById(R.id.button7);
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
@@ -62,6 +63,11 @@ public class BerandaActivity extends AppCompatActivity {
 
         button6.setOnClickListener(v -> {
             Intent intent  = new Intent(BerandaActivity.this, ProyekActivity.class);
+            startActivity(intent);
+        });
+
+        button7.setOnClickListener(v -> {
+            Intent intent = new Intent(BerandaActivity.this, InputActivity.class);
             startActivity(intent);
         });
 
