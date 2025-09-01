@@ -40,7 +40,9 @@
         android:id="@+id/cardForm"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="18dp"
+        android:layout_marginTop="65dp"
+        android:layout_marginRight="18dp"
+        android:layout_marginLeft="18dp"
         app:cardCornerRadius="16dp"
         app:cardElevation="6dp"
         app:layout_constraintTop_toBottomOf="@id/topAppBar"
@@ -54,7 +56,7 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/textViewNamaLengkao"
+                android:id="@+id/textViewNamaFasilitas"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="5dp"
@@ -73,69 +75,12 @@
                 android:minHeight="48dp" />
 
             <TextView
-                android:id="@+id/textViewAlamatemail"
+                android:id="@+id/textViewNamaProyek"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="5dp"
                 android:layout_marginBottom="10dp"
-                android:text="Alamat Email"
-                android:textColor="@android:color/black"
-                android:textSize="15dp"
-                tools:ignore="TextSizeCheck" />
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:hint="Silahkan Masukkan Alamat Email"
-                android:inputType="textEmailAddress"
-                android:minHeight="48dp" />
-
-            <TextView
-                android:id="@+id/textViewNomerhp"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
-                android:layout_marginBottom="10dp"
-                android:text="No. Handphone"
-                android:textColor="@android:color/black"
-                android:textSize="15dp"
-                tools:ignore="TextSizeCheck" />
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:hint="Silahkan Masukkan No. Handphone"
-                android:inputType="phone"
-                android:minHeight="48dp" />
-
-            <TextView
-                android:id="@+id/textViewAlamat"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
-                android:layout_marginBottom="10dp"
-                android:text="Alamat Tempat Tinggal"
-                android:textColor="@android:color/black"
-                android:textSize="15dp"
-                tools:ignore="TextSizeCheck" />
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:hint="Silahkan Masukkan Alamat Tempat Tinggal"
-                android:inputType="text"
-                android:minHeight="48dp" />
-
-            <TextView
-                android:id="@+id/textViewopsi"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
-                android:layout_marginBottom="10dp"
-                android:text="Marketting Akuisisi"
+                android:text="Nama Proyek"
                 android:textColor="@android:color/black"
                 android:textSize="15dp"
                 tools:ignore="TextSizeCheck" />
@@ -145,6 +90,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
+                android:minHeight="48dp" />
+
+            <TextView
+                android:id="@+id/textViewLokasi"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="5dp"
+                android:layout_marginBottom="10dp"
+                android:text="Lokasi"
+                android:textColor="@android:color/black"
+                android:textSize="15dp"
+                tools:ignore="TextSizeCheck" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:hint="Silahkan Masukkan Lokasi Fasilitas"
+                android:inputType="phone"
                 android:minHeight="48dp" />
 
             <LinearLayout
