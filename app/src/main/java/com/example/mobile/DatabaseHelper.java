@@ -82,12 +82,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             // Tambahkan divisi default
             insertDivision(db, "Marketing");
-            insertDivision(db, "HRD");
-            insertDivision(db, "IT");
-            insertDivision(db, "Finance");
-            insertDivision(db, "Operations");
-            insertDivision(db, "Sales");
-            insertDivision(db, "Customer Service");
+            insertDivision(db, "Electronic Data Procesing");
+
         }
     }
 
