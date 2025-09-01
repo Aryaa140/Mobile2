@@ -6,28 +6,38 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
     private EditText editTextUsername, editTextPassword;
+
+    private TextView buatAkun;
     private Button buttonLogin;
     private DatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main); // Sesuaikan dengan nama layout Anda
+        setContentView(R.layout.activity_main);
 
-        // Inisialisasi database helper
         databaseHelper = new DatabaseHelper(this);
 
-        // Inisialisasi view
+        buatAkun = findViewById(R.id.BuatAkun);
+
         editTextUsername = findViewById(R.id.username);
         editTextPassword = findViewById(R.id.password);
         buttonLogin = findViewById(R.id.btnLogin);
 
-        // Menangani klik tombol login
+        buatAkun.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, SignUpActivity.class);
+                startActivity(intent);
+            }
+        });
+
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // Method untuk validasi input
     private boolean validateInput() {
         String username = editTextUsername.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
