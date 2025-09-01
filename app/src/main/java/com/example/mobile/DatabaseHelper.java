@@ -48,12 +48,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         // Menambahkan divisi default
         insertDivision(db, "Marketing");
-        insertDivision(db, "HRD");
-        insertDivision(db, "IT");
-        insertDivision(db, "Finance");
-        insertDivision(db, "Operations");
-        insertDivision(db, "Sales");
-        insertDivision(db, "Customer Service");
+        insertDivision(db, "Electronic Data Procesing");
+
 
         // Menambahkan pengguna contoh
         ContentValues values = new ContentValues();
