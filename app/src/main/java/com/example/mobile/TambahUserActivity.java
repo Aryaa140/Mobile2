@@ -24,6 +24,7 @@ public class TambahUserActivity extends AppCompatActivity {
         setContentView(R.layout.activity_tambahuser);
 
         TopAppBar = findViewById(R.id.topAppBar);
+        Simpan = findViewById(R.id.btnSimpan);
         Batal = findViewById(R.id.btnBatal);
 
         TopAppBar.setNavigationOnClickListener(v -> {
