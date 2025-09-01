@@ -10,12 +10,15 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
 
 public class InputActivity extends AppCompatActivity {
 
     MaterialToolbar TopAppBar;
     MaterialCardView cardFasilitas, cardBooking, cardProyek, cardPromo, cardProspek, cardUnit;
+    BottomNavigationView bottomNavigationView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +49,33 @@ public class InputActivity extends AppCompatActivity {
         cardBooking.setOnClickListener(v -> {
             Intent intent = new Intent(InputActivity.this, BookingActivity.class);
             startActivity(intent);
+        });
+
+        cardProyek.setOnClickListener(v -> {
+            Intent intent = new Intent(InputActivity.this, InputDataProyekActivity.class);
+            startActivity(intent);
+        });
+
+        cardProspek.setOnClickListener(v -> {
+            Intent intent = new Intent(InputActivity.this, TambahUserActivity.class);
+            startActivity(intent);
+        });
+
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.nav_home) {
+                return true;
+            } else if (id == R.id.nav_folder) {
+                startActivity(new Intent(this, LihatDataActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            }
+            return false;
         });
 
 
