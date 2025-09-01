@@ -2,38 +2,81 @@ package com.example.mobile;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
-
-import androidx.activity.EdgeToEdge;
+import android.widget.EditText;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
-
-    Button btnLogin, btnSignUp;
+    private EditText editTextUsername, editTextPassword;
+    private Button buttonLogin;
+    private DatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main); // Sesuaikan dengan nama layout Anda
 
-        btnLogin = findViewById(R.id.btnLogin);
+        // Inisialisasi database helper
+        databaseHelper = new DatabaseHelper(this);
 
-        btnLogin.setOnClickListener(new View.OnClickListener() {
+        // Inisialisasi view
+        editTextUsername = findViewById(R.id.username);
+        editTextPassword = findViewById(R.id.password);
+        buttonLogin = findViewById(R.id.btnLogin);
+
+        // Menangani klik tombol login
+        buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), BerandaActivity.class);
-                startActivity(intent);
+                // Validasi input
+                if (validateInput()) {
+                    // Verifikasi kredensial
+                    String username = editTextUsername.getText().toString().trim();
+                    String password = editTextPassword.getText().toString().trim();
+
+                    if (databaseHelper.checkUser(username, password)) {
+                        // Login berhasil
+                        Toast.makeText(MainActivity.this, "Login berhasil!", Toast.LENGTH_SHORT).show();
+
+                        // Pindah ke activity beranda
+                        Intent intent = new Intent(MainActivity.this, BerandaActivity.class);
+                        startActivity(intent);
+                        finish(); // Menutup activity login
+                    } else {
+                        // Login gagal
+                        Toast.makeText(MainActivity.this, "Username atau password salah!", Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
         });
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+    }
+
+    // Method untuk validasi input
+    private boolean validateInput() {
+        String username = editTextUsername.getText().toString().trim();
+        String password = editTextPassword.getText().toString().trim();
+
+        if (TextUtils.isEmpty(username)) {
+            editTextUsername.setError("Username tidak boleh kosong");
+            editTextUsername.requestFocus();
+            return false;
+        }
+
+        if (TextUtils.isEmpty(password)) {
+            editTextPassword.setError("Password tidak boleh kosong");
+            editTextPassword.requestFocus();
+            return false;
+        }
+
+        if (password.length() < 6) {
+            editTextPassword.setError("Password minimal 6 karakter");
+            editTextPassword.requestFocus();
+            return false;
+        }
+
+        return true;
     }
 }
