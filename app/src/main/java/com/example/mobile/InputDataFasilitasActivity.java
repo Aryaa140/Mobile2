@@ -20,7 +20,6 @@ public class InputDataFasilitasActivity extends AppCompatActivity {
 
     BottomNavigationView bottomNavigationView;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,6 +29,8 @@ public class InputDataFasilitasActivity extends AppCompatActivity {
         TopAppBar = findViewById(R.id.topAppBar);
         Simpan = findViewById(R.id.btnSimpan);
         Batal = findViewById(R.id.btnBatal);
+
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         TopAppBar.setNavigationOnClickListener(v -> {
             Intent intent = new Intent(InputDataFasilitasActivity.this, InputActivity.class);
