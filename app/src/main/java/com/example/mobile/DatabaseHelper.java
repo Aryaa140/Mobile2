@@ -8,7 +8,7 @@ import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "login.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 1;
 
     // Tabel pengguna
     public static final String TABLE_USERS = "users";
@@ -17,11 +17,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_DIVISION = "division";
     public static final String COLUMN_NIP = "nip";
     public static final String COLUMN_PASSWORD = "password";
-
-    // Tabel divisi (jika ingin membuat referensi)
-    public static final String TABLE_DIVISIONS = "divisions";
-    public static final String COLUMN_DIVISION_ID = "division_id";
-    public static final String COLUMN_DIVISION_NAME = "division_name";
 
     // Query membuat tabel
     private static final String CREATE_TABLE_USERS = "CREATE TABLE " + TABLE_USERS + "("
@@ -32,11 +27,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + COLUMN_PASSWORD + " TEXT"
             + ")";
 
-    private static final String CREATE_TABLE_DIVISIONS = "CREATE TABLE " + TABLE_DIVISIONS + "("
-            + COLUMN_DIVISION_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-            + COLUMN_DIVISION_NAME + " TEXT UNIQUE"
-            + ")";
-
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -44,43 +34,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_USERS);
-        db.execSQL(CREATE_TABLE_DIVISIONS);
 
-        // Menambahkan divisi default
-        insertDivision(db, "Marketing");
-        insertDivision(db, "Electronic Data Procesing");
-
-
-        // Menambahkan pengguna contoh
+        // Menambahkan pengguna contoh - HANYA 2 DIVISI
         ContentValues values = new ContentValues();
         values.put(COLUMN_USERNAME, "admin");
-        values.put(COLUMN_DIVISION, "IT");
+        values.put(COLUMN_DIVISION, "Marketing");
         values.put(COLUMN_NIP, "1234567890");
-        values.put(COLUMN_PASSWORD, "password123"); // Dalam aplikasi nyata, password harus di-hash
+        values.put(COLUMN_PASSWORD, "password123");
         db.insert(TABLE_USERS, null, values);
-    }
 
-    private void insertDivision(SQLiteDatabase db, String divisionName) {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_DIVISION_NAME, divisionName);
-        db.insert(TABLE_DIVISIONS, null, values);
+        // User contoh untuk Electronic Data Processing
+        ContentValues values2 = new ContentValues();
+        values2.put(COLUMN_USERNAME, "edp");
+        values2.put(COLUMN_DIVISION, "Electronic Data Procesing");
+        values2.put(COLUMN_NIP, "0987654321");
+        values2.put(COLUMN_PASSWORD, "edppass");
+        db.insert(TABLE_USERS, null, values2);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion < 2) {
-            // Upgrade dari versi 1 ke 2 - tambahkan kolom baru
-            db.execSQL("ALTER TABLE " + TABLE_USERS + " ADD COLUMN " + COLUMN_DIVISION + " TEXT");
-            db.execSQL("ALTER TABLE " + TABLE_USERS + " ADD COLUMN " + COLUMN_NIP + " TEXT");
-
-            // Buat tabel divisi
-            db.execSQL(CREATE_TABLE_DIVISIONS);
-
-            // Tambahkan divisi default
-            insertDivision(db, "Marketing");
-            insertDivision(db, "Electronic Data Procesing");
-
-        }
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
+        onCreate(db);
     }
 
     // Method untuk memeriksa kredensial pengguna
@@ -128,16 +103,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return count > 0;
     }
 
-    // Method untuk mendapatkan semua divisi
-    public Cursor getAllDivisions() {
-        SQLiteDatabase db = this.getReadableDatabase();
-        return db.query(TABLE_DIVISIONS,
-                new String[]{COLUMN_DIVISION_ID, COLUMN_DIVISION_NAME},
-                null, null, null, null, COLUMN_DIVISION_NAME + " ASC");
+    // Method untuk mendapatkan semua divisi yang tersedia (hardcoded)
+    public String[] getAllDivisions() {
+        return new String[]{"Marketing", "Electronic Data Procesing"};
     }
 
     // Method untuk menambahkan pengguna baru
     public boolean addUser(String username, String division, String nip, String password) {
+        // Validasi divisi
+        if (!division.equals("Marketing") && !division.equals("Electronic Data Procesing")) {
+            Log.e("DatabaseHelper", "Division not allowed: " + division);
+            return false;
+        }
+
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_USERNAME, username);

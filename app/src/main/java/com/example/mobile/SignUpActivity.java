@@ -2,16 +2,6 @@ package com.example.mobile;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
-
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import android.content.Intent;
-import android.database.Cursor;
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
@@ -21,11 +11,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SignUpActivity extends AppCompatActivity {
-
     private EditText editTextUsername, editTextNoNip, editTextPassword, editTextPassword2;
     private Spinner spinnerDivision;
     private Button buttonBuatAkun, buttonKembali;
@@ -42,14 +29,14 @@ public class SignUpActivity extends AppCompatActivity {
 
         // Inisialisasi view
         editTextUsername = findViewById(R.id.username);
-        spinnerDivision = findViewById(R.id.spinnerOpsi); // Tetap menggunakan ID yang sama di XML
+        spinnerDivision = findViewById(R.id.spinnerOpsi);
         editTextNoNip = findViewById(R.id.noNip);
         editTextPassword = findViewById(R.id.password);
         editTextPassword2 = findViewById(R.id.password2);
         buttonBuatAkun = findViewById(R.id.btnBuatAkun);
         buttonKembali = findViewById(R.id.btnKembali);
 
-        // Setup spinner dengan divisi dari database
+        // Setup spinner dengan divisi dari database helper
         setupDivisionSpinner();
 
         // Menangani klik tombol buat akun
@@ -91,24 +78,19 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
-    // Method untuk setup spinner dengan divisi dari database
+    // Method untuk setup spinner dengan divisi
     private void setupDivisionSpinner() {
-        List<String> divisions = new ArrayList<>();
-        divisions.add("Pilih Divisi"); // Item default
+        // Ambil divisi dari database helper
+        String[] divisions = databaseHelper.getAllDivisions();
 
-        // Ambil divisi dari database
-        Cursor cursor = databaseHelper.getAllDivisions();
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                String divisionName = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_DIVISION_NAME));
-                divisions.add(divisionName);
-            } while (cursor.moveToNext());
-            cursor.close();
-        }
+        // Buat array dengan tambahan "Pilih Divisi" di awal
+        String[] spinnerItems = new String[divisions.length + 1];
+        spinnerItems[0] = "Pilih Divisi";
+        System.arraycopy(divisions, 0, spinnerItems, 1, divisions.length);
 
         // Create an ArrayAdapter
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, divisions);
+                android.R.layout.simple_spinner_item, spinnerItems);
 
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
