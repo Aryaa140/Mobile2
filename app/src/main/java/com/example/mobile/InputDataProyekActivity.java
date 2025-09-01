@@ -20,7 +20,7 @@ import java.util.Calendar;
 
 public class InputDataProyekActivity extends AppCompatActivity {
 
-    Button btnPilihTanggal;
+    Button btnPilihTanggal, Batal;
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
 
@@ -31,6 +31,7 @@ public class InputDataProyekActivity extends AppCompatActivity {
         setContentView(R.layout.activity_input_data_proyek);
 
         btnPilihTanggal = findViewById(R.id.btnPilihTanggal);
+        Batal = findViewById(R.id.btnBatal);
 
         TopAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
@@ -57,6 +58,12 @@ public class InputDataProyekActivity extends AppCompatActivity {
                         timePickerDialog.show();
                     }, year, month, day);
             datePickerDialog.show();
+        });
+
+        Batal.setOnClickListener(v -> {
+            Intent intent = new Intent(InputDataProyekActivity.this, InputActivity.class);
+            startActivity(intent);
+            finish();
         });
 
         bottomNavigationView.setOnItemSelectedListener(item -> {

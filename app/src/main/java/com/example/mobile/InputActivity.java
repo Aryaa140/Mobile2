@@ -35,6 +35,8 @@ public class InputActivity extends AppCompatActivity {
         cardProspek = findViewById(R.id.cardProspek);
         cardUnit = findViewById(R.id.cardUnit);
 
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+
         TopAppBar.setNavigationOnClickListener(v -> {
             Intent intent = new Intent(InputActivity.this, BerandaActivity.class);
             startActivity(intent);
