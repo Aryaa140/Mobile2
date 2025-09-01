@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_home"
+            android:title="Beranda"/>
+
+        <item
+            android:id="@+id/nav_folder"
+            android:icon="@drawable/ic_folder"
+            android:title="Lihat Data"/>
+
+        <item
+            android:id="@+id/nav_profile"
+            android:icon="@drawable/ic_person"
+            android:title="Profile"/>
+</menu>
