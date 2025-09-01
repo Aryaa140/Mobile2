@@ -56,7 +56,7 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/textViewNamaFasilitas"
+                android:id="@+id/textViewNamaProyek"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="5dp"
@@ -70,26 +70,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
-                android:hint="Silahkan Masukkan Nama Fasilitas Umum"
+                android:hint="Silahkan Masukkan Nama Proyek"
                 android:inputType="textPersonName"
                 android:minHeight="48dp" />
 
             <TextView
-                android:id="@+id/textViewNamaProyek"
+                android:id="@+id/textViewNama"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="5dp"
                 android:layout_marginBottom="10dp"
-                android:text="Nama Proyek"
+                android:text="Lokasi Proyek"
                 android:textColor="@android:color/black"
                 android:textSize="15dp"
                 tools:ignore="TextSizeCheck" />
 
-            <Spinner
-                android:id="@+id/spinnerRole"
+            <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
+                android:layout_marginBottom="20dp"
+                android:hint="Silahkan Masukkan Lokasi Proyek"
+                android:inputType="textPersonName"
                 android:minHeight="48dp" />
 
             <TextView
@@ -98,18 +99,20 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="5dp"
                 android:layout_marginBottom="10dp"
-                android:text="Lokasi"
+                android:text="Tanggal Proyek Dibuat"
                 android:textColor="@android:color/black"
                 android:textSize="15dp"
                 tools:ignore="TextSizeCheck" />
 
-            <EditText
+            <Button
+                android:id="@+id/btnPilihLokasi"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:hint="Silahkan Masukkan Lokasi Fasilitas"
-                android:inputType="phone"
-                android:minHeight="48dp" />
+                android:text="Input Tanggal"
+                android:textColor="@android:color/black"
+                android:backgroundTint="@android:color/white"
+                android:minHeight="48dp"
+                android:layout_marginBottom="16dp"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
