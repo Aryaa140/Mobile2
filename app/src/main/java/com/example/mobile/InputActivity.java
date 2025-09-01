@@ -16,7 +16,7 @@ import com.google.android.material.card.MaterialCardView;
 public class InputActivity extends AppCompatActivity {
 
     MaterialToolbar TopAppBar;
-    MaterialCardView cardFasilitas, cardBooking, cardProyek, cardPromo, cardProspek, cardUnit;
+    MaterialCardView cardFasilitas, cardProyek;
     BottomNavigationView bottomNavigationView;
 
 
@@ -29,11 +29,7 @@ public class InputActivity extends AppCompatActivity {
         TopAppBar = findViewById(R.id.topAppBar);
 
         cardFasilitas = findViewById(R.id.cardFasilitas);
-        cardBooking = findViewById(R.id.cardBooking);
         cardProyek = findViewById(R.id.cardProyek);
-        cardPromo = findViewById(R.id.cardPromo);
-        cardProspek = findViewById(R.id.cardProspek);
-        cardUnit = findViewById(R.id.cardUnit);
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
@@ -48,20 +44,12 @@ public class InputActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        cardBooking.setOnClickListener(v -> {
-            Intent intent = new Intent(InputActivity.this, BookingActivity.class);
-            startActivity(intent);
-        });
 
         cardProyek.setOnClickListener(v -> {
             Intent intent = new Intent(InputActivity.this, InputDataProyekActivity.class);
             startActivity(intent);
         });
-
-        cardProspek.setOnClickListener(v -> {
-            Intent intent = new Intent(InputActivity.this, TambahUserActivity.class);
-            startActivity(intent);
-        });
+        
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
