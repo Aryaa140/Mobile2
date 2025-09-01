@@ -105,7 +105,7 @@
                 tools:ignore="TextSizeCheck" />
 
             <Button
-                android:id="@+id/btnPilihLokasi"
+                android:id="@+id/btnPilihTanggal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Input Tanggal"
