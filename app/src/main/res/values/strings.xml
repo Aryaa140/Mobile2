@@ -7,5 +7,14 @@
         <item>Electronic Data Processing</item>
     </string-array>
 
+    <string-array name="opsi_spinnerProspek">
+        <item>Pameran</item>
+        <item>Sosial Media</item>
+        <item>User Get User</item>
+        <item>Open Table</item>
+        <item>Open Houser</item>
+        <item>Canvasing/Sebar Brosur</item>
+    </string-array>
+
 </resources>
 
