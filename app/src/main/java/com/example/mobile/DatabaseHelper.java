@@ -8,7 +8,22 @@ import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "login.db";
-    private static final int DATABASE_VERSION = 2; // Tingkatkan versi database
+    private static final int DATABASE_VERSION = 3; // Tingkatkan versi database
+    // tabel pelanggan
+    public static final String TABLE_PROSPEK = "prospek";
+    public static final String COLUMN_PROSPEK_ID = "prospek_id";
+    public static final String COLUMN_NAMA = "nama";
+    public static final String COLUMN_EMAIL = "email";
+    public static final String COLUMN_NO_HP = "no_hp";
+    public static final String COLUMN_ALAMAT = "alamat";
+    public static final String COLUMN_REFERENSI = "referensi";
+    private static final String CREATE_TABLE_PROSPEK = "CREATE TABLE " + TABLE_PROSPEK + "("
+            + COLUMN_PROSPEK_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            + COLUMN_NAMA + " TEXT NOT NULL,"
+            + COLUMN_EMAIL + " TEXT,"
+            + COLUMN_NO_HP + " TEXT,"
+            + COLUMN_ALAMAT + " TEXT,"
+            + COLUMN_REFERENSI + " TEXT"+")";
 
     // Tabel pengguna
     public static final String TABLE_USERS = "users";
@@ -34,6 +49,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_USERS);
+        db.execSQL(CREATE_TABLE_PROSPEK );
 
         // Menambahkan pengguna contoh - HANYA 2 DIVISI
         ContentValues values = new ContentValues();
@@ -206,4 +222,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             this.nip = nip;
         }
     }
+
+   /**/
+   public long addProspek(String nama, String email, String noHp, String alamat, String referensi) {
+       SQLiteDatabase db = this.getWritableDatabase();
+       ContentValues values = new ContentValues();
+
+       values.put(COLUMN_NAMA, nama);
+       values.put(COLUMN_EMAIL, email);
+       values.put(COLUMN_NO_HP, noHp);
+       values.put(COLUMN_ALAMAT, alamat);
+       values.put(COLUMN_REFERENSI, referensi);
+
+       long result = db.insert(TABLE_PROSPEK, null, values);
+       db.close();
+
+       Log.d("DatabaseHelper", "addProspek: " + nama + " result: " + result);
+       return result;
+   }
+    public Cursor getAllProspek() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns = {
+                COLUMN_PROSPEK_ID,
+                COLUMN_NAMA,
+                COLUMN_EMAIL,
+                COLUMN_NO_HP,
+                COLUMN_ALAMAT,
+                COLUMN_REFERENSI
+        };
+
+        return db.query(TABLE_PROSPEK, columns, null, null, null, null,
+                COLUMN_PROSPEK_ID + " DESC");
+    }
+
 }
