@@ -69,7 +69,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         Log.d("DatabaseHelper", "Database created with sample users");
     }
-
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Hapus tabel lama jika ada
