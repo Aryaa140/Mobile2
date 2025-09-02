@@ -11,11 +11,12 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.card.MaterialCardView;
 
 public class LihatDataActivity extends AppCompatActivity {
 
     MaterialToolbar TopAppBar;
-
+    MaterialCardView cardFasilitas, cardProyek, cardPromo, cardProspek, cardBooking;
     BottomNavigationView bottomNavigationView;
 
     @Override
@@ -27,11 +28,23 @@ public class LihatDataActivity extends AppCompatActivity {
         TopAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
+        cardFasilitas = findViewById(R.id.cardFasilitas);
+        cardProyek = findViewById(R.id.cardProyek);
+        cardProspek = findViewById(R.id.cardProspek);
+        cardBooking = findViewById(R.id.cardBooking);
+        cardPromo = findViewById(R.id.cardPromo);
+
         TopAppBar.setNavigationOnClickListener(v -> {
             Intent intent = new Intent(LihatDataActivity.this, BerandaActivity.class);
             startActivity(intent);
             finish();
         });
+
+        cardProspek.setOnClickListener(v -> {
+            Intent intent = new Intent(LihatDataActivity.this, LihatDataProspekActivity.class);
+            startActivity(intent);
+        });
+
 
         bottomNavigationView.setSelectedItemId(R.id.nav_folder);
 
