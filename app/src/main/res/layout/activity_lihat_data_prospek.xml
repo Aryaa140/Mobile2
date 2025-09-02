@@ -136,9 +136,7 @@
                             android:textSize="14sp"
                             app:cornerRadius="8dp"
                             app:backgroundTint="@android:color/holo_blue_dark"
-                            app:iconPadding="0dp"
-                            app:insetTop="0dp"
-                            app:insetBottom="0dp" />
+                            app:iconPadding="0dp" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnDelete"
@@ -150,9 +148,7 @@
                             android:textSize="14sp"
                             app:cornerRadius="8dp"
                             app:backgroundTint="@android:color/holo_red_dark"
-                            app:iconPadding="0dp"
-                            app:insetTop="0dp"
-                            app:insetBottom="0dp" />
+                            app:iconPadding="0dp" />
 
                     </LinearLayout>
                 </LinearLayout>
