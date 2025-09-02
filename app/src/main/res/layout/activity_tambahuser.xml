@@ -65,6 +65,7 @@
                 tools:ignore="TextSizeCheck" />
 
             <EditText
+                android:id="@+id/editTextNama"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
@@ -84,6 +85,7 @@
                 tools:ignore="TextSizeCheck" />
 
             <EditText
+                android:id="@+id/editTextEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
@@ -103,6 +105,7 @@
                 tools:ignore="TextSizeCheck" />
 
             <EditText
+                android:id="@+id/editTextNoHp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
@@ -122,6 +125,7 @@
                 tools:ignore="TextSizeCheck" />
 
             <EditText
+                android:id="@+id/editTextAlamat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
