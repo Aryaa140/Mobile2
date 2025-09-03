@@ -13,6 +13,12 @@
         android:theme="@style/Theme.Mobile"
         tools:targetApi="31">
         <activity
+            android:name=".HapusAkunActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LupaPasswordActivity"
+            android:exported="false" />
+        <activity
             android:name=".GantiPasswordActivity"
             android:exported="false" />
         <activity

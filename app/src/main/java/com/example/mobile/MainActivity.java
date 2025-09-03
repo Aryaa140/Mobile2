@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
     private EditText editTextUsername, editTextPassword;
-    private TextView buatAkun;
+    private TextView buatAkun, lupaPassword;
     private Button buttonLogin;
     private DatabaseHelper databaseHelper;
 
@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Inisialisasi view
         buatAkun = findViewById(R.id.BuatAkun);
+        lupaPassword = findViewById(R.id.lupaPassword);
         editTextUsername = findViewById(R.id.username);
         editTextPassword = findViewById(R.id.password);
         buttonLogin = findViewById(R.id.btnLogin);
@@ -35,6 +36,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, SignUpActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        lupaPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, LupaPasswordActivity.class);
                 startActivity(intent);
             }
         });
