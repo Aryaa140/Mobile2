@@ -13,7 +13,6 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class ProfileActivity extends AppCompatActivity {
-
     BottomNavigationView bottomNavigationView;
     CardView cardEditProfil, cardGantiPW, cardHapusAkun, cardLogout;
 

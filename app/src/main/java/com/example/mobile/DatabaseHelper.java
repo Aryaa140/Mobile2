@@ -80,6 +80,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.d("DatabaseHelper", "Database upgraded from version " + oldVersion + " to " + newVersion);
     }
 
+
+
     // Method untuk memeriksa kredensial pengguna
     public boolean checkUser(String username, String password) {
         SQLiteDatabase db = this.getReadableDatabase();
