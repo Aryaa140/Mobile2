@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "login.db";
@@ -223,6 +225,64 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
    /**/
+   public static class Prospek {
+       private int prospekId;
+       private String nama;
+       private String email;
+       private String noHp;
+       private String alamat;
+       private String referensi;
+
+       // Getter dan Setter
+       public int getProspekId() {
+           return prospekId;
+       }
+
+       public void setProspekId(int prospekId) {
+           this.prospekId = prospekId;
+       }
+
+       public String getNama() {
+           return nama;
+       }
+
+       public void setNama(String nama) {
+           this.nama = nama;
+       }
+
+       public String getEmail() {
+           return email;
+       }
+
+       public void setEmail(String email) {
+           this.email = email;
+       }
+
+       public String getNoHp() {
+           return noHp;
+       }
+
+       public void setNoHp(String noHp) {
+           this.noHp = noHp;
+       }
+
+       public String getAlamat() {
+           return alamat;
+       }
+
+       public void setAlamat(String alamat) {
+           this.alamat = alamat;
+       }
+
+       public String getReferensi() {
+           return referensi;
+       }
+
+       public void setReferensi(String referensi) {
+           this.referensi = referensi;
+       }
+   }
+   
    public long addProspek(String nama, String email, String noHp, String alamat, String referensi) {
        SQLiteDatabase db = this.getWritableDatabase();
        ContentValues values = new ContentValues();
@@ -239,7 +299,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
        Log.d("DatabaseHelper", "addProspek: " + nama + " result: " + result);
        return result;
    }
-    public Cursor getAllProspek() {
+    /*public Cursor getAllProspek() {
         SQLiteDatabase db = this.getReadableDatabase();
         String[] columns = {
                 COLUMN_PROSPEK_ID,
@@ -252,6 +312,113 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return db.query(TABLE_PROSPEK, columns, null, null, null, null,
                 COLUMN_PROSPEK_ID + " DESC");
+    }*/
+    public List<Prospek> getAllProspek() {
+        List<Prospek> prospekList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] columns = {
+                COLUMN_PROSPEK_ID,
+                COLUMN_NAMA,
+                COLUMN_EMAIL,
+                COLUMN_NO_HP,
+                COLUMN_ALAMAT,
+                COLUMN_REFERENSI
+        };
+
+        Cursor cursor = db.query(TABLE_PROSPEK, columns, null, null,
+                null, null, COLUMN_NAMA + " ASC");
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                Prospek prospek = new Prospek();
+                prospek.setProspekId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PROSPEK_ID)));
+                prospek.setNama(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA)));
+                prospek.setEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)));
+                prospek.setNoHp(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NO_HP)));
+                prospek.setAlamat(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ALAMAT)));
+                prospek.setReferensi(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI)));
+
+                prospekList.add(prospek);
+            } while (cursor.moveToNext());
+
+            cursor.close();
+        }
+
+        db.close();
+        return prospekList;
     }
+
+    // Method untuk mendapatkan prospek by ID
+    public Prospek getProspekById(int prospekId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns = {
+                COLUMN_PROSPEK_ID,
+                COLUMN_NAMA,
+                COLUMN_EMAIL,
+                COLUMN_NO_HP,
+                COLUMN_ALAMAT,
+                COLUMN_REFERENSI
+        };
+
+        String selection = COLUMN_PROSPEK_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(prospekId)};
+
+        Cursor cursor = db.query(TABLE_PROSPEK, columns, selection, selectionArgs, null, null, null);
+
+        Prospek prospek = null;
+        if (cursor != null && cursor.moveToFirst()) {
+            prospek = new Prospek();
+            prospek.setProspekId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PROSPEK_ID)));
+            prospek.setNama(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA)));
+            prospek.setEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)));
+            prospek.setNoHp(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NO_HP)));
+            prospek.setAlamat(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ALAMAT)));
+            prospek.setReferensi(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI)));
+
+            cursor.close();
+        }
+
+        db.close();
+        return prospek;
+    }
+
+    // Method untuk update prospek
+    public int updateProspek(int prospekId, String nama, String email, String noHp, String alamat, String referensi) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(COLUMN_NAMA, nama);
+        values.put(COLUMN_EMAIL, email);
+        values.put(COLUMN_NO_HP, noHp);
+        values.put(COLUMN_ALAMAT, alamat);
+        values.put(COLUMN_REFERENSI, referensi);
+
+        String selection = COLUMN_PROSPEK_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(prospekId)};
+
+        int result = db.update(TABLE_PROSPEK, values, selection, selectionArgs);
+        db.close();
+
+        Log.d("DatabaseHelper", "updateProspek ID: " + prospekId + " result: " + result);
+        return result;
+    }
+
+    // Method untuk menghapus prospek
+    public int deleteProspek(int prospekId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String selection = COLUMN_PROSPEK_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(prospekId)};
+
+        int result = db.delete(TABLE_PROSPEK, selection, selectionArgs);
+        db.close();
+
+        Log.d("DatabaseHelper", "deleteProspek ID: " + prospekId + " result: " + result);
+        return result;
+    }
+
+    // Method untuk menambahkan prospek (sudah ada, dipertahankan)
+
+
 
 }
