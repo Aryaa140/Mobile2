@@ -21,7 +21,6 @@ import java.util.Calendar;
 
 public class BookingActivity extends AppCompatActivity {
 
-    Button btnPilihLokasi;
     EditText editDateTime;
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
@@ -32,7 +31,6 @@ public class BookingActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_booking);
 
-        btnPilihLokasi = findViewById(R.id.btnPilihLokasi);
         editDateTime = findViewById(R.id.editDateTime);
 
         TopAppBar = findViewById(R.id.topAppBar);
@@ -44,12 +42,6 @@ public class BookingActivity extends AppCompatActivity {
             finish();
         });
 
-        btnPilihLokasi.setOnClickListener(v -> {
-            Uri gmmIntentUri = Uri.parse("geo:-7.398656,112.621292?q=Quality Riverside Krian");
-            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-            mapIntent.setPackage("com.google.android.apps.maps");
-            startActivity(mapIntent);
-        });
 
         editDateTime.setOnClickListener(v -> {
             final Calendar calendar = Calendar.getInstance();
