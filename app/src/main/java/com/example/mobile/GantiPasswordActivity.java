@@ -5,48 +5,31 @@ import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class ProfileActivity extends AppCompatActivity {
+public class GantiPasswordActivity extends AppCompatActivity {
 
+    MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
-    CardView cardEditProfil, cardGantiPW, cardLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_profile);
+        setContentView(R.layout.activity_ganti_password);
 
+        TopAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
-        cardLogout = findViewById(R.id.card_logout);
-        cardEditProfil = findViewById(R.id.cardEditProfil);
-        cardGantiPW = findViewById(R.id.cardGantiPW);
 
         bottomNavigationView.setSelectedItemId(R.id.nav_profile);
 
-        cardEditProfil.setOnClickListener(v -> {
-            Intent intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            finish();
-        });
-
-        cardGantiPW.setOnClickListener(v -> {
-            Intent intent = new Intent(ProfileActivity.this, GantiPasswordActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            finish();
-        });
-
-        cardLogout.setOnClickListener(v -> {
-            Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        TopAppBar.setNavigationOnClickListener(v -> {
+            Intent intent = new Intent(GantiPasswordActivity.this, ProfileActivity.class);
             startActivity(intent);
             finish();
         });
@@ -67,8 +50,6 @@ public class ProfileActivity extends AppCompatActivity {
             }
             return false;
         });
-
-
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());

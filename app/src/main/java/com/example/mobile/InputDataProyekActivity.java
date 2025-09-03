@@ -66,6 +66,12 @@ public class InputDataProyekActivity extends AppCompatActivity {
             finish();
         });
 
+        TopAppBar.setNavigationOnClickListener(v -> {
+            Intent intent = new Intent(InputDataProyekActivity.this, InputActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
 

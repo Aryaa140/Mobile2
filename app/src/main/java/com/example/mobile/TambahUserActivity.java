@@ -64,6 +64,7 @@ public class TambahUserActivity extends AppCompatActivity {
         editTextNoHp = findViewById(R.id.editTextNoHp);
         editTextAlamat = findViewById(R.id.editTextAlamat);
         spinnerReferensi = findViewById(R.id.spinnerRole);
+
         btnSimpan = findViewById(R.id.btnSimpan);
         btnBatal = findViewById(R.id.btnBatal);
 

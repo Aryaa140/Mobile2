@@ -39,6 +39,7 @@
             android:padding="16dp">
 
             <androidx.cardview.widget.CardView
+                android:id="@+id/cardEditProfil"
                 android:layout_width="match_parent"
                 android:layout_height="75dp"
                 android:layout_marginBottom="16dp"
@@ -72,6 +73,7 @@
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
+                android:id="@+id/cardGantiPW"
                 android:layout_width="match_parent"
                 android:layout_height="75dp"
                 android:layout_marginBottom="16dp"
@@ -96,10 +98,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerInParent="true"
-                        android:text="Ganti Password"
+                        android:text="Ganti Password/Lupa Password"
                         android:textColor="@android:color/black"
-                        android:textSize="16sp"
+                        android:textSize="14sp"
                         android:textStyle="bold"/>
+
                 </RelativeLayout>
             </androidx.cardview.widget.CardView>
 

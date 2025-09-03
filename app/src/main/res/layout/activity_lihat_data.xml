@@ -54,7 +54,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardProspek"
                 android:layout_width="match_parent"
                 android:layout_height="75dp"
@@ -86,9 +86,9 @@
                         android:textStyle="bold"/>
 
                 </RelativeLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardFasilitas"
                 android:layout_width="match_parent"
                 android:layout_height="75dp"
@@ -119,9 +119,9 @@
                         android:textSize="16sp"
                         android:textStyle="bold"/>
                 </RelativeLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardProyek"
                 android:layout_width="match_parent"
                 android:layout_height="75dp"
@@ -152,9 +152,9 @@
                         android:textSize="16sp"
                         android:textStyle="bold"/>
                 </RelativeLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardBooking"
                 android:layout_width="match_parent"
                 android:layout_height="75dp"
@@ -185,9 +185,9 @@
                         android:textSize="16sp"
                         android:textStyle="bold"/>
                 </RelativeLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardPromo"
                 android:layout_width="match_parent"
                 android:layout_height="75dp"
@@ -218,7 +218,7 @@
                         android:textSize="16sp"
                         android:textStyle="bold"/>
                 </RelativeLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </ScrollView>
