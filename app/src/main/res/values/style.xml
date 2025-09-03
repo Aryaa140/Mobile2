@@ -1,10 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
-
 <resources>
 
     <style name="ToolbarWhiteIcons" parent="ThemeOverlay.Material3.ActionBar">
         <item name="colorControlNormal">@android:color/white</item>
-
         <item name="colorControlActivated">@android:color/white</item>
         <item name="android:textColorPrimary">@android:color/white</item>
     </style>
@@ -22,6 +19,11 @@
         <item name="android:insetBottom">8dp</item>
     </style>
 
+    <!-- Simpan CustomCardView di sini aja -->
+    <style name="CustomCardView" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">#FFFFFF</item> <!-- paksa putih -->
+        <item name="android:background">#FFFFFF</item> <!-- tambahan biar pasti -->
+    </style>
 
 
 </resources>

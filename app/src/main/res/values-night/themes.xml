@@ -1,7 +1,11 @@
+<!-- res/values/themes.xml -->
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+
     <style name="Base.Theme.Mobile" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <!-- Override card supaya tetap putih -->
+        <item name="cardViewStyle">@style/CustomCardView</item>
+        <item name="materialCardViewStyle">@style/CustomCardView</item>
     </style>
+
+    <style name="Theme.Mobile" parent="Base.Theme.Mobile" />
 </resources>
