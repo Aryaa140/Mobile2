@@ -213,7 +213,62 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return count > 0;
     }
+// Di class DatabaseHelper tambahkan method berikut:
 
+    // Method untuk update data user
+    public boolean updateUser(String nip, String newUsername, String newDivision) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_USERNAME, newUsername);
+        values.put(COLUMN_DIVISION, newDivision);
+
+        String selection = COLUMN_NIP + " = ?";
+        String[] selectionArgs = {nip};
+
+        try {
+            int rowsAffected = db.update(TABLE_USERS, values, selection, selectionArgs);
+            return rowsAffected > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (db != null && db.isOpen()) {
+                db.close();
+            }
+        }
+    }
+
+    // Method untuk mendapatkan user berdasarkan NIP
+    public User getUserByNip(String nip) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns = {
+                COLUMN_ID,
+                COLUMN_USERNAME,
+                COLUMN_DIVISION,
+                COLUMN_NIP
+        };
+
+        String selection = COLUMN_NIP + " = ?";
+        String[] selectionArgs = {nip};
+
+        Cursor cursor = db.query(TABLE_USERS, columns, selection, selectionArgs, null, null, null);
+
+        User user = null;
+        if (cursor != null && cursor.moveToFirst()) {
+            user = new User();
+            user.setId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)));
+            user.setUsername(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USERNAME)));
+            user.setDivision(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DIVISION)));
+            user.setNip(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NIP)));
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+        db.close();
+
+        return user;
+    }
     // Kelas model untuk data user
     public static class User {
         private int id;
