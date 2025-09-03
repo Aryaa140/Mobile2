@@ -183,6 +183,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return user;
     }
+    // Method untuk update password user
+    public boolean updateUserPassword(String username, String newPassword) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_PASSWORD, newPassword);
+
+        String selection = COLUMN_USERNAME + " = ?";
+        String[] selectionArgs = {username};
+
+        int rowsAffected = db.update(TABLE_USERS, values, selection, selectionArgs);
+        db.close();
+
+        Log.d("DatabaseHelper", "updateUserPassword: " + username + " result: " + (rowsAffected > 0));
+        return rowsAffected > 0;
+    }
+
+    // Method untuk verifikasi password lama (jika perlu)
+    public boolean verifyCurrentPassword(String username, String currentPassword) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns = {COLUMN_ID};
+        String selection = COLUMN_USERNAME + " = ? AND " + COLUMN_PASSWORD + " = ?";
+        String[] selectionArgs = {username, currentPassword};
+
+        Cursor cursor = db.query(TABLE_USERS, columns, selection, selectionArgs, null, null, null);
+        int count = cursor.getCount();
+        cursor.close();
+        db.close();
+
+        return count > 0;
+    }
 
     // Kelas model untuk data user
     public static class User {
