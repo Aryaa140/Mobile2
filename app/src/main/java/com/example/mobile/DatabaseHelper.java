@@ -271,6 +271,45 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return user;
     }
+    // Di class DatabaseHelper tambahkan method berikut:
+
+    // Method untuk menghapus user berdasarkan ID
+    public boolean deleteUser(int userId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String selection = COLUMN_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(userId)};
+
+        try {
+            int rowsAffected = db.delete(TABLE_USERS, selection, selectionArgs);
+            return rowsAffected > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (db != null && db.isOpen()) {
+                db.close();
+            }
+        }
+    }
+
+    // Method untuk mendapatkan user ID berdasarkan username
+    public int getUserId(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns = {COLUMN_ID};
+        String selection = COLUMN_USERNAME + " = ?";
+        String[] selectionArgs = {username};
+
+        Cursor cursor = db.query(TABLE_USERS, columns, selection, selectionArgs, null, null, null);
+
+        int userId = -1;
+        if (cursor != null && cursor.moveToFirst()) {
+            userId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
+            cursor.close();
+        }
+
+        db.close();
+        return userId;
+    }
     // Kelas model untuk data user
     public static class User {
         private int id;
