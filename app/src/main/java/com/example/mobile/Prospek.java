@@ -1,15 +1,15 @@
 package com.example.mobile;
 
 public class Prospek {
-    private int id;
+    private int prospekId;
     private String nama;
     private String email;
     private String noHp;
     private String alamat;
     private String referensi;
 
-    public Prospek(int id, String nama, String email, String noHp, String alamat, String referensi) {
-        this.id = id;
+    public Prospek(int prospekId, String nama, String email, String noHp, String alamat, String referensi) {
+        this.prospekId = prospekId;
         this.nama = nama;
         this.email = email;
         this.noHp = noHp;
@@ -17,7 +17,7 @@ public class Prospek {
         this.referensi = referensi;
     }
 
-    public int getId() { return id; }
+    public int getProspekId() { return prospekId; }
     public String getNama() { return nama; }
     public String getEmail() { return email; }
     public String getNoHp() { return noHp; }
