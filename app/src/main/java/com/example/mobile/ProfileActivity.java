@@ -15,7 +15,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 public class ProfileActivity extends AppCompatActivity {
 
     BottomNavigationView bottomNavigationView;
-    CardView cardEditProfil, cardGantiPW, cardLogout;
+    CardView cardEditProfil, cardGantiPW, cardHapusAkun, cardLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +27,7 @@ public class ProfileActivity extends AppCompatActivity {
         cardLogout = findViewById(R.id.card_logout);
         cardEditProfil = findViewById(R.id.cardEditProfil);
         cardGantiPW = findViewById(R.id.cardGantiPW);
+        cardHapusAkun = findViewById(R.id.cardHapusAkun);
 
         bottomNavigationView.setSelectedItemId(R.id.nav_profile);
 
@@ -39,6 +40,13 @@ public class ProfileActivity extends AppCompatActivity {
 
         cardGantiPW.setOnClickListener(v -> {
             Intent intent = new Intent(ProfileActivity.this, GantiPasswordActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+        });
+
+        cardHapusAkun.setOnClickListener(v -> {
+            Intent intent = new Intent(ProfileActivity.this, HapusAkunActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             finish();
