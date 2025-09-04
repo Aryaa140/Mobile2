@@ -2,6 +2,7 @@ package com.example.mobile;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +17,7 @@ public class ProyekActivity extends AppCompatActivity {
 
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
+    LinearLayout cardRiverside;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +28,9 @@ public class ProyekActivity extends AppCompatActivity {
         TopAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.nav_folder);
+
+        cardRiverside = findViewById(R.id.cardRiverside);
+
 
         TopAppBar.setNavigationOnClickListener(v -> {
             Intent intent = new Intent(ProyekActivity.this, BerandaActivity.class);
@@ -49,6 +54,15 @@ public class ProyekActivity extends AppCompatActivity {
             }
             return false;
         });
+
+        cardRiverside.setOnClickListener(v -> {
+            Intent intent = new Intent(ProyekActivity.this, DetailProyekActivity.class);
+            intent.putExtra("nama", "The Quality Riverside");
+            intent.putExtra("lokasi", "Gamping, Kec. Krian");
+            intent.putExtra("gambar", R.drawable.quality_riverside);
+            startActivity(intent);
+        });
+
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());

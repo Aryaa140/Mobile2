@@ -17,7 +17,7 @@ public class BerandaActivity extends AppCompatActivity {
 
     Button button2, button3, button4, button5, button6, button7;
     BottomNavigationView bottomNavigationView;
-    MaterialCardView cardWelcome;
+    MaterialCardView cardWelcome, cardProspekM, cardLihatDataM, cardFasilitasM, cardProyekM, cardBookingM, cardInputDataM;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,13 +26,12 @@ public class BerandaActivity extends AppCompatActivity {
         setContentView(R.layout.activity_beranda);
 
         cardWelcome = findViewById(R.id.cardWelcome);
-
-        button2  = findViewById(R.id.button2);
-        button3 = findViewById(R.id.button3);
-        button4 = findViewById(R.id.button4);
-        button5 = findViewById(R.id.button5);
-        button6 = findViewById(R.id.button6);
-        button7 = findViewById(R.id.button7);
+        cardProspekM = findViewById(R.id.cardProspekM);
+        cardLihatDataM = findViewById(R.id.cardLihatDataM);
+        cardFasilitasM = findViewById(R.id.cardFasilitasM);
+        cardProyekM = findViewById(R.id.cardProyekM);
+        cardBookingM = findViewById(R.id.cardBookingM);
+        cardInputDataM = findViewById(R.id.cardInputDataM);
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
@@ -40,36 +39,32 @@ public class BerandaActivity extends AppCompatActivity {
             Intent intent = new Intent(BerandaActivity.this, ProfileActivity.class);
             startActivity(intent);
         });
-
-        button2.setOnClickListener(v -> {
+        cardProspekM.setOnClickListener(v -> {
             Intent intent = new Intent(BerandaActivity.this, TambahUserActivity.class);
             startActivity(intent);
         });
-
-        button3.setOnClickListener(v -> {
+        cardLihatDataM.setOnClickListener(v -> {
             Intent intent = new Intent(BerandaActivity.this, LihatDataActivity.class);
             startActivity(intent);
         });
-
-        button4.setOnClickListener(v -> {
-            Intent intent  = new Intent(BerandaActivity.this, FasilitasUmumActivity.class);
+        cardFasilitasM.setOnClickListener(v -> {
+            Intent intent = new Intent(BerandaActivity.this, FasilitasUmumActivity.class);
             startActivity(intent);
         });
-
-        button5.setOnClickListener(v -> {
-            Intent intent  = new Intent(BerandaActivity.this, BookingActivity.class);
+        cardProyekM.setOnClickListener(v -> {
+            Intent intent = new Intent(BerandaActivity.this, ProyekActivity.class);
             startActivity(intent);
         });
-
-        button6.setOnClickListener(v -> {
-            Intent intent  = new Intent(BerandaActivity.this, ProyekActivity.class);
+        cardBookingM.setOnClickListener(v -> {
+            Intent intent = new Intent(BerandaActivity.this, BookingActivity.class);
             startActivity(intent);
         });
-
-        button7.setOnClickListener(v -> {
+        cardInputDataM.setOnClickListener(v -> {
             Intent intent = new Intent(BerandaActivity.this, InputActivity.class);
             startActivity(intent);
         });
+
+
 
         bottomNavigationView.setSelectedItemId(R.id.nav_home);
 
