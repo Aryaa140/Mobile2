@@ -12,7 +12,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class FasilitasUmumActivity extends AppCompatActivity {
+public class FasilitasActivity extends AppCompatActivity {
 
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
@@ -22,13 +22,13 @@ public class FasilitasUmumActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_fasilitas_umum);
+        setContentView(R.layout.activity_fasilitas);
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         TopAppBar = findViewById(R.id.topAppBar);
 
         TopAppBar.setNavigationOnClickListener(v -> {
-            Intent intent = new Intent(FasilitasUmumActivity.this, BerandaActivity.class);
+            Intent intent = new Intent(FasilitasActivity.this, BerandaActivity.class);
             startActivity(intent);
             finish();
         });

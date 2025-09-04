@@ -61,7 +61,7 @@
             android:name=".ProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".FasilitasUmumActivity"
+            android:name=".FasilitasActivity"
             android:exported="false" />
         <activity
             android:name=".LihatDataActivity"
