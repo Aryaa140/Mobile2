@@ -195,14 +195,15 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:padding="8dp">
+                    android:padding="8dp"
+                    app:tint="@color/light_blue_500">
 
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:src="@drawable/ic_prospek"
                         android:contentDescription="Prospek"
-                        android:tint="@color/light_blue_500" />
+                        app:tint="@color/light_blue_500" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -211,7 +212,8 @@
                         android:text="Prospek"
                         android:textSize="12sp"
                         android:textColor="@android:color/black"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        app:tint="@color/light_blue_500" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -236,7 +238,7 @@
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:src="@drawable/ic_folder"
+                        android:src="@drawable/ic_dataa"
                         android:contentDescription="Lihat Data"
                         android:tint="@color/light_blue_500" />
 
@@ -274,7 +276,7 @@
                         android:layout_height="40dp"
                         android:src="@drawable/ic_masjid"
                         android:contentDescription="Fasilitas Umum"
-                        android:tint="@color/light_blue_500" />
+                        app:tint="@color/light_blue_500" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -310,7 +312,7 @@
                         android:layout_height="40dp"
                         android:src="@drawable/ic_project"
                         android:contentDescription="Proyek"
-                        android:tint="@color/light_blue_500" />
+                        app:tint="@color/light_blue_500" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -346,7 +348,7 @@
                         android:layout_height="40dp"
                         android:src="@drawable/ic_booking"
                         android:contentDescription="Booking"
-                        android:tint="@color/light_blue_500" />
+                        app:tint="@color/light_blue_500" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -381,7 +383,7 @@
                         android:layout_height="40dp"
                         android:src="@drawable/ic_input"
                         android:contentDescription="Input Data"
-                        android:tint="@color/light_blue_500" />
+                        app:tint="@color/light_blue_500" />
 
                     <TextView
                         android:layout_width="wrap_content"
