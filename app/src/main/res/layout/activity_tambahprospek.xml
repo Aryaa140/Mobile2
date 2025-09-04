@@ -55,7 +55,7 @@
             android:padding="16dp">
 
             <EditText
-                android:id="@+id/PenginputData"
+                android:id="@+id/editTextProspek"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="15dp"
@@ -68,7 +68,7 @@
                 android:padding="12dp" />
 
             <EditText
-                android:id="@+id/username"
+                android:id="@+id/editTextNama"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="15dp"

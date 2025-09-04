@@ -58,123 +58,83 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <TextView
-                    android:id="@+id/textViewPenginputData"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginBottom="10dp"
-                    android:text="Nama Penginput Prospek"
-                    android:textColor="@android:color/black"
-                    android:textSize="15dp"
-                    tools:ignore="TextSizeCheck" />
-
                 <EditText
                     android:id="@+id/editTextProspek"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:hint="Prospek"
-                    android:inputType="textPersonName"
-                    android:minHeight="48dp" />
-
-                <TextView
-                    android:id="@+id/textViewNamaLengkao"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginBottom="10dp"
-                    android:text="Nama Lengkap"
-                    android:textColor="@android:color/black"
-                    android:textSize="15dp"
-                    tools:ignore="TextSizeCheck" />
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawableStart="@drawable/ic_pin_person"
+                    android:drawablePadding="8dp"
+                    android:hint="`"
+                    android:padding="12dp" />
 
                 <EditText
                     android:id="@+id/editTextNama"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:hint="Nama Lengkap"
-                    android:inputType="textPersonName"
-                    android:minHeight="48dp" />
-
-                <TextView
-                    android:id="@+id/textViewAlamatemail"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginBottom="10dp"
-                    android:text="Alamat Email"
-                    android:textColor="@android:color/black"
-                    android:textSize="15dp"
-                    tools:ignore="TextSizeCheck" />
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawableStart="@drawable/ic_username"
+                    android:drawablePadding="8dp"
+                    android:hint="`"
+                    android:padding="12dp"
+                    android:inputType="textPersonName"/>
 
                 <EditText
                     android:id="@+id/editTextEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:hint="Alamat Email"
-                    android:inputType="textEmailAddress"
-                    android:minHeight="48dp" />
-
-                <TextView
-                    android:id="@+id/textViewNomerhp"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginBottom="10dp"
-                    android:text="No. Handphone"
-                    android:textColor="@android:color/black"
-                    android:textSize="15dp"
-                    tools:ignore="TextSizeCheck" />
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawableStart="@drawable/ic_request"
+                    android:drawablePadding="8dp"
+                    android:hint="`"
+                    android:padding="12dp"
+                    android:inputType="textEmailAddress"/>
 
                 <EditText
                     android:id="@+id/editTextNoHp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:hint="No. Handhphone"
-                    android:inputType="phone"
-                    android:minHeight="48dp" />
-
-                <TextView
-                    android:id="@+id/textViewAlamat"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginBottom="10dp"
-                    android:text="Alamat Tempat Tinggal"
-                    android:textColor="@android:color/black"
-                    android:textSize="15dp"
-                    tools:ignore="TextSizeCheck" />
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawableStart="@drawable/ic_phonec"
+                    android:drawablePadding="8dp"
+                    android:hint="`"
+                    android:padding="12dp"
+                    android:inputType="phone"/>
 
                 <EditText
                     android:id="@+id/editTextAlamat"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:hint="Alamat Tempat Tinggal"
-                    android:inputType="text"
-                    android:minHeight="48dp" />
-
-                <TextView
-                    android:id="@+id/textViewopsi"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginBottom="10dp"
-                    android:text="Referensi Prospek"
-                    android:textColor="@android:color/black"
-                    android:textSize="15dp"
-                    tools:ignore="TextSizeCheck" />
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawableStart="@drawable/ic_home"
+                    android:drawablePadding="8dp"
+                    android:hint="`"
+                    android:padding="12dp"/>
 
                 <Spinner
                     android:id="@+id/spinnerRole"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:minHeight="48dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawablePadding="8dp"
                     android:entries="@array/opsi_spinnerProspek"/>
 
                 <LinearLayout
@@ -192,7 +152,7 @@
                         android:paddingRight="24dp"
                         android:paddingTop="10dp"
                         android:paddingBottom="10dp"
-                        android:text="Edit"
+                        android:text="Edit Data"
                         android:textColor="@android:color/black"
                         android:backgroundTint="@android:color/white"
                         android:layout_marginEnd="12dp"/>

@@ -128,8 +128,7 @@ public class TambahProspekActivity extends AppCompatActivity {
             Toast.makeText(this, "Data prospek berhasil disimpan", Toast.LENGTH_SHORT).show();
             clearForm();
 
-            // Opsional: Kembali ke BerandaActivity setelah simpan berhasil
-            Intent intent = new Intent(TambahProspekActivity.this, BerandaActivity.class);
+            Intent intent = new Intent(TambahProspekActivity.this, TambahProspekActivity.class);
             startActivity(intent);
             finish();
         } else {
