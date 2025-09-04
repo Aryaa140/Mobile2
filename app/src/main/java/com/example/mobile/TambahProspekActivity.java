@@ -16,7 +16,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
 
-public class TambahUserActivity extends AppCompatActivity {
+public class TambahProspekActivity extends AppCompatActivity {
 
     Button Simpan, Batal;
     MaterialToolbar TopAppBar;
@@ -29,22 +29,20 @@ public class TambahUserActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_tambahuser);
+        setContentView(R.layout.activity_tambahprospek);
 
         TopAppBar = findViewById(R.id.topAppBar);
         Simpan = findViewById(R.id.btnSimpan);
         Batal = findViewById(R.id.btnBatal);
 
-        // Intent untuk navigation back - TETAP DIJAGA
         TopAppBar.setNavigationOnClickListener(v -> {
-            Intent intent = new Intent(TambahUserActivity.this, BerandaActivity.class);
+            Intent intent = new Intent(TambahProspekActivity.this, BerandaActivity.class);
             startActivity(intent);
             finish();
         });
 
-        // Intent untuk button Batal - TETAP DIJAGA
         Batal.setOnClickListener(v -> {
-            Intent intent = new Intent(TambahUserActivity.this, BerandaActivity.class);
+            Intent intent = new Intent(TambahProspekActivity.this, BerandaActivity.class);
             startActivity(intent);
             finish();
         });
@@ -57,8 +55,7 @@ public class TambahUserActivity extends AppCompatActivity {
 
         databaseHelper = new DatabaseHelper(this);
 
-        // Inisialisasi view - TAMBAH editTextPenginput
-        editTextPenginput = findViewById(R.id.editTextProspek); // Sesuaikan dengan ID di XML
+        editTextPenginput = findViewById(R.id.editTextProspek);
         editTextNama = findViewById(R.id.editTextNama);
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextNoHp = findViewById(R.id.editTextNoHp);
@@ -75,13 +72,6 @@ public class TambahUserActivity extends AppCompatActivity {
                 simpanDataProspek();
             }
         });
-
-        /*btnBatal.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish(); // Tutup activity
-            }
-        });*/
     }
 
     private void simpanDataProspek() {
@@ -139,7 +129,7 @@ public class TambahUserActivity extends AppCompatActivity {
             clearForm();
 
             // Opsional: Kembali ke BerandaActivity setelah simpan berhasil
-            Intent intent = new Intent(TambahUserActivity.this, BerandaActivity.class);
+            Intent intent = new Intent(TambahProspekActivity.this, BerandaActivity.class);
             startActivity(intent);
             finish();
         } else {

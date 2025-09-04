@@ -40,7 +40,10 @@
         android:id="@+id/cardForm"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="18dp"
+        android:layout_marginTop="35dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginLeft="15dp"
+
         app:cardCornerRadius="16dp"
         app:cardElevation="6dp"
         app:layout_constraintTop_toBottomOf="@id/topAppBar"
@@ -58,123 +61,83 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <TextView
-                android:id="@+id/textViewPenginputData"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
-                android:layout_marginBottom="10dp"
-                android:text="Nama Penginput Prospek"
-                android:textColor="@android:color/black"
-                android:textSize="15dp"
-                tools:ignore="TextSizeCheck" />
-
             <EditText
-                android:id="@+id/editTextProspek"
+                android:id="@+id/PenginputData"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:hint="Silahkan Masukkan Nama Penginput"
-                android:inputType="textPersonName"
-                android:minHeight="48dp" />
-
-            <TextView
-                android:id="@+id/textViewNamaLengkao"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
-                android:layout_marginBottom="10dp"
-                android:text="Nama Lengkap"
-                android:textColor="@android:color/black"
-                android:textSize="15dp"
-                tools:ignore="TextSizeCheck" />
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@android:drawable/edit_text"
+                android:drawableStart="@drawable/ic_pin_person"
+                android:drawablePadding="8dp"
+                android:hint="Masukkan Nama Penginput Prospek"
+                android:padding="12dp" />
 
             <EditText
-                android:id="@+id/editTextNama"
+                android:id="@+id/username"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:hint="Silahkan Masukkan Nama Lengkap"
-                android:inputType="textPersonName"
-                android:minHeight="48dp" />
-
-            <TextView
-                android:id="@+id/textViewAlamatemail"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
-                android:layout_marginBottom="10dp"
-                android:text="Alamat Email"
-                android:textColor="@android:color/black"
-                android:textSize="15dp"
-                tools:ignore="TextSizeCheck" />
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@android:drawable/edit_text"
+                android:drawableStart="@drawable/ic_username"
+                android:drawablePadding="8dp"
+                android:hint="Masukkan Nama Lengkap"
+                android:padding="12dp"
+                android:inputType="textPersonName"/>
 
             <EditText
                 android:id="@+id/editTextEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:hint="Silahkan Masukkan Alamat Email"
-                android:inputType="textEmailAddress"
-                android:minHeight="48dp" />
-
-            <TextView
-                android:id="@+id/textViewNomerhp"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
-                android:layout_marginBottom="10dp"
-                android:text="No. Handphone"
-                android:textColor="@android:color/black"
-                android:textSize="15dp"
-                tools:ignore="TextSizeCheck" />
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@android:drawable/edit_text"
+                android:drawableStart="@drawable/ic_request"
+                android:drawablePadding="8dp"
+                android:hint="Masukkan Alamat Email"
+                android:padding="12dp"
+                android:inputType="textEmailAddress"/>
 
             <EditText
                 android:id="@+id/editTextNoHp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:hint="Silahkan Masukkan No. Handphone"
-                android:inputType="phone"
-                android:minHeight="48dp" />
-
-            <TextView
-                android:id="@+id/textViewAlamat"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
-                android:layout_marginBottom="10dp"
-                android:text="Alamat Tempat Tinggal"
-                android:textColor="@android:color/black"
-                android:textSize="15dp"
-                tools:ignore="TextSizeCheck" />
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@android:drawable/edit_text"
+                android:drawableStart="@drawable/ic_phonec"
+                android:drawablePadding="8dp"
+                android:hint="Masukkan No. Handphone"
+                android:padding="12dp"
+                android:inputType="phone"/>
 
             <EditText
                 android:id="@+id/editTextAlamat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:hint="Silahkan Masukkan Alamat Tempat Tinggal"
-                android:inputType="text"
-                android:minHeight="48dp" />
-
-            <TextView
-                android:id="@+id/textViewopsi"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
-                android:layout_marginBottom="10dp"
-                android:text="Referensi Prospek"
-                android:textColor="@android:color/black"
-                android:textSize="15dp"
-                tools:ignore="TextSizeCheck" />
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@android:drawable/edit_text"
+                android:drawableStart="@drawable/ic_home"
+                android:drawablePadding="8dp"
+                android:hint="Masukkan Alamat Rumah"
+                android:padding="12dp"/>
 
             <Spinner
                 android:id="@+id/spinnerRole"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:minHeight="48dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@android:drawable/edit_text"
+                android:drawablePadding="8dp"
                 android:entries="@array/opsi_spinnerProspek"/>
 
             <LinearLayout

@@ -70,7 +70,7 @@
             android:name=".BerandaActivity"
             android:exported="false" />
         <activity
-            android:name=".TambahUserActivity"
+            android:name=".TambahProspekActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

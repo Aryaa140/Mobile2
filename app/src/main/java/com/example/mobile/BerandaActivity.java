@@ -40,7 +40,7 @@ public class BerandaActivity extends AppCompatActivity {
             startActivity(intent);
         });
         cardProspekM.setOnClickListener(v -> {
-            Intent intent = new Intent(BerandaActivity.this, TambahUserActivity.class);
+            Intent intent = new Intent(BerandaActivity.this, TambahProspekActivity.class);
             startActivity(intent);
         });
         cardLihatDataM.setOnClickListener(v -> {
