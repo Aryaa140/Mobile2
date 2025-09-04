@@ -11,89 +11,127 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center_vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
+        <!-- Baris Penginput dan Tanggal -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:paddingEnd="12dp">
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
 
             <TextView
-                android:id="@+id/tvNama"
-                android:layout_width="wrap_content"
+                android:id="@+id/tvPenginput"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Nama Prospek"
+                android:layout_weight="1"
+                android:text="Penginput: -"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
-                android:textSize="16sp"
-                android:ellipsize="end"
-                android:singleLine="true" />
-
-            <TextView
-                android:id="@+id/tvEmail"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="email@example.com"
-                android:textColor="@android:color/darker_gray"
                 android:textSize="14sp"
                 android:ellipsize="end"
                 android:singleLine="true" />
 
             <TextView
-                android:id="@+id/tvNoHp"
+                android:id="@+id/tvTanggal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="08123456789"
+                android:text="Tanggal: -"
                 android:textColor="@android:color/darker_gray"
-                android:textSize="14sp"
+                android:textSize="12sp"
                 android:ellipsize="end"
                 android:singleLine="true" />
 
-            <TextView
-                android:id="@+id/tvAlamat"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Alamat Prospek"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="14sp"
-                android:ellipsize="end"
-                android:singleLine="true" />
         </LinearLayout>
 
+        <!-- Data Utama -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:layout_marginStart="8dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnEdit"
-                android:layout_width="96dp"
-                android:layout_height="48dp"
-                android:layout_marginBottom="8dp"
-                android:text="Edit"
-                android:textAllCaps="false"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                app:cornerRadius="8dp"
-                app:backgroundTint="@android:color/holo_blue_dark" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:paddingEnd="12dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnDelete"
-                android:layout_width="96dp"
-                android:layout_height="48dp"
-                android:text="Hapus"
-                android:textAllCaps="false"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                app:cornerRadius="8dp"
-                app:backgroundTint="@android:color/holo_red_dark" />
+                <TextView
+                    android:id="@+id/tvNama"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nama: -"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    android:ellipsize="end"
+                    android:singleLine="true" />
 
+                <TextView
+                    android:id="@+id/tvEmail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Email: -"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="14sp"
+                    android:ellipsize="end"
+                    android:singleLine="true" />
+
+                <TextView
+                    android:id="@+id/tvNoHp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No. HP: -"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="14sp"
+                    android:ellipsize="end"
+                    android:singleLine="true" />
+
+                <TextView
+                    android:id="@+id/tvAlamat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Alamat: -"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="14sp"
+                    android:ellipsize="end"
+                    android:maxLines="2" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginStart="8dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnEdit"
+                    android:layout_width="96dp"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Edit"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
+                    app:cornerRadius="8dp"
+                    app:backgroundTint="@android:color/holo_blue_dark" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDelete"
+                    android:layout_width="96dp"
+                    android:layout_height="48dp"
+                    android:text="Hapus"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
+                    app:cornerRadius="8dp"
+                    app:backgroundTint="@android:color/holo_red_dark" />
+
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
