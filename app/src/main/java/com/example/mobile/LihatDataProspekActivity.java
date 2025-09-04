@@ -75,15 +75,7 @@ public class LihatDataProspekActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {}
         });
 
-        btnEdit.setOnClickListener(v -> {
-            Intent intent = new Intent(LihatDataProspekActivity.this, EditDataProspekActivity.class);
-            startActivity(intent);
-        });
 
-        btnDelete.setOnClickListener(v -> {
-            Intent intent = new Intent(LihatDataProspekActivity.this, HapusDataProspekActivity.class);
-            startActivity(intent);
-        });
 
         TopAppBar.setNavigationOnClickListener(v -> {
             Intent intent = new Intent(LihatDataProspekActivity.this, LihatDataActivity.class);
