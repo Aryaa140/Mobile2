@@ -43,14 +43,13 @@ public class LihatDataProspekActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+
         setContentView(R.layout.activity_lihat_data_prospek);
 
         TopAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         searchEditText = findViewById(R.id.searchEditText);
         recyclerView = findViewById(R.id.recyclerProspek);
-        btnDelete = findViewById(R.id.btnDelete);
-        btnEdit = findViewById(R.id.btnEdit);
 
         dbHelper = new DatabaseHelper(this);
 
