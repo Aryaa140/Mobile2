@@ -2,7 +2,11 @@ package com.example.mobile;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,40 +15,34 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
-
 
 public class TambahUserActivity extends AppCompatActivity {
 
     Button Simpan, Batal;
     MaterialToolbar TopAppBar;
-    private EditText editTextNama, editTextEmail, editTextNoHp, editTextAlamat;
+    private EditText editTextPenginput, editTextNama, editTextEmail, editTextNoHp, editTextAlamat;
     private Spinner spinnerReferensi;
     private Button btnSimpan, btnBatal;
     private DatabaseHelper databaseHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_tambahuser);
 
-
         TopAppBar = findViewById(R.id.topAppBar);
         Simpan = findViewById(R.id.btnSimpan);
         Batal = findViewById(R.id.btnBatal);
 
+        // Intent untuk navigation back - TETAP DIJAGA
         TopAppBar.setNavigationOnClickListener(v -> {
             Intent intent = new Intent(TambahUserActivity.this, BerandaActivity.class);
             startActivity(intent);
             finish();
         });
 
+        // Intent untuk button Batal - TETAP DIJAGA
         Batal.setOnClickListener(v -> {
             Intent intent = new Intent(TambahUserActivity.this, BerandaActivity.class);
             startActivity(intent);
@@ -56,9 +54,11 @@ public class TambahUserActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
         databaseHelper = new DatabaseHelper(this);
 
-        // Inisialisasi view - LANGSUNG di onCreate
+        // Inisialisasi view - TAMBAH editTextPenginput
+        editTextPenginput = findViewById(R.id.editTextProspek); // Sesuaikan dengan ID di XML
         editTextNama = findViewById(R.id.editTextNama);
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextNoHp = findViewById(R.id.editTextNoHp);
@@ -83,15 +83,23 @@ public class TambahUserActivity extends AppCompatActivity {
             }
         });*/
     }
+
     private void simpanDataProspek() {
-        // Ambil data dari form
+        // Ambil data dari form - TAMBAH penginput
+        String penginput = editTextPenginput.getText().toString().trim();
         String nama = editTextNama.getText().toString().trim();
         String email = editTextEmail.getText().toString().trim();
         String noHp = editTextNoHp.getText().toString().trim();
         String alamat = editTextAlamat.getText().toString().trim();
         String referensi = spinnerReferensi.getSelectedItem().toString();
 
-        // Validasi input
+        // Validasi input - TAMBAH validasi penginput
+        if (penginput.isEmpty()) {
+            editTextPenginput.setError("Nama penginput harus diisi");
+            editTextPenginput.requestFocus();
+            return;
+        }
+
         if (nama.isEmpty()) {
             editTextNama.setError("Nama lengkap harus diisi");
             editTextNama.requestFocus();
@@ -123,25 +131,34 @@ public class TambahUserActivity extends AppCompatActivity {
             return;
         }
 
-        // Simpan data ke database
-        long result = databaseHelper.addProspek(nama, email, noHp, alamat, referensi);
+        // Simpan data ke database - TAMBAH parameter penginput
+        long result = databaseHelper.addProspek(penginput, nama, email, noHp, alamat, referensi);
 
         if (result != -1) {
             Toast.makeText(this, "Data prospek berhasil disimpan", Toast.LENGTH_SHORT).show();
             clearForm();
+
+            // Opsional: Kembali ke BerandaActivity setelah simpan berhasil
+            Intent intent = new Intent(TambahUserActivity.this, BerandaActivity.class);
+            startActivity(intent);
+            finish();
         } else {
             Toast.makeText(this, "Gagal menyimpan data prospek", Toast.LENGTH_SHORT).show();
         }
     }
+
     private void clearForm() {
+        editTextPenginput.setText(""); // TAMBAHAN
         editTextNama.setText("");
         editTextEmail.setText("");
         editTextNoHp.setText("");
         editTextAlamat.setText("");
         spinnerReferensi.setSelection(0); // Reset ke pilihan pertama
     }
+
+    @Override
     protected void onDestroy() {
-        super.onDestroy(); // ✅ BENAR: onDestroy() bukan onOnDestroy()
+        super.onDestroy();
         if (databaseHelper != null) {
             databaseHelper.close();
         }
