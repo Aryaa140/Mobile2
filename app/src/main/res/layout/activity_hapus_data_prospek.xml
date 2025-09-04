@@ -17,7 +17,7 @@
         android:theme="@style/ToolbarWhiteIcons"
         app:navigationIcon="@drawable/ic_back"
         app:navigationIconTint="@android:color/white"
-        app:title="Edit Data Prospek"
+        app:title="Hapus Data Prospek"
         app:titleCentered="true"
         app:titleTextColor="@android:color/white"
         app:layout_constraintTop_toTopOf="parent"
@@ -185,14 +185,14 @@
                     android:layout_marginTop="16dp">
 
                     <Button
-                        android:id="@+id/btnEdit"
+                        android:id="@+id/btnHapus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingLeft="24dp"
                         android:paddingRight="24dp"
                         android:paddingTop="10dp"
                         android:paddingBottom="10dp"
-                        android:text="Edit"
+                        android:text="Hapus"
                         android:textColor="@android:color/black"
                         android:backgroundTint="@android:color/white"
                         android:layout_marginEnd="12dp"/>

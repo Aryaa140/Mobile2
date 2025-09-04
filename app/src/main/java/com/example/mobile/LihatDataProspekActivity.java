@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.activity.EdgeToEdge;
@@ -23,6 +24,7 @@ public class LihatDataProspekActivity extends AppCompatActivity {
 
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
+    Button btnEdit, btnDelete;
     private RecyclerView recyclerView;
     private ProspekAdapter adapter;
     private ArrayList<Prospek> prospekList;
@@ -40,6 +42,8 @@ public class LihatDataProspekActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         searchEditText = findViewById(R.id.searchEditText);
         recyclerView = findViewById(R.id.recyclerProspek);
+        btnDelete = findViewById(R.id.btnDelete);
+        btnEdit = findViewById(R.id.btnEdit);
 
         dbHelper = new DatabaseHelper(this);
 
@@ -63,6 +67,16 @@ public class LihatDataProspekActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {}
+        });
+
+        btnEdit.setOnClickListener(v -> {
+            Intent intent = new Intent(LihatDataProspekActivity.this, EditDataProspekActivity.class);
+            startActivity(intent);
+        });
+
+        btnDelete.setOnClickListener(v -> {
+            Intent intent = new Intent(LihatDataProspekActivity.this, HapusDataProspekActivity.class);
+            startActivity(intent);
         });
 
         TopAppBar.setNavigationOnClickListener(v -> {
