@@ -8,6 +8,7 @@
     </string-array>
 
     <string-array name="opsi_spinnerProspek">
+        <item>Pilih Refrensi Prospek</item>
         <item>Pameran</item>
         <item>Sosial Media</item>
         <item>User Get User</item>
