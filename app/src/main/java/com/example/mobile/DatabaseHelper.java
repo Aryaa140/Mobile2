@@ -12,7 +12,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "login.db";
-    private static final int DATABASE_VERSION = 3; // Tingkatkan versi database
+    private static final int DATABASE_VERSION = 4; // Tingkatkan versi database
 
     // tabel prospek
     public static final String TABLE_PROSPEK = "prospek";
@@ -282,29 +282,44 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public List<Prospek> getAllProspek() {
         List<Prospek> prospekList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
 
-        String[] columns = {COLUMN_PROSPEK_ID, COLUMN_PENGINPUT, COLUMN_NAMA, COLUMN_EMAIL,
-                COLUMN_NO_HP, COLUMN_ALAMAT, COLUMN_REFERENSI, COLUMN_TANGGAL_BUAT};
-        Cursor cursor = db.query(TABLE_PROSPEK, columns, null, null, null, null, COLUMN_NAMA + " ASC");
+        try {
+            String[] columns = {COLUMN_PROSPEK_ID, COLUMN_PENGINPUT, COLUMN_NAMA, COLUMN_EMAIL,
+                    COLUMN_NO_HP, COLUMN_ALAMAT, COLUMN_REFERENSI, COLUMN_TANGGAL_BUAT};
 
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                Prospek prospek = new Prospek(
-                        cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PROSPEK_ID)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PENGINPUT)), // TAMBAHAN
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NO_HP)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ALAMAT)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_BUAT)) // TAMBAHAN
-                );
-                prospekList.add(prospek);
-            } while (cursor.moveToNext());
-            cursor.close();
+            cursor = db.query(TABLE_PROSPEK, columns, null, null, null, null, COLUMN_TANGGAL_BUAT + " DESC");
+
+            Log.d("DatabaseHelper", "Jumlah data: " + cursor.getCount());
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    try {
+                        Prospek prospek = new Prospek(
+                                cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PROSPEK_ID)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PENGINPUT)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NO_HP)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ALAMAT)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_BUAT))
+                        );
+                        prospekList.add(prospek);
+                    } catch (Exception e) {
+                        Log.e("DatabaseHelper", "Error parsing data: " + e.getMessage());
+                    }
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            Log.e("DatabaseHelper", "Error getAllProspek: " + e.getMessage());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
         }
 
-        db.close();
         return prospekList;
     }
 
