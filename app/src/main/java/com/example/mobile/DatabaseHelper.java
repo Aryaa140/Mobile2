@@ -22,14 +22,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_NO_HP = "no_hp";
     public static final String COLUMN_ALAMAT = "alamat";
     public static final String COLUMN_REFERENSI = "referensi";
+    public static final String COLUMN_PENGINPUT = "penginput";
+    public static final String COLUMN_TANGGAL_BUAT = "tanggal_buat";
+
 
     private static final String CREATE_TABLE_PROSPEK = "CREATE TABLE " + TABLE_PROSPEK + "("
             + COLUMN_PROSPEK_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            + COLUMN_PENGINPUT + " TEXT NOT NULL," // TAMBAHAN BARU
             + COLUMN_NAMA + " TEXT NOT NULL,"
             + COLUMN_EMAIL + " TEXT,"
             + COLUMN_NO_HP + " TEXT,"
             + COLUMN_ALAMAT + " TEXT,"
-            + COLUMN_REFERENSI + " TEXT" + ")";
+            + COLUMN_REFERENSI + " TEXT,"
+            + COLUMN_TANGGAL_BUAT + " DATETIME DEFAULT CURRENT_TIMESTAMP" + ")";
 
     // tabel users
     public static final String TABLE_USERS = "users";
@@ -258,14 +263,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // ======== PROSPEK METHODS ========
 
-    public long addProspek(String nama, String email, String noHp, String alamat, String referensi) {
+    public long addProspek(String penginput, String nama, String email, String noHp, String alamat, String referensi) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
+        values.put(COLUMN_PENGINPUT, penginput); // TAMBAHAN
         values.put(COLUMN_NAMA, nama);
         values.put(COLUMN_EMAIL, email);
         values.put(COLUMN_NO_HP, noHp);
         values.put(COLUMN_ALAMAT, alamat);
         values.put(COLUMN_REFERENSI, referensi);
+        // COLUMN_TANGGAL_BUAT otomatis terisi karena DEFAULT CURRENT_TIMESTAMP
 
         long result = db.insert(TABLE_PROSPEK, null, values);
         db.close();
@@ -276,18 +283,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<Prospek> prospekList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
 
-        String[] columns = {COLUMN_PROSPEK_ID, COLUMN_NAMA, COLUMN_EMAIL, COLUMN_NO_HP, COLUMN_ALAMAT, COLUMN_REFERENSI};
+        String[] columns = {COLUMN_PROSPEK_ID, COLUMN_PENGINPUT, COLUMN_NAMA, COLUMN_EMAIL,
+                COLUMN_NO_HP, COLUMN_ALAMAT, COLUMN_REFERENSI, COLUMN_TANGGAL_BUAT};
         Cursor cursor = db.query(TABLE_PROSPEK, columns, null, null, null, null, COLUMN_NAMA + " ASC");
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 Prospek prospek = new Prospek(
                         cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PROSPEK_ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PENGINPUT)), // TAMBAHAN
                         cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA)),
                         cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)),
                         cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NO_HP)),
                         cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ALAMAT)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI))
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_BUAT)) // TAMBAHAN
                 );
                 prospekList.add(prospek);
             } while (cursor.moveToNext());
@@ -300,7 +310,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public Prospek getProspekById(int prospekId) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String[] columns = {COLUMN_PROSPEK_ID, COLUMN_NAMA, COLUMN_EMAIL, COLUMN_NO_HP, COLUMN_ALAMAT, COLUMN_REFERENSI};
+        String[] columns = {COLUMN_PROSPEK_ID, COLUMN_PENGINPUT, COLUMN_NAMA, COLUMN_EMAIL,
+                COLUMN_NO_HP, COLUMN_ALAMAT, COLUMN_REFERENSI, COLUMN_TANGGAL_BUAT};
         String selection = COLUMN_PROSPEK_ID + " = ?";
         String[] selectionArgs = {String.valueOf(prospekId)};
 
@@ -310,11 +321,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (cursor != null && cursor.moveToFirst()) {
             prospek = new Prospek(
                     cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PROSPEK_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PENGINPUT)), // TAMBAHAN
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA)),
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)),
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NO_HP)),
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ALAMAT)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI))
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_BUAT)) // TAMBAHAN
             );
             cursor.close();
         }
@@ -323,9 +336,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return prospek;
     }
 
-    public int updateProspek(int prospekId, String nama, String email, String noHp, String alamat, String referensi) {
+    public int updateProspek(int prospekId, String penginput, String nama, String email,
+                             String noHp, String alamat, String referensi) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
+        values.put(COLUMN_PENGINPUT, penginput); // TAMBAHAN
         values.put(COLUMN_NAMA, nama);
         values.put(COLUMN_EMAIL, email);
         values.put(COLUMN_NO_HP, noHp);
