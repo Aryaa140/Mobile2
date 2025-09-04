@@ -360,7 +360,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- ✅ Input Data dipindah ke sini -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardInputDataM"
                 android:layout_width="90dp"
@@ -395,7 +394,6 @@
                         android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-
 
         </LinearLayout>
     </HorizontalScrollView>
