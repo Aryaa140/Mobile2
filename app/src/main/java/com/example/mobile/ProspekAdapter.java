@@ -1,6 +1,7 @@
 package com.example.mobile;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
@@ -17,10 +19,12 @@ import java.util.ArrayList;
 public class ProspekAdapter extends RecyclerView.Adapter<ProspekAdapter.ViewHolder> {
     private Context context;
     private ArrayList<Prospek> prospekList;
+    private DatabaseHelper databaseHelper;
 
     public ProspekAdapter(Context context, ArrayList<Prospek> prospekList) {
         this.context = context;
         this.prospekList = prospekList;
+        this.databaseHelper = new DatabaseHelper(context);
     }
 
     @NonNull
@@ -34,29 +38,92 @@ public class ProspekAdapter extends RecyclerView.Adapter<ProspekAdapter.ViewHold
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Prospek prospek = prospekList.get(position);
 
-        // Set data ke TextView
-        holder.tvPenginput.setText("Penginput: " + prospek.getPenginput());
-        holder.tvNama.setText("Nama: " + prospek.getNama());
-        holder.tvEmail.setText("Email: " + prospek.getEmail());
-        holder.tvNoHp.setText("No. HP: " + prospek.getNoHp());
-        holder.tvAlamat.setText("Alamat: " + prospek.getAlamat());
-        holder.tvTanggal.setText("Tanggal: " + formatTanggal(prospek.getTanggalBuat()));
+        // Null safety check
+        if (prospek != null) {
+            holder.tvPenginput.setText("Penginput: " + (prospek.getPenginput() != null ? prospek.getPenginput() : "-"));
+            holder.tvNama.setText("Nama: " + (prospek.getNama() != null ? prospek.getNama() : "-"));
+            holder.tvEmail.setText("Email: " + (prospek.getEmail() != null ? prospek.getEmail() : "-"));
+            holder.tvNoHp.setText("No. HP: " + (prospek.getNoHp() != null ? prospek.getNoHp() : "-"));
+            holder.tvAlamat.setText("Alamat: " + (prospek.getAlamat() != null ? prospek.getAlamat() : "-"));
+            holder.tvTanggal.setText("Tanggal: " + formatTanggal(prospek.getTanggalBuat()));
+        } else {
+            // Handle null data
+            holder.tvPenginput.setText("Penginput: -");
+            holder.tvNama.setText("Nama: -");
+            holder.tvEmail.setText("Email: -");
+            holder.tvNoHp.setText("No. HP: -");
+            holder.tvAlamat.setText("Alamat: -");
+            holder.tvTanggal.setText("Tanggal: -");
+        }
 
-        holder.btnEdit.setOnClickListener(v ->
-                Toast.makeText(context, "Edit " + prospek.getNama(), Toast.LENGTH_SHORT).show()
-        );
+        // Edit button click listener
+        holder.btnEdit.setOnClickListener(v -> {
+            if (prospek != null) {
+                // Buka EditDataProspekActivity dengan membawa prospekId
+                Intent intent = new Intent(context, EditDataProspekActivity.class);
+                intent.putExtra("PROSPEK_ID", prospek.getProspekId());
+                context.startActivity(intent);
+            } else {
+                Toast.makeText(context, "Data tidak valid", Toast.LENGTH_SHORT).show();
+            }
+        });
 
-        holder.btnDelete.setOnClickListener(v ->
-                Toast.makeText(context, "Hapus " + prospek.getNama(), Toast.LENGTH_SHORT).show()
-        );
+        // Delete button click listener
+        holder.btnDelete.setOnClickListener(v -> {
+            if (prospek != null) {
+                showDeleteConfirmationDialog(prospek, position);
+            } else {
+                Toast.makeText(context, "Data tidak valid", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    // Method untuk memformat tanggal (opsional)
+    // Method untuk menampilkan dialog konfirmasi delete
+    private void showDeleteConfirmationDialog(Prospek prospek, int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Konfirmasi Hapus");
+        builder.setMessage("Apakah Anda yakin ingin menghapus data prospek: " + prospek.getNama() + "?");
+
+        builder.setPositiveButton("Ya", (dialog, which) -> {
+            // Hapus data dari database
+            boolean isDeleted = deleteProspek(prospek.getProspekId());
+
+            if (isDeleted) {
+                // Hapus dari list dan update UI
+                prospekList.remove(position);
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position, prospekList.size());
+
+                Toast.makeText(context, "Data berhasil dihapus", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(context, "Gagal menghapus data", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNegativeButton("Tidak", (dialog, which) -> {
+            dialog.dismiss();
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    // Method untuk menghapus data dari database
+    private boolean deleteProspek(int prospekId) {
+        int result = databaseHelper.deleteProspek(prospekId);
+        return result > 0;
+    }
+
+    // Method untuk memformat tanggal
     private String formatTanggal(String tanggal) {
         if (tanggal == null || tanggal.isEmpty()) {
             return "-";
         }
-        // Anda bisa menambahkan logic formatting tanggal di sini
+
+        // Format sederhana: jika tanggal panjang, ambil hanya bagian tanggalnya
+        if (tanggal.contains(" ")) {
+            return tanggal.split(" ")[0]; // Ambil hanya tanggal (YYYY-MM-DD)
+        }
         return tanggal;
     }
 
@@ -87,5 +154,18 @@ public class ProspekAdapter extends RecyclerView.Adapter<ProspekAdapter.ViewHold
         prospekList.clear();
         prospekList.addAll(newProspekList);
         notifyDataSetChanged();
+    }
+
+    // Method untuk refresh data dari database
+    public void refreshData() {
+        ArrayList<Prospek> newData = new ArrayList<>(databaseHelper.getAllProspek());
+        updateData(newData);
+    }
+
+    // Clean up resources
+    public void close() {
+        if (databaseHelper != null) {
+            databaseHelper.close();
+        }
     }
 }

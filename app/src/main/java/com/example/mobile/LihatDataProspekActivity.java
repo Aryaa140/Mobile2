@@ -31,7 +31,14 @@ public class LihatDataProspekActivity extends AppCompatActivity {
     private ArrayList<Prospek> prospekListFull; // Untuk pencarian
     private DatabaseHelper dbHelper;
     private EditText searchEditText;
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
+        if (resultCode == RESULT_OK) {
+            // Refresh data jika ada perubahan dari edit activity
+            refreshData();
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
