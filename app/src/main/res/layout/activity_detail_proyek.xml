@@ -6,87 +6,242 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/biru_ungu"
-    tools:context=".MainActivity"
-    tools:ignore="ExtraText">
+    android:background="@drawable/gradient_bg"
+    tools:context=".DetailProyekActivity">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
         android:background="@android:color/transparent"
-        android:theme="@style/ToolbarWhiteIcons"
         app:navigationIcon="@drawable/ic_back"
         app:navigationIconTint="@android:color/white"
-        app:title="Menu Proyek"
+        app:title="Menu Detail Proyek"
         app:titleCentered="true"
         app:titleTextColor="@android:color/white"
-        app:menu="@menu/top_app_bar_menu"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/container"
+    <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/biru_ungu"
+        android:fillViewport="true"
         app:layout_constraintTop_toBottomOf="@id/topAppBar"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <ScrollView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:padding="16dp">
 
-            <LinearLayout
-                android:orientation="vertical"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardDetail"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                android:background="@android:color/white"
+                android:layout_marginBottom="8dp"> <!-- dikurangi dari 16dp -->
 
-                <ImageView
-                    android:id="@+id/imgProyek"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="200dp"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/quality_riverside"/>
-
-                <TextView
-                    android:id="@+id/txtNama"
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="The Quality Riverside"
-                    android:textStyle="bold"
-                    android:textSize="20sp"
-                    android:paddingTop="8dp"/>
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                <TextView
-                    android:id="@+id/txtLokasi"
-                    android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/imgProyek"
+                            android:layout_width="120dp"
+                            android:layout_height="80dp"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/quality_riverside" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:paddingStart="12dp">
+
+                            <TextView
+                                android:id="@+id/txtNama"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="The Quality Riverside"
+                                android:textStyle="bold"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:id="@+id/txtLokasi"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Gamping, Kec. Krian"
+                                android:paddingTop="4dp" />
+
+                            <TextView
+                                android:id="@+id/txtTanggal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Tanggal: 07 September 2025"
+                                android:paddingTop="2dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/txtDeskripsi"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Deskripsi"
+                        android:paddingTop="8dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnLihatUnit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Lihat Unit"
+                        android:textColor="@android:color/black"
+                        android:backgroundTint="@android:color/white"
+                        app:cornerRadius="50dp"
+                        app:icon="@drawable/ic_arrow_right"
+                        app:iconGravity="textEnd"
+                        app:iconTint="@android:color/black"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginLeft="200dp"
+                        android:layout_marginRight="0dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardFasilitas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                android:background="@android:color/white">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Gamping, Kec. Krian"
-                    android:paddingTop="4dp"/>
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                <TextView
-                    android:id="@+id/txtDeskripsi"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Deskripsi detail proyek akan ditampilkan di sini..."
-                    android:paddingTop="8dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="FASILITAS SEKITAR"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:layout_gravity="center"
+                        android:paddingBottom="8dp"/>
 
-                <Button
-                    android:id="@+id/btnHubungi"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Hubungi Marketing"
-                    android:layout_marginTop="16dp"/>
-            </LinearLayout>
-        </ScrollView>
+                    <!-- Tambahin HorizontalScrollView -->
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <!-- Transportasi -->
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:padding="8dp"
+                                android:gravity="center_horizontal">
+
+                                <ImageView
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:src="@drawable/ic_transport"
+                                    android:layout_marginBottom="4dp"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Transportasi"
+                                    android:textStyle="bold"
+                                    android:textSize="16sp"
+                                    android:textColor="@android:color/black"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Terminal Krian (15 menit)"
+                                    android:textColor="@android:color/black"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Stasiun Krian (10 menit)"
+                                    android:textColor="@android:color/black"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Tol Manyar-Mojokerto (30 menit)"
+                                    android:textColor="@android:color/black"/>
+                            </LinearLayout>
+
+                            <!-- Sekolah -->
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:padding="8dp"
+                                android:gravity="center_horizontal">
+
+                                <ImageView
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:src="@drawable/ic_sekolah"
+                                    android:layout_marginBottom="4dp"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Sekolah"
+                                    android:textStyle="bold"
+                                    android:textSize="16sp"
+                                    android:textColor="@android:color/black"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="SMA Al-Islam Krian (9 menit)"
+                                    android:textColor="@android:color/black"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="SMAN 1 Krian (23 menit)"
+                                    android:textColor="@android:color/black"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Universitas Anwar Medika (27 menit)"
+                                    android:textColor="@android:color/black"/>
+                            </LinearLayout>
 
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                        </LinearLayout>
+                    </HorizontalScrollView>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </ScrollView>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"

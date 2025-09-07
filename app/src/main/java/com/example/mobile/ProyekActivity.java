@@ -57,9 +57,6 @@ public class ProyekActivity extends AppCompatActivity {
 
         cardRiverside.setOnClickListener(v -> {
             Intent intent = new Intent(ProyekActivity.this, DetailProyekActivity.class);
-            intent.putExtra("nama", "The Quality Riverside");
-            intent.putExtra("lokasi", "Gamping, Kec. Krian");
-            intent.putExtra("gambar", R.drawable.quality_riverside);
             startActivity(intent);
         });
 
