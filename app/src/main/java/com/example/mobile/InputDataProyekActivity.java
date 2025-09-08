@@ -1,7 +1,5 @@
 package com.example.mobile;
 
-import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
@@ -19,11 +17,9 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.util.Calendar;
-
 public class InputDataProyekActivity extends AppCompatActivity {
 
-    Button btnPilihTanggal, btnSimpan, btnBatal;
+    Button btnSimpan, btnBatal;
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
     EditText editTextNamaProyek, editTextLokasiProyek;
@@ -40,7 +36,6 @@ public class InputDataProyekActivity extends AppCompatActivity {
         databaseHelper = new DatabaseHelper(this);
 
         // Inisialisasi view
-        btnPilihTanggal = findViewById(R.id.btnPilihTanggal);
         btnSimpan = findViewById(R.id.btnSimpan);
         btnBatal = findViewById(R.id.btnBatal);
         editTextNamaProyek = findViewById(R.id.editTextNamaProyek);
@@ -52,31 +47,6 @@ public class InputDataProyekActivity extends AppCompatActivity {
 
         // Setup spinner untuk status proyek
         setupStatusSpinner();
-
-        // Pilih tanggal dan waktu
-        btnPilihTanggal.setOnClickListener(v -> {
-            final Calendar calendar = Calendar.getInstance();
-            int year = calendar.get(Calendar.YEAR);
-            int month = calendar.get(Calendar.MONTH);
-            int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-            DatePickerDialog datePickerDialog = new DatePickerDialog(
-                    InputDataProyekActivity.this,
-                    (view, year1, month1, dayOfMonth) -> {
-                        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-                        int minute = calendar.get(Calendar.MINUTE);
-
-                        TimePickerDialog timePickerDialog = new TimePickerDialog(
-                                InputDataProyekActivity.this,
-                                (timeView, hourOfDay, minuteOfHour) -> {
-                                    String dateTime = dayOfMonth + "/" + (month1 + 1) + "/" + year1
-                                            + " " + String.format("%02d:%02d", hourOfDay, minuteOfHour);
-                                    btnPilihTanggal.setText(dateTime);
-                                }, hour, minute, true);
-                        timePickerDialog.show();
-                    }, year, month, day);
-            datePickerDialog.show();
-        });
 
         // Simpan data proyek
         btnSimpan.setOnClickListener(v -> {
@@ -140,10 +110,8 @@ public class InputDataProyekActivity extends AppCompatActivity {
         // Validasi input
         String namaProyek = editTextNamaProyek.getText().toString().trim();
         String lokasiProyek = editTextLokasiProyek.getText().toString().trim();
-        String tanggalProyek = btnPilihTanggal.getText().toString();
         String statusProyek = spinnerStatusProyek.getSelectedItem().toString();
 
-        // Cek apakah semua field terisi
         if (namaProyek.isEmpty()) {
             editTextNamaProyek.setError("Nama proyek harus diisi");
             editTextNamaProyek.requestFocus();
@@ -156,13 +124,8 @@ public class InputDataProyekActivity extends AppCompatActivity {
             return;
         }
 
-        if (tanggalProyek.equals("Input Tanggal")) {
-            Toast.makeText(this, "Pilih tanggal proyek terlebih dahulu", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Simpan data ke database
-        long result = databaseHelper.addProyek(namaProyek, lokasiProyek, tanggalProyek, statusProyek);
+        // Simpan data ke database (tanpa tanggal)
+        long result = databaseHelper.addProyek(namaProyek, lokasiProyek, statusProyek);
 
         if (result != -1) {
             Toast.makeText(this, "Data proyek berhasil disimpan", Toast.LENGTH_SHORT).show();
@@ -170,7 +133,6 @@ public class InputDataProyekActivity extends AppCompatActivity {
             // Kosongkan form
             editTextNamaProyek.setText("");
             editTextLokasiProyek.setText("");
-            btnPilihTanggal.setText("Input Tanggal");
             spinnerStatusProyek.setSelection(0);
 
             // Redirect ke halaman input activity
