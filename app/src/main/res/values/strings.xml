@@ -17,5 +17,15 @@
         <item>Canvasing/Sebar Brosur</item>
     </string-array>
 
+    <string-array name="opsi_spinnerStatusProyek">
+        <item>Sold Out</item>
+        <item>On Progress</item>
+    </string-array>
+
+    <string-array name="opsi_spinnerStatusFasilitas">
+        <item>Selesai</item>
+        <item>On Progress</item>
+    </string-array>
+
 </resources>
 

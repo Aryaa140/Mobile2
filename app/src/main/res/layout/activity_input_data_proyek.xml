@@ -55,49 +55,37 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <TextView
-                android:id="@+id/textViewNamaProyek"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
-                android:layout_marginBottom="10dp"
-                android:text="Nama Proyek"
-                android:textColor="@android:color/black"
-                android:textSize="15dp"
-                tools:ignore="TextSizeCheck" />
-
             <EditText
+                android:id="@+id/editTextNamaProyek"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:hint="Silahkan Masukkan Nama Proyek"
-                android:inputType="textPersonName"
-                android:minHeight="48dp" />
-
-            <TextView
-                android:id="@+id/textViewNama"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
-                android:layout_marginBottom="10dp"
-                android:text="Lokasi Proyek"
-                android:textColor="@android:color/black"
-                android:textSize="15dp"
-                tools:ignore="TextSizeCheck" />
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@android:drawable/edit_text"
+                android:drawableStart="@drawable/ic_project"
+                android:drawablePadding="8dp"
+                android:hint="Masukkan Nama Proyek"
+                android:padding="12dp" />
 
             <EditText
+                android:id="@+id/editTextLokasiProyek"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:hint="Silahkan Masukkan Lokasi Proyek"
-                android:inputType="textPersonName"
-                android:minHeight="48dp" />
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@android:drawable/edit_text"
+                android:drawableStart="@drawable/ic_location"
+                android:drawablePadding="8dp"
+                android:hint="Masukkan Lokasi Proyek"
+                android:padding="12dp" />
 
             <TextView
                 android:id="@+id/textViewLokasi"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
+                android:layout_marginLeft="15dp"
                 android:layout_marginBottom="10dp"
                 android:text="Tanggal Proyek Dibuat"
                 android:textColor="@android:color/black"
@@ -108,11 +96,35 @@
                 android:id="@+id/btnPilihTanggal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:layout_marginLeft="15dp"
                 android:text="Input Tanggal"
                 android:textColor="@android:color/black"
                 android:backgroundTint="@android:color/white"
                 android:minHeight="48dp"
                 android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:id="@+id/textViewStatus"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="15dp"
+                android:layout_marginBottom="10dp"
+                android:text="Status Proyek"
+                android:textColor="@android:color/black"
+                android:textSize="15dp"
+                tools:ignore="TextSizeCheck" />
+
+            <Spinner
+                android:id="@+id/spinnerRoleProspek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@android:drawable/edit_text"
+                android:drawablePadding="8dp"
+                android:entries="@array/opsi_spinnerStatusProyek"/>
 
             <LinearLayout
                 android:layout_width="match_parent"

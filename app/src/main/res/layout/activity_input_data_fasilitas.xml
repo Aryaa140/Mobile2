@@ -55,30 +55,24 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <TextView
-                android:id="@+id/textViewNamaFasilitas"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
-                android:layout_marginBottom="10dp"
-                android:text="Nama Fasilitas Umum"
-                android:textColor="@android:color/black"
-                android:textSize="15dp"
-                tools:ignore="TextSizeCheck" />
-
             <EditText
+                android:id="@+id/editTextNamaProyek"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:hint="Silahkan Masukkan Nama Fasilitas Umum"
-                android:inputType="textPersonName"
-                android:minHeight="48dp" />
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@android:drawable/edit_text"
+                android:drawableStart="@drawable/ic_masjid"
+                android:drawablePadding="8dp"
+                android:hint="Masukkan Nama Fasilitas"
+                android:padding="12dp" />
 
             <TextView
                 android:id="@+id/textViewNamaProyek"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
+                android:layout_marginLeft="15dp"
                 android:layout_marginBottom="10dp"
                 android:text="Nama Proyek"
                 android:textColor="@android:color/black"
@@ -86,30 +80,51 @@
                 tools:ignore="TextSizeCheck" />
 
             <Spinner
-                android:id="@+id/spinnerRole"
+                android:id="@+id/spinnerRoleNamaProyek"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:minHeight="48dp" />
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@android:drawable/edit_text"
+                android:drawablePadding="8dp"
+                android:entries="@array/opsi_spinnerStatusProyek"/>
+
+            <EditText
+                android:id="@+id/editTextLokasiFasilitas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@android:drawable/edit_text"
+                android:drawableStart="@drawable/ic_location"
+                android:drawablePadding="8dp"
+                android:hint="Masukkan Lokasi Fasilitas"
+                android:padding="12dp" />
+
 
             <TextView
-                android:id="@+id/textViewLokasi"
+                android:id="@+id/textViewStatus"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
+                android:layout_marginLeft="15dp"
                 android:layout_marginBottom="10dp"
-                android:text="Lokasi"
+                android:text="Status Fasilitas"
                 android:textColor="@android:color/black"
                 android:textSize="15dp"
                 tools:ignore="TextSizeCheck" />
 
-            <EditText
+            <Spinner
+                android:id="@+id/spinnerRoleProspek"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:hint="Silahkan Masukkan Lokasi Fasilitas"
-                android:inputType="phone"
-                android:minHeight="48dp" />
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@android:drawable/edit_text"
+                android:drawablePadding="8dp"
+                android:entries="@array/opsi_spinnerStatusFasilitas"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
