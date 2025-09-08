@@ -51,6 +51,10 @@ public class InputDataProyekActivity extends AppCompatActivity {
         // Simpan data proyek
         btnSimpan.setOnClickListener(v -> {
             simpanDataProyek();
+
+            Intent intent = new Intent(InputDataProyekActivity.this, InputDataProyekActivity.class);
+            startActivity(intent);
+            finish();
         });
 
         // Batal input
