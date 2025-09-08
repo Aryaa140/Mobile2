@@ -723,14 +723,21 @@ public static class Proyek {
     public long addProyek(String namaProyek, String lokasiProyek, String statusProyek) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_NAMA_PROYEK, namaProyek);
-        values.put(COLUMN_LOKASI_PROYEK, lokasiProyek);
-        values.put(COLUMN_STATUS_PROYEK, statusProyek);
+        values.put("nama_proyek", namaProyek);
+        values.put("lokasi_proyek", lokasiProyek);
+        values.put("status_proyek", statusProyek);
 
-        long result = db.insert(TABLE_PROYEK, null, values);
-        db.close();
+        long result = -1;
+        try {
+            result = db.insert("proyek", null, values);
+        } catch (Exception e) {
+            Log.e("DatabaseHelper", "Error addProyek: " + e.getMessage());
+        } finally {
+            db.close();
+        }
         return result;
     }
+
     public List<Proyek> getAllProyek() {
         List<Proyek> proyekList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
