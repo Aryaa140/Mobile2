@@ -17,7 +17,8 @@ public class BerandaActivity extends AppCompatActivity {
 
     Button button2, button3, button4, button5, button6, button7;
     BottomNavigationView bottomNavigationView;
-    MaterialCardView cardWelcome, cardProspekM, cardLihatDataM, cardFasilitasM, cardProyekM, cardBookingM, cardInputDataM;
+    MaterialCardView cardWelcome, cardProspekM, cardLihatDataM, cardFasilitasM, cardProyekM, cardBookingM, cardInputDataM,
+            cardUserpM, cardPemohonM;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,8 @@ public class BerandaActivity extends AppCompatActivity {
         cardProyekM = findViewById(R.id.cardProyekM);
         cardBookingM = findViewById(R.id.cardBookingM);
         cardInputDataM = findViewById(R.id.cardInputDataM);
+        cardUserpM = findViewById(R.id.cardUserpM);
+        cardPemohonM = findViewById(R.id.cardPemohonM);
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
@@ -61,6 +64,14 @@ public class BerandaActivity extends AppCompatActivity {
         });
         cardInputDataM.setOnClickListener(v -> {
             Intent intent = new Intent(BerandaActivity.this, InputActivity.class);
+            startActivity(intent);
+        });
+        cardUserpM.setOnClickListener(v -> {
+            Intent intent = new Intent(BerandaActivity.this, TambahUserpActivity.class);
+            startActivity(intent);
+        });
+        cardPemohonM.setOnClickListener(v -> {
+            Intent intent = new Intent(BerandaActivity.this, TambahPemohonActivity.class);
             startActivity(intent);
         });
 
