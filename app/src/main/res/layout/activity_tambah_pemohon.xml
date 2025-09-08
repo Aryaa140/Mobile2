@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/biru_ungu"
-    tools:context=".InputUserp">
+    tools:context=".TambahUserpActivity">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
@@ -16,7 +16,7 @@
         android:theme="@style/ToolbarWhiteIcons"
         app:navigationIcon="@drawable/ic_back"
         app:navigationIconTint="@android:color/white"
-        app:title="Tambah User Prospek"
+        app:title="Menu User -> Pemohon"
         app:titleCentered="true"
         app:titleTextColor="@android:color/white"
         app:layout_constraintTop_toTopOf="parent"
@@ -49,141 +49,122 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="16dp"
                     android:text="Pilih Prospek"
                     android:textColor="@android:color/black"
                     android:textSize="15sp" />
 
                 <Spinner
-                    android:id="@+id/spinnerProspek"
+                    android:id="@+id/spinnerRoleProspek"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:minHeight="48dp"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:text="Nama Penginput"
-                    android:textColor="@android:color/black"
-                    android:textSize="15sp" />
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawablePadding="8dp"
+                    android:entries="@array/opsi_spinnerProspek"/>
 
                 <EditText
                     android:id="@+id/editTextPenginput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:hint="Nama Penginput"
-                    android:inputType="textPersonName"
-                    android:minHeight="48dp"
-                    android:enabled="false"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:text="Nama Lengkap"
-                    android:textColor="@android:color/black"
-                    android:textSize="15sp" />
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawableStart="@drawable/ic_pin_person"
+                    android:drawablePadding="8dp"
+                    android:hint="Masukkan Nama Penginput Prospek"
+                    android:padding="12dp" />
 
                 <EditText
                     android:id="@+id/editTextNama"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:hint="Nama Lengkap"
-                    android:inputType="textPersonName"
-                    android:minHeight="48dp"
-                    android:enabled="false"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:text="Alamat Email"
-                    android:textColor="@android:color/black"
-                    android:textSize="15sp" />
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawableStart="@drawable/ic_username"
+                    android:drawablePadding="8dp"
+                    android:hint="Masukkan Nama Lengkap"
+                    android:padding="12dp"
+                    android:inputType="textPersonName"/>
 
                 <EditText
                     android:id="@+id/editTextEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:hint="Alamat Email"
-                    android:inputType="textEmailAddress"
-                    android:minHeight="48dp"
-                    android:enabled="false"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:text="No. Handphone"
-                    android:textColor="@android:color/black"
-                    android:textSize="15sp" />
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawableStart="@drawable/ic_request"
+                    android:drawablePadding="8dp"
+                    android:hint="Masukkan Alamat Email"
+                    android:padding="12dp"
+                    android:inputType="textEmailAddress"/>
 
                 <EditText
                     android:id="@+id/editTextNoHp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:hint="No. Handphone"
-                    android:inputType="phone"
-                    android:minHeight="48dp"
-                    android:enabled="false"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:text="Alamat Tempat Tinggal"
-                    android:textColor="@android:color/black"
-                    android:textSize="15sp" />
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawableStart="@drawable/ic_phonec"
+                    android:drawablePadding="8dp"
+                    android:hint="Masukkan No. Handphone"
+                    android:padding="12dp"
+                    android:inputType="phone"/>
 
                 <EditText
                     android:id="@+id/editTextAlamat"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:hint="Alamat Tempat Tinggal"
-                    android:inputType="text"
-                    android:minHeight="48dp"
-                    android:enabled="false"/>
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawableStart="@drawable/ic_home"
+                    android:drawablePadding="8dp"
+                    android:hint="Masukkan Alamat Rumah"
+                    android:padding="12dp"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
-                    android:text="Referensi Prospek"
+                    android:layout_marginLeft="16dp"
+                    android:text="Pilih Refrensi Proyek"
                     android:textColor="@android:color/black"
                     android:textSize="15sp" />
 
-                <EditText
-                    android:id="@+id/editTextReferensi"
+                <Spinner
+                    android:id="@+id/spinnerRoleRefrensiProyek"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:hint="Referensi Prospek"
-                    android:inputType="text"
-                    android:minHeight="48dp"
-                    android:enabled="false"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:text="Uang Pengadaan"
-                    android:textColor="@android:color/black"
-                    android:textSize="15sp" />
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawablePadding="8dp"
+                    android:entries="@array/opsi_spinnerProspek"/>
 
                 <EditText
                     android:id="@+id/editTextUangPengadaan"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:hint="Masukkan Uang Pengadaan"
-                    android:inputType="numberDecimal"
-                    android:minHeight="48dp"/>
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawableStart="@drawable/ic_money"
+                    android:drawablePadding="8dp"
+                    android:hint="Masukkan Jumlah Uang Muka"
+                    android:padding="12dp"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -201,8 +182,8 @@
                         android:paddingTop="10dp"
                         android:paddingBottom="10dp"
                         android:text="Simpan"
-                        android:textColor="@android:color/white"
-                        android:backgroundTint="@color/colorPrimary"
+                        android:textColor="@android:color/black"
+                        android:backgroundTint="@android:color/white"
                         android:layout_marginEnd="12dp"/>
 
                     <Button
@@ -221,5 +202,17 @@
         </ScrollView>
 
     </androidx.cardview.widget.CardView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        app:menu="@menu/bottom_nav_menu"
+        app:itemIconTint="@color/bottom_nav_selector"
+        app:itemTextColor="@color/bottom_nav_selector"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

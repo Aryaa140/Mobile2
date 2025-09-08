@@ -18,10 +18,10 @@ import androidx.core.view.WindowInsetsCompat;
 
 import java.util.List;
 
-public class InputUserp extends AppCompatActivity {
+public class TambahUserpActivity extends AppCompatActivity {
 
     private DatabaseHelper dbHelper;
-    private Spinner spinnerProspek;
+    private Spinner spinnerRoleProspek, spinnerRoleRefrensiProyek;
     private EditText editTextPenginput, editTextNama, editTextEmail, editTextNoHp,
             editTextAlamat, editTextReferensi, editTextUangPengadaan;
     private Button btnSimpan, btnBatal;
@@ -32,32 +32,29 @@ public class InputUserp extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_input_userp);
+        setContentView(R.layout.activity_tambahuserp);
 
         // Inisialisasi database helper
         dbHelper = new DatabaseHelper(this);
 
         // Inisialisasi view
         Toolbar toolbar = findViewById(R.id.topAppBar);
-        spinnerProspek = findViewById(R.id.spinnerProspek);
+        spinnerRoleProspek = findViewById(R.id.spinnerRoleProspek);
         editTextPenginput = findViewById(R.id.editTextPenginput);
         editTextNama = findViewById(R.id.editTextNama);
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextNoHp = findViewById(R.id.editTextNoHp);
         editTextAlamat = findViewById(R.id.editTextAlamat);
-        editTextReferensi = findViewById(R.id.editTextReferensi);
+        spinnerRoleRefrensiProyek = findViewById(R.id.spinnerRoleRefrensiProyek);
         editTextUangPengadaan = findViewById(R.id.editTextUangPengadaan);
         btnSimpan = findViewById(R.id.btnSimpan);
         btnBatal = findViewById(R.id.btnBatal);
 
-        // Setup toolbar
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        // Load data ke spinner
         loadProspekData();
 
-        // Setup spinner listener
-        spinnerProspek.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        spinnerRoleProspek.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedNama = parent.getItemAtPosition(position).toString();
@@ -94,7 +91,7 @@ public class InputUserp extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_item, prospekNamaList);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerProspek.setAdapter(adapter);
+        spinnerRoleProspek.setAdapter(adapter);
     }
 
     private void loadProspekDetails(String nama) {
