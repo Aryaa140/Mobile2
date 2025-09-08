@@ -12,7 +12,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "login.db";
-    private static final int DATABASE_VERSION = 5; // Tingkatkan versi database
+    private static final int DATABASE_VERSION = 6; // Tingkatkan versi database
 
     // tabel prospek
     public static final String TABLE_PROSPEK = "prospek";
@@ -72,6 +72,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + COLUMN_NIP + " TEXT UNIQUE,"
             + COLUMN_PASSWORD + " TEXT"
             + ")";
+    // tabel proyek
+    public static final String TABLE_PROYEK = "proyek";
+    public static final String COLUMN_PROYEK_ID = "proyek_id";
+    public static final String COLUMN_NAMA_PROYEK = "nama_proyek";
+    public static final String COLUMN_LOKASI_PROYEK = "lokasi_proyek";
+    public static final String COLUMN_TANGGAL_PROYEK = "tanggal_proyek";
+    public static final String COLUMN_STATUS_PROYEK = "status_proyek";
+
+    private static final String CREATE_TABLE_PROYEK = "CREATE TABLE " + TABLE_PROYEK + "("
+            + COLUMN_PROYEK_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            + COLUMN_NAMA_PROYEK + " TEXT NOT NULL,"
+            + COLUMN_LOKASI_PROYEK + " TEXT NOT NULL,"
+            + COLUMN_TANGGAL_PROYEK + " DATE NOT NULL,"
+            + COLUMN_STATUS_PROYEK + " TEXT NOT NULL" + ")";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -82,6 +96,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_USERS);
         db.execSQL(CREATE_TABLE_PROSPEK);
         db.execSQL(CREATE_TABLE_USER_PROSPEK);
+        db.execSQL(CREATE_TABLE_PROYEK);
+
 
         // User contoh Marketing
         ContentValues values = new ContentValues();
@@ -108,10 +124,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             // Upgrade dari versi lama ke versi 5
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_PROSPEK);
             db.execSQL(CREATE_TABLE_USER_PROSPEK);
+        }
+
+        if (oldVersion < 6) {
+            // Upgrade ke versi 6 dengan menambahkan tabel proyek
+            db.execSQL(CREATE_TABLE_PROYEK);
         } else {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROSPEK);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_PROSPEK);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROYEK);
             onCreate(db);
         }
         Log.d("DatabaseHelper", "Database upgraded from version " + oldVersion + " to " + newVersion);
@@ -645,6 +667,155 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public String getTanggalUpdate() { return tanggalUpdate; }
         public void setTanggalUpdate(String tanggalUpdate) { this.tanggalUpdate = tanggalUpdate; }
     }
+//===== proyek method ====
+public static class Proyek {
+    private int proyekId;
+    private String namaProyek;
+    private String lokasiProyek;
+    private String tanggalProyek;
+    private String statusProyek;
 
+    public Proyek(int proyekId, String namaProyek, String lokasiProyek, String tanggalProyek, String statusProyek) {
+        this.proyekId = proyekId;
+        this.namaProyek = namaProyek;
+        this.lokasiProyek = lokasiProyek;
+        this.tanggalProyek = tanggalProyek;
+        this.statusProyek = statusProyek;
+    }
 
+    public Proyek(String namaProyek, String lokasiProyek, String tanggalProyek, String statusProyek) {
+        this.namaProyek = namaProyek;
+        this.lokasiProyek = lokasiProyek;
+        this.tanggalProyek = tanggalProyek;
+        this.statusProyek = statusProyek;
+    }
+
+    // Getter dan Setter methods
+    public int getProyekId() { return proyekId; }
+    public void setProyekId(int proyekId) { this.proyekId = proyekId; }
+
+    public String getNamaProyek() { return namaProyek; }
+    public void setNamaProyek(String namaProyek) { this.namaProyek = namaProyek; }
+
+    public String getLokasiProyek() { return lokasiProyek; }
+    public void setLokasiProyek(String lokasiProyek) { this.lokasiProyek = lokasiProyek; }
+
+    public String getTanggalProyek() { return tanggalProyek; }
+    public void setTanggalProyek(String tanggalProyek) { this.tanggalProyek = tanggalProyek; }
+
+    public String getStatusProyek() { return statusProyek; }
+    public void setStatusProyek(String statusProyek) { this.statusProyek = statusProyek; }
+}
+    public long addProyek(String namaProyek, String lokasiProyek, String tanggalProyek, String statusProyek) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NAMA_PROYEK, namaProyek);
+        values.put(COLUMN_LOKASI_PROYEK, lokasiProyek);
+        values.put(COLUMN_TANGGAL_PROYEK, tanggalProyek);
+        values.put(COLUMN_STATUS_PROYEK, statusProyek);
+
+        long result = db.insert(TABLE_PROYEK, null, values);
+        db.close();
+        return result;
+    }
+
+    public List<Proyek> getAllProyek() {
+        List<Proyek> proyekList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+
+        try {
+            String[] columns = {
+                    COLUMN_PROYEK_ID,
+                    COLUMN_NAMA_PROYEK,
+                    COLUMN_LOKASI_PROYEK,
+                    COLUMN_TANGGAL_PROYEK,
+                    COLUMN_STATUS_PROYEK
+            };
+
+            cursor = db.query(TABLE_PROYEK, columns, null, null, null, null, COLUMN_TANGGAL_PROYEK + " DESC");
+
+            Log.d("DatabaseHelper", "Jumlah data proyek: " + cursor.getCount());
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    try {
+                        Proyek proyek = new Proyek(
+                                cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PROYEK_ID)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA_PROYEK)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LOKASI_PROYEK)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_PROYEK)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_PROYEK))
+                        );
+                        proyekList.add(proyek);
+                    } catch (Exception e) {
+                        Log.e("DatabaseHelper", "Error parsing data proyek: " + e.getMessage());
+                    }
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            Log.e("DatabaseHelper", "Error getAllProyek: " + e.getMessage());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+
+        return proyekList;
+    }
+
+    public Proyek getProyekById(int proyekId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns = {
+                COLUMN_PROYEK_ID,
+                COLUMN_NAMA_PROYEK,
+                COLUMN_LOKASI_PROYEK,
+                COLUMN_TANGGAL_PROYEK,
+                COLUMN_STATUS_PROYEK
+        };
+        String selection = COLUMN_PROYEK_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(proyekId)};
+
+        Cursor cursor = db.query(TABLE_PROYEK, columns, selection, selectionArgs, null, null, null);
+
+        Proyek proyek = null;
+        if (cursor != null && cursor.moveToFirst()) {
+            proyek = new Proyek(
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PROYEK_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA_PROYEK)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LOKASI_PROYEK)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_PROYEK)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_PROYEK))
+            );
+            cursor.close();
+        }
+
+        db.close();
+        return proyek;
+    }
+
+    public int updateProyek(int proyekId, String namaProyek, String lokasiProyek, String tanggalProyek, String statusProyek) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NAMA_PROYEK, namaProyek);
+        values.put(COLUMN_LOKASI_PROYEK, lokasiProyek);
+        values.put(COLUMN_TANGGAL_PROYEK, tanggalProyek);
+        values.put(COLUMN_STATUS_PROYEK, statusProyek);
+
+        String selection = COLUMN_PROYEK_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(proyekId)};
+        int result = db.update(TABLE_PROYEK, values, selection, selectionArgs);
+        db.close();
+        return result;
+    }
+
+    public int deleteProyek(int proyekId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String selection = COLUMN_PROYEK_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(proyekId)};
+        int result = db.delete(TABLE_PROYEK, selection, selectionArgs);
+        db.close();
+        return result;
+    }
 }
