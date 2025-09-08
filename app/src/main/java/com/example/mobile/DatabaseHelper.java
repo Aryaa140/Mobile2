@@ -12,7 +12,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "login.db";
-    private static final int DATABASE_VERSION = 7; // Tingkatkan versi database
+    private static final int DATABASE_VERSION = 8; // Tingkatkan versi database
 
     // tabel prospek
     public static final String TABLE_PROSPEK = "prospek";
@@ -135,27 +135,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < 5) {
-            // Upgrade dari versi lama ke versi 5
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_PROSPEK);
             db.execSQL(CREATE_TABLE_USER_PROSPEK);
         }
 
         if (oldVersion < 6) {
-            // Upgrade ke versi 6 dengan menambahkan tabel proyek
             db.execSQL(CREATE_TABLE_PROYEK);
         }
 
         if (oldVersion < 7) {
-            // Upgrade ke versi 7 dengan menambahkan tabel fasilitas
             db.execSQL(CREATE_TABLE_FASILITAS);
-        } else {
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROSPEK);
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_PROSPEK);
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROYEK);
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_FASILITAS);
-            onCreate(db);
         }
+
+        if (oldVersion < 8) {
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROYEK);
+            db.execSQL(CREATE_TABLE_PROYEK);
+        }
+
         Log.d("DatabaseHelper", "Database upgraded from version " + oldVersion + " to " + newVersion);
     }
 
@@ -723,18 +719,12 @@ public static class Proyek {
     public long addProyek(String namaProyek, String lokasiProyek, String statusProyek) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("nama_proyek", namaProyek);
-        values.put("lokasi_proyek", lokasiProyek);
-        values.put("status_proyek", statusProyek);
+        values.put(COLUMN_NAMA_PROYEK, namaProyek);
+        values.put(COLUMN_LOKASI_PROYEK, lokasiProyek);
+        values.put(COLUMN_STATUS_PROYEK, statusProyek);
 
-        long result = -1;
-        try {
-            result = db.insert("proyek", null, values);
-        } catch (Exception e) {
-            Log.e("DatabaseHelper", "Error addProyek: " + e.getMessage());
-        } finally {
-            db.close();
-        }
+        long result = db.insert(TABLE_PROYEK, null, values);
+        db.close();
         return result;
     }
 

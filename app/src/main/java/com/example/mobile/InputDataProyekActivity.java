@@ -124,7 +124,7 @@ public class InputDataProyekActivity extends AppCompatActivity {
             return;
         }
 
-        // Simpan data ke database (tanpa tanggal)
+        // Simpan data ke database (hanya 3 parameter)
         long result = databaseHelper.addProyek(namaProyek, lokasiProyek, statusProyek);
 
         if (result != -1) {
