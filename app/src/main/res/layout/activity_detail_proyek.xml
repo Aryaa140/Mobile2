@@ -94,7 +94,7 @@
                         android:id="@+id/txtDeskripsi"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Perumahan The Quality Riverside mengusung konsep hijau yang asri. The Quality Riverside merupakan proyek terbaru dari PT Bumi Jati Kalang Sejahtera. Properti ini hadir dengan keunggulan lokasi yang strategis, desain kekinian, dan spesifikasi yang mumpuni.  Dengan lingkungan yang mampu menampung lebih dari 1.000 kepala keluarga"
+                        android:text="The Quality Riverside merupakan perumahan yang mengusung konsep hijau yang asri. Properti ini hadir dengan keunggulan lokasi yang strategis, desain kekinian, dan spesifikasi yang mumpuni.  Dengan lingkungan yang mampu menampung lebih dari 1.000 unit hunian."
 
                         android:paddingTop="8dp" />
 
