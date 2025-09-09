@@ -45,7 +45,7 @@
                 app:cardCornerRadius="12dp"
                 app:cardElevation="4dp"
                 android:background="@android:color/white"
-                android:layout_marginBottom="8dp"> <!-- dikurangi dari 16dp -->
+                android:layout_marginBottom="8dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -87,12 +87,6 @@
                                 android:text="Gamping, Kec. Krian"
                                 android:paddingTop="4dp" />
 
-                            <TextView
-                                android:id="@+id/txtTanggal"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Tanggal: 07 September 2025"
-                                android:paddingTop="2dp" />
                         </LinearLayout>
                     </LinearLayout>
 
