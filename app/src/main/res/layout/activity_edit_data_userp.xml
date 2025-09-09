@@ -26,11 +26,12 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/cardForm"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_margin="18dp"
         app:cardCornerRadius="16dp"
         app:cardElevation="6dp"
         app:layout_constraintTop_toBottomOf="@id/topAppBar"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -45,24 +46,19 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginLeft="16dp"
-                    android:text="Pilih Prospek"
-                    android:textColor="@android:color/black"
-                    android:textSize="15sp" />
-
-                <Spinner
-                    android:id="@+id/spinnerRoleProspek"
+                <EditText
+                    android:id="@+id/editTextNamaProspek"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="15dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
                     android:background="@android:drawable/edit_text"
-                    android:drawablePadding="8dp" />
+                    android:drawableStart="@drawable/ic_pin_person"
+                    android:drawablePadding="8dp"
+                    android:hint="'"
+                    android:padding="12dp" />
+
 
                 <EditText
                     android:id="@+id/editTextPenginput"
@@ -74,7 +70,7 @@
                     android:background="@android:drawable/edit_text"
                     android:drawableStart="@drawable/ic_pin_person"
                     android:drawablePadding="8dp"
-                    android:hint="Masukkan Nama Penginput Prospek"
+                    android:hint="'"
                     android:padding="12dp" />
 
                 <EditText
@@ -87,7 +83,7 @@
                     android:background="@android:drawable/edit_text"
                     android:drawableStart="@drawable/ic_username"
                     android:drawablePadding="8dp"
-                    android:hint="Masukkan Nama Lengkap"
+                    android:hint="'"
                     android:padding="12dp"
                     android:inputType="textPersonName"/>
 
@@ -115,7 +111,7 @@
                     android:background="@android:drawable/edit_text"
                     android:drawableStart="@drawable/ic_phonec"
                     android:drawablePadding="8dp"
-                    android:hint="Masukkan No. Handphone"
+                    android:hint="'"
                     android:padding="12dp"
                     android:inputType="phone"/>
 
@@ -129,7 +125,7 @@
                     android:background="@android:drawable/edit_text"
                     android:drawableStart="@drawable/ic_home"
                     android:drawablePadding="8dp"
-                    android:hint="Masukkan Alamat Rumah"
+                    android:hint="'"
                     android:padding="12dp"/>
 
                 <TextView
@@ -161,7 +157,7 @@
                     android:background="@android:drawable/edit_text"
                     android:drawableStart="@drawable/ic_money"
                     android:drawablePadding="8dp"
-                    android:hint="Masukkan Jumlah Uang Tanda Jadi"
+                    android:hint="'"
                     android:padding="12dp"/>
 
                 <LinearLayout
