@@ -367,7 +367,7 @@
                         <ImageView
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:src="@drawable/ic_prospek"
+                            android:src="@drawable/ic_pemohon"
                             android:contentDescription="Prospek"
                             app:tint="@color/light_blue_500" />
 
@@ -440,7 +440,7 @@
                         <ImageView
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:src="@drawable/ic_pemohon"
+                            android:src="@drawable/ic_prospek"
                             android:contentDescription="Lihat Data"
                             android:tint="@color/light_blue_500" />
 
