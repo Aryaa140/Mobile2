@@ -1,5 +1,6 @@
 package com.example.mobile;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -16,6 +17,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import java.util.List;
 
 public class TambahUserpActivity extends AppCompatActivity {
@@ -25,9 +29,10 @@ public class TambahUserpActivity extends AppCompatActivity {
     private EditText editTextPenginput, editTextNama, editTextEmail, editTextNoHp,
             editTextAlamat, editTextUangTandaJadi;
     private Button btnSimpan, btnBatal;
-
     private int selectedProspekId = -1;
     private String selectedNamaProyek = "";
+    MaterialToolbar TopAppBar;
+    BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +44,9 @@ public class TambahUserpActivity extends AppCompatActivity {
         dbHelper = new DatabaseHelper(this);
 
         // Inisialisasi view
-        Toolbar toolbar = findViewById(R.id.topAppBar);
+        TopAppBar = findViewById(R.id.topAppBar);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setSelectedItemId(R.id.nav_folder);
         spinnerRoleProspek = findViewById(R.id.spinnerRoleProspek);
         spinnerRoleRefrensiProyek = findViewById(R.id.spinnerRoleRefrensiProyek);
         editTextPenginput = findViewById(R.id.editTextPenginput);
@@ -51,11 +58,34 @@ public class TambahUserpActivity extends AppCompatActivity {
         btnSimpan = findViewById(R.id.btnSimpan);
         btnBatal = findViewById(R.id.btnBatal);
 
-        toolbar.setNavigationOnClickListener(v -> finish());
-
         // Load data untuk spinner
         loadProspekData();
         loadProyekData();
+
+        TopAppBar.setNavigationOnClickListener(v -> {
+            Intent intent = new Intent(TambahUserpActivity.this, BerandaActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.nav_home) {
+                startActivity(new Intent(this, BerandaActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_folder) {
+                startActivity(new Intent(this, LihatDataActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            }
+            return false;
+        });
 
         // Listener untuk spinner prospek
         spinnerRoleProspek.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
