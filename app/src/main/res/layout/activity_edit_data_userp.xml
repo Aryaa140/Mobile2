@@ -54,7 +54,7 @@
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
                     android:background="@android:drawable/edit_text"
-                    android:drawableStart="@drawable/ic_pin_person"
+                    android:drawableStart="@drawable/ic_username"
                     android:drawablePadding="8dp"
                     android:hint="'"
                     android:padding="12dp" />
@@ -74,20 +74,6 @@
                     android:padding="12dp" />
 
                 <EditText
-                    android:id="@+id/editTextNama"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:background="@android:drawable/edit_text"
-                    android:drawableStart="@drawable/ic_username"
-                    android:drawablePadding="8dp"
-                    android:hint="'"
-                    android:padding="12dp"
-                    android:inputType="textPersonName"/>
-
-                <EditText
                     android:id="@+id/editTextEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -97,7 +83,7 @@
                     android:background="@android:drawable/edit_text"
                     android:drawableStart="@drawable/ic_request"
                     android:drawablePadding="8dp"
-                    android:hint="Masukkan Alamat Email"
+                    android:hint="'"
                     android:padding="12dp"
                     android:inputType="textEmailAddress"/>
 
