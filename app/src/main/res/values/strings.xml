@@ -26,6 +26,11 @@
         <item>On Progress</item>
     </string-array>
 
+    <string-array name="opsi_spinnerStatusPembayaran">
+        <item>Angsuran/KPR</item>
+        <item>Lunas</item>
+    </string-array>
+
     <string-array name="opsi_spinnerTipeUnitHunian">
         <item>Balcony A Type</item>
         <item>Balcony B Type</item>
