@@ -1,13 +1,13 @@
 package com.example.mobile;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,14 +24,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-import android.widget.Button;
-import android.widget.Spinner;
-import android.widget.ArrayAdapter;
-import android.view.View;
-import androidx.appcompat.widget.Toolbar;
-
+import java.util.Locale;
+import android.content.Intent;
 public class LihatDataUserpActivity extends AppCompatActivity {
 
     private DatabaseHelper dbHelper;
@@ -109,145 +107,27 @@ public class LihatDataUserpActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    private void showEditDialog(DatabaseHelper.UserProspek userProspek) {
-        // Buat dialog custom dengan layout yang khusus untuk edit
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View dialogView = getLayoutInflater().inflate(R.layout.activity_edit_data_userp, null);
-        builder.setView(dialogView);
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-
-        // Inisialisasi view dari dialog
-        Toolbar toolbar = dialogView.findViewById(R.id.topAppBar);
-        EditText editTextPenginput = dialogView.findViewById(R.id.editTextPenginput);
-        EditText editTextNama = dialogView.findViewById(R.id.editTextNama);
-        EditText editTextEmail = dialogView.findViewById(R.id.editTextEmail);
-        EditText editTextNoHp = dialogView.findViewById(R.id.editTextNoHp);
-        EditText editTextAlamat = dialogView.findViewById(R.id.editTextAlamat);
-        Spinner spinnerProyek = dialogView.findViewById(R.id.spinnerRoleRefrensiProyek);
-        EditText editTextUangTandaJadi = dialogView.findViewById(R.id.editTextUangPengadaan);
-        Button btnSimpan = dialogView.findViewById(R.id.btnSimpan);
-        Button btnBatal = dialogView.findViewById(R.id.btnBatal);
-
-        // Set judul toolbar
-        toolbar.setTitle("Edit Data User Prospek");
-        toolbar.setNavigationOnClickListener(v -> dialog.dismiss());
-
-        // Isi data saat ini
-        editTextPenginput.setText(userProspek.getPenginput());
-        editTextNama.setText(userProspek.getNama());
-        editTextEmail.setText(userProspek.getEmail());
-        editTextNoHp.setText(userProspek.getNoHp());
-        editTextAlamat.setText(userProspek.getAlamat());
-        editTextUangTandaJadi.setText(String.valueOf(userProspek.getUangTandaJadi()));
-
-        // Non-aktifkan field yang tidak boleh diubah
-        editTextPenginput.setEnabled(false);
-
-        // Load data proyek untuk spinner
-        List<String> proyekList = dbHelper.getAllNamaProyek();
-        ArrayAdapter<String> proyekAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_item, proyekList);
-        proyekAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerProyek.setAdapter(proyekAdapter);
-
-        // Set proyek yang dipilih sebelumnya
-        if (userProspek.getNamaProyek() != null && !userProspek.getNamaProyek().isEmpty()) {
-            int position = proyekAdapter.getPosition(userProspek.getNamaProyek());
-            if (position >= 0) {
-                spinnerProyek.setSelection(position);
-            }
-        }
-
-        // Set hint yang sesuai
-        editTextNama.setHint("Nama Lengkap");
-        editTextEmail.setHint("Alamat Email");
-        editTextNoHp.setHint("Nomor Handphone");
-        editTextAlamat.setHint("Alamat Rumah");
-        editTextUangTandaJadi.setHint("Jumlah Uang Tanda Jadi");
-
-        // Listener untuk button Simpan
-        btnSimpan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String nama = editTextNama.getText().toString().trim();
-                String email = editTextEmail.getText().toString().trim();
-                String noHp = editTextNoHp.getText().toString().trim();
-                String alamat = editTextAlamat.getText().toString().trim();
-                String namaProyek = spinnerProyek.getSelectedItem().toString();
-                String uangTandaJadiStr = editTextUangTandaJadi.getText().toString().trim();
-
-                // Validasi input
-                if (nama.isEmpty() || uangTandaJadiStr.isEmpty()) {
-                    Toast.makeText(LihatDataUserpActivity.this,
-                            "Nama dan uang tanda jadi harus diisi", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                if (namaProyek.isEmpty() || namaProyek.equals("Pilih Refrensi Proyek")) {
-                    Toast.makeText(LihatDataUserpActivity.this,
-                            "Pilih proyek terlebih dahulu", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                try {
-                    double uangTandaJadi = Double.parseDouble(uangTandaJadiStr);
-
-                    // Update data
-                    int result = dbHelper.updateUserProspek(
-                            userProspek.getUserProspekId(),
-                            userProspek.getPenginput(), // penginput tidak bisa diubah
-                            nama,
-                            email,
-                            noHp,
-                            alamat,
-                            namaProyek,
-                            uangTandaJadi
-                    );
-
-                    if (result > 0) {
-                        Toast.makeText(LihatDataUserpActivity.this,
-                                "Data berhasil diupdate", Toast.LENGTH_SHORT).show();
-                        loadUserProspekData();
-                        dialog.dismiss();
-                    } else {
-                        Toast.makeText(LihatDataUserpActivity.this,
-                                "Gagal mengupdate data", Toast.LENGTH_SHORT).show();
-                    }
-                } catch (NumberFormatException e) {
-                    Toast.makeText(LihatDataUserpActivity.this,
-                            "Format uang tanda jadi tidak valid", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        // Listener untuk button Batal
-        btnBatal.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-
-        // Sembunyikan bottom navigation di dialog
-        View bottomNav = dialogView.findViewById(R.id.bottom_navigation);
-        if (bottomNav != null) {
-            bottomNav.setVisibility(View.GONE);
-        }
-
-        // Sembunyikan field yang tidak diperlukan
-        View editTextNamaProspek = dialogView.findViewById(R.id.editTextNamaProspek);
-        if (editTextNamaProspek != null) {
-            editTextNamaProspek.setVisibility(View.GONE);
-        }
-
-        // Sembunyikan spinner prospek jika ada
-        View spinnerRoleProspek = dialogView.findViewById(R.id.spinnerRoleRefrensiProyek);
-        if (spinnerRoleProspek != null) {
-            spinnerRoleProspek.setVisibility(View.GONE);
-        }
+    // Method untuk format angka dengan separator
+    private String formatCurrency(double amount) {
+        DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(Locale.US);
+        formatter.applyPattern("#,###");
+        return formatter.format(amount);
     }
+
+    private void showEditDialog(DatabaseHelper.UserProspek userProspek) {
+        // Gunakan Intent untuk membuka activity edit
+        Intent intent = new Intent(LihatDataUserpActivity.this, EditDataUserpActivity.class);
+        intent.putExtra("USER_PROSPEK_ID", userProspek.getUserProspekId());
+        intent.putExtra("PENGINPUT", userProspek.getPenginput());
+        intent.putExtra("NAMA", userProspek.getNama());
+        intent.putExtra("EMAIL", userProspek.getEmail());
+        intent.putExtra("NO_HP", userProspek.getNoHp());
+        intent.putExtra("ALAMAT", userProspek.getAlamat());
+        intent.putExtra("NAMA_PROYEK", userProspek.getNamaProyek());
+        intent.putExtra("UANG_TANDA_JADI", userProspek.getUangTandaJadi());
+        startActivityForResult(intent, 1);
+    }
+
     private void showDeleteConfirmation(DatabaseHelper.UserProspek userProspek) {
         new AlertDialog.Builder(this)
                 .setTitle("Konfirmasi Hapus")
@@ -263,6 +143,15 @@ public class LihatDataUserpActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("Tidak", null)
                 .show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            // Refresh data setelah edit
+            loadUserProspekData();
+        }
     }
 
     // Adapter class
@@ -291,7 +180,10 @@ public class LihatDataUserpActivity extends AppCompatActivity {
             holder.tvEmail.setText("Email: " + userProspek.getEmail());
             holder.tvNoHp.setText("No. HP: " + userProspek.getNoHp());
             holder.tvAlamat.setText("Alamat: " + userProspek.getAlamat());
-            holder.tvJumlahUangTandaJadi.setText("Uang Tanda Jadi: Rp " + userProspek.getUangTandaJadi());
+
+            // Format uang tanda jadi dengan separator
+            String formattedUang = "Uang Tanda Jadi: Rp " + formatCurrency(userProspek.getUangTandaJadi());
+            holder.tvJumlahUangTandaJadi.setText(formattedUang);
 
             holder.btnEdit.setOnClickListener(v -> showEditDialog(userProspek));
             holder.btnDelete.setOnClickListener(v -> showDeleteConfirmation(userProspek));
