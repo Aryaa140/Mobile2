@@ -23,10 +23,11 @@ public class TambahUserpActivity extends AppCompatActivity {
     private DatabaseHelper dbHelper;
     private Spinner spinnerRoleProspek, spinnerRoleRefrensiProyek;
     private EditText editTextPenginput, editTextNama, editTextEmail, editTextNoHp,
-            editTextAlamat, editTextReferensi, editTextUangPengadaan;
+            editTextAlamat, editTextUangTandaJadi;
     private Button btnSimpan, btnBatal;
 
     private int selectedProspekId = -1;
+    private String selectedNamaProyek = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,20 +41,23 @@ public class TambahUserpActivity extends AppCompatActivity {
         // Inisialisasi view
         Toolbar toolbar = findViewById(R.id.topAppBar);
         spinnerRoleProspek = findViewById(R.id.spinnerRoleProspek);
+        spinnerRoleRefrensiProyek = findViewById(R.id.spinnerRoleRefrensiProyek);
         editTextPenginput = findViewById(R.id.editTextPenginput);
         editTextNama = findViewById(R.id.editTextNama);
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextNoHp = findViewById(R.id.editTextNoHp);
         editTextAlamat = findViewById(R.id.editTextAlamat);
-        spinnerRoleRefrensiProyek = findViewById(R.id.spinnerRoleRefrensiProyek);
-        editTextUangPengadaan = findViewById(R.id.editTextUangPengadaan);
+        editTextUangTandaJadi = findViewById(R.id.editTextUangPengadaan); // Tetap gunakan ID yang sama di XML
         btnSimpan = findViewById(R.id.btnSimpan);
         btnBatal = findViewById(R.id.btnBatal);
 
         toolbar.setNavigationOnClickListener(v -> finish());
 
+        // Load data untuk spinner
         loadProspekData();
+        loadProyekData();
 
+        // Listener untuk spinner prospek
         spinnerRoleProspek.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -64,6 +68,19 @@ public class TambahUserpActivity extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
                 // Do nothing
+            }
+        });
+
+        // Listener untuk spinner proyek
+        spinnerRoleRefrensiProyek.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedNamaProyek = parent.getItemAtPosition(position).toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                selectedNamaProyek = "";
             }
         });
 
@@ -94,18 +111,38 @@ public class TambahUserpActivity extends AppCompatActivity {
         spinnerRoleProspek.setAdapter(adapter);
     }
 
+    private void loadProyekData() {
+        List<String> proyekNamaList = dbHelper.getAllNamaProyek();
+
+        if (proyekNamaList.isEmpty()) {
+            Toast.makeText(this, "Tidak ada data proyek tersedia", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_item, proyekNamaList);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerRoleRefrensiProyek.setAdapter(adapter);
+    }
+
     private void loadProspekDetails(String nama) {
-        // PERBAIKAN: Gunakan Prospek (bukan DatabaseHelper.Prospek)
+        // Hapus DatabaseHelper. dan gunakan class Prospek langsung
         Prospek prospek = dbHelper.getProspekByNama(nama);
 
         if (prospek != null) {
-            selectedProspekId = prospek.getProspekId(); // PERBAIKAN: getProspekId() bukan getId()
+            selectedProspekId = prospek.getProspekId();
             editTextPenginput.setText(prospek.getPenginput());
             editTextNama.setText(prospek.getNama());
             editTextEmail.setText(prospek.getEmail());
             editTextNoHp.setText(prospek.getNoHp());
             editTextAlamat.setText(prospek.getAlamat());
-            editTextReferensi.setText(prospek.getReferensi());
+
+            // Non-aktifkan edit text yang diisi otomatis dari prospek
+            editTextPenginput.setEnabled(false);
+            editTextNama.setEnabled(false);
+            editTextEmail.setEnabled(false);
+            editTextNoHp.setEnabled(false);
+            editTextAlamat.setEnabled(false);
         }
     }
 
@@ -116,17 +153,22 @@ public class TambahUserpActivity extends AppCompatActivity {
             return;
         }
 
-        String uangPengadaanStr = editTextUangPengadaan.getText().toString().trim();
-        if (uangPengadaanStr.isEmpty()) {
-            Toast.makeText(this, "Uang pengadaan harus diisi", Toast.LENGTH_SHORT).show();
+        if (selectedNamaProyek.isEmpty()) {
+            Toast.makeText(this, "Pilih proyek terlebih dahulu", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String uangTandaJadiStr = editTextUangTandaJadi.getText().toString().trim();
+        if (uangTandaJadiStr.isEmpty()) {
+            Toast.makeText(this, "Uang tanda jadi harus diisi", Toast.LENGTH_SHORT).show();
             return;
         }
 
         try {
-            double uangPengadaan = Double.parseDouble(uangPengadaanStr);
+            double uangTandaJadi = Double.parseDouble(uangTandaJadiStr);
 
             // Pindahkan data dari prospek ke user_prospek dan hapus dari prospek
-            boolean success = dbHelper.migrateAndDeleteProspek(selectedProspekId, uangPengadaan);
+            boolean success = dbHelper.migrateAndDeleteProspek(selectedProspekId, selectedNamaProyek, uangTandaJadi);
 
             if (success) {
                 Toast.makeText(this, "Data berhasil ditambahkan ke user prospek", Toast.LENGTH_SHORT).show();
@@ -135,7 +177,7 @@ public class TambahUserpActivity extends AppCompatActivity {
                 Toast.makeText(this, "Gagal menambahkan data", Toast.LENGTH_SHORT).show();
             }
         } catch (NumberFormatException e) {
-            Toast.makeText(this, "Format uang pengadaan tidak valid", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Format uang tanda jadi tidak valid", Toast.LENGTH_SHORT).show();
         }
     }
 

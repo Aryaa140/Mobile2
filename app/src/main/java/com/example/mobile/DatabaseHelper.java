@@ -12,7 +12,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "login.db";
-    private static final int DATABASE_VERSION = 8; // Tingkatkan versi database
+    private static final int DATABASE_VERSION = 9; // Tingkatkan versi database
 
     // tabel prospek
     public static final String TABLE_PROSPEK = "prospek";
@@ -35,27 +35,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + COLUMN_ALAMAT + " TEXT,"
             + COLUMN_REFERENSI + " TEXT,"
             + COLUMN_TANGGAL_BUAT + " DATETIME DEFAULT CURRENT_TIMESTAMP" + ")";
-    // tabel user prospek
-    // tabel user_prospek (tabel baru)
-    public static final String TABLE_USER_PROSPEK = "user_prospek";
-    public static final String COLUMN_USER_PROSPEK_ID = "user_prospek_id";
-    public static final String COLUMN_UANG_PENGADAAN = "uang_pengadaan";
-    public static final String COLUMN_TANGGAL_UPDATE = "tanggal_update";
-
-    private static final String CREATE_TABLE_USER_PROSPEK = "CREATE TABLE " + TABLE_USER_PROSPEK + "("
-            + COLUMN_USER_PROSPEK_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-            + COLUMN_PROSPEK_ID + " INTEGER,"
-            + COLUMN_PENGINPUT + " TEXT NOT NULL,"
-            + COLUMN_NAMA + " TEXT NOT NULL,"
-            + COLUMN_EMAIL + " TEXT,"
-            + COLUMN_NO_HP + " TEXT,"
-            + COLUMN_ALAMAT + " TEXT,"
-            + COLUMN_REFERENSI + " TEXT,"
-            + COLUMN_UANG_PENGADAAN + " REAL DEFAULT 0,"
-            + COLUMN_TANGGAL_BUAT + " DATETIME,"
-            + COLUMN_TANGGAL_UPDATE + " DATETIME DEFAULT CURRENT_TIMESTAMP,"
-            + "FOREIGN KEY (" + COLUMN_PROSPEK_ID + ") REFERENCES " + TABLE_PROSPEK + "(" + COLUMN_PROSPEK_ID + ")" + ")";
-
 
     // tabel users
     public static final String TABLE_USERS = "users";
@@ -84,6 +63,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + COLUMN_NAMA_PROYEK + " TEXT NOT NULL,"
             + COLUMN_LOKASI_PROYEK + " TEXT NOT NULL,"
             + COLUMN_STATUS_PROYEK + " TEXT NOT NULL" + ")";
+    // tabel user prospek
+    // tabel user_prospek (tabel baru)
+    public static final String TABLE_USER_PROSPEK = "user_prospek";
+    public static final String COLUMN_USER_PROSPEK_ID = "user_prospek_id";
+    public static final String COLUMN_UANG_TANDA_JADI = "uang_tanda_jadi"; // Ganti nama kolom
+    public static final String COLUMN_NAMA_PROYEK_USER = "nama_proyek"; // Tambah kolom baru
+
+    private static final String CREATE_TABLE_USER_PROSPEK = "CREATE TABLE " + TABLE_USER_PROSPEK + "("
+            + COLUMN_USER_PROSPEK_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            + COLUMN_PENGINPUT + " TEXT NOT NULL,"
+            + COLUMN_NAMA + " TEXT NOT NULL,"
+            + COLUMN_EMAIL + " TEXT,"
+            + COLUMN_NO_HP + " TEXT,"
+            + COLUMN_ALAMAT + " TEXT,"
+            + COLUMN_NAMA_PROYEK_USER + " TEXT," // Kolom baru untuk nama proyek
+            + COLUMN_UANG_TANDA_JADI + " REAL DEFAULT 0," // Ganti nama kolom
+            + COLUMN_TANGGAL_BUAT + " DATETIME DEFAULT CURRENT_TIMESTAMP,"
+            + "FOREIGN KEY (" + COLUMN_NAMA_PROYEK_USER + ") REFERENCES " + TABLE_PROYEK + "(" + COLUMN_NAMA_PROYEK + ")" + ")";
+
     //tabel fasilitas
     public static final String TABLE_FASILITAS = "fasilitas";
     public static final String COLUMN_FASILITAS_ID = "fasilitas_id";
@@ -109,8 +107,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_USERS);
         db.execSQL(CREATE_TABLE_PROSPEK);
-        db.execSQL(CREATE_TABLE_USER_PROSPEK);
+
         db.execSQL(CREATE_TABLE_PROYEK);
+        db.execSQL(CREATE_TABLE_USER_PROSPEK);
         db.execSQL(CREATE_TABLE_FASILITAS);
 
         // User contoh Marketing
@@ -150,6 +149,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (oldVersion < 8) {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROYEK);
             db.execSQL(CREATE_TABLE_PROYEK);
+        }
+        if (oldVersion < 9) {
+            // Hapus tabel lama jika ada
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_PROSPEK);
+            // Buat tabel baru dengan struktur yang diperbarui
+            db.execSQL(CREATE_TABLE_USER_PROSPEK);
         }
 
         Log.d("DatabaseHelper", "Database upgraded from version " + oldVersion + " to " + newVersion);
@@ -444,6 +449,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return result;
     }
+    public int deleteProspekById(int prospekId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String selection = COLUMN_PROSPEK_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(prospekId)};
+        int result = db.delete(TABLE_PROSPEK, selection, selectionArgs);
+        db.close();
+        return result;
+    }
 
     // ======== USER MODEL ========
 
@@ -491,25 +504,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return prospekNamaList;
     }
-    public long addUserProspek(int prospekId, String penginput, String nama, String email,
-                               String noHp, String alamat, String referensi,
-                               double uangPengadaan, String tanggalBuat) {
+    public long addUserProspek(String penginput, String nama, String email,
+                               String noHp, String alamat, String namaProyek,
+                               double uangTandaJadi) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_PROSPEK_ID, prospekId);
         values.put(COLUMN_PENGINPUT, penginput);
         values.put(COLUMN_NAMA, nama);
         values.put(COLUMN_EMAIL, email);
         values.put(COLUMN_NO_HP, noHp);
         values.put(COLUMN_ALAMAT, alamat);
-        values.put(COLUMN_REFERENSI, referensi);
-        values.put(COLUMN_UANG_PENGADAAN, uangPengadaan);
-        values.put(COLUMN_TANGGAL_BUAT, tanggalBuat);
+        values.put(COLUMN_NAMA_PROYEK_USER, namaProyek);
+        values.put(COLUMN_UANG_TANDA_JADI, uangTandaJadi);
+        // COLUMN_TANGGAL_BUAT otomatis terisi karena DEFAULT CURRENT_TIMESTAMP
 
         long result = db.insert(TABLE_USER_PROSPEK, null, values);
         db.close();
         return result;
     }
+
     public List<UserProspek> getAllUserProspek() {
         List<UserProspek> userProspekList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -517,13 +530,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         try {
             String[] columns = {
-                    COLUMN_USER_PROSPEK_ID, COLUMN_PROSPEK_ID, COLUMN_PENGINPUT,
-                    COLUMN_NAMA, COLUMN_EMAIL, COLUMN_NO_HP, COLUMN_ALAMAT,
-                    COLUMN_REFERENSI, COLUMN_UANG_PENGADAAN,
-                    COLUMN_TANGGAL_BUAT, COLUMN_TANGGAL_UPDATE
+                    COLUMN_USER_PROSPEK_ID,
+                    COLUMN_PENGINPUT,
+                    COLUMN_NAMA,
+                    COLUMN_EMAIL,
+                    COLUMN_NO_HP,
+                    COLUMN_ALAMAT,
+                    COLUMN_NAMA_PROYEK_USER,
+                    COLUMN_UANG_TANDA_JADI,
+                    COLUMN_TANGGAL_BUAT
             };
 
-            cursor = db.query(TABLE_USER_PROSPEK, columns, null, null, null, null, COLUMN_TANGGAL_UPDATE + " DESC");
+            cursor = db.query(TABLE_USER_PROSPEK, columns, null, null, null, null, COLUMN_TANGGAL_BUAT + " DESC");
 
             Log.d("DatabaseHelper", "Jumlah data user_prospek: " + cursor.getCount());
 
@@ -532,16 +550,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     try {
                         UserProspek userProspek = new UserProspek(
                                 cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_USER_PROSPEK_ID)),
-                                cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PROSPEK_ID)),
                                 cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PENGINPUT)),
                                 cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA)),
                                 cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)),
                                 cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NO_HP)),
                                 cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ALAMAT)),
-                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI)),
-                                cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_UANG_PENGADAAN)),
-                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_BUAT)),
-                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_UPDATE))
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA_PROYEK_USER)),
+                                cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_UANG_TANDA_JADI)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_BUAT))
                         );
                         userProspekList.add(userProspek);
                     } catch (Exception e) {
@@ -560,6 +576,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return userProspekList;
     }
+
     public Prospek getProspekByNama(String nama) {
         SQLiteDatabase db = this.getReadableDatabase();
         String[] columns = {COLUMN_PROSPEK_ID, COLUMN_PENGINPUT, COLUMN_NAMA, COLUMN_EMAIL,
@@ -587,28 +604,44 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return prospek;
     }
-    public int deleteProspekById(int prospekId) {
+    public int updateUserProspek(int userProspekId, String penginput, String nama, String email,
+                                 String noHp, String alamat, String namaProyek, double uangTandaJadi) {
         SQLiteDatabase db = this.getWritableDatabase();
-        String selection = COLUMN_PROSPEK_ID + " = ?";
-        String[] selectionArgs = {String.valueOf(prospekId)};
-        int result = db.delete(TABLE_PROSPEK, selection, selectionArgs);
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_PENGINPUT, penginput);
+        values.put(COLUMN_NAMA, nama);
+        values.put(COLUMN_EMAIL, email);
+        values.put(COLUMN_NO_HP, noHp);
+        values.put(COLUMN_ALAMAT, alamat);
+        values.put(COLUMN_NAMA_PROYEK_USER, namaProyek);
+        values.put(COLUMN_UANG_TANDA_JADI, uangTandaJadi);
+
+        String selection = COLUMN_USER_PROSPEK_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(userProspekId)};
+        int result = db.update(TABLE_USER_PROSPEK, values, selection, selectionArgs);
         db.close();
         return result;
     }
-    public boolean migrateAndDeleteProspek(int prospekId, double uangPengadaan) {
+    public int deleteUserProspek(int userProspekId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String selection = COLUMN_USER_PROSPEK_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(userProspekId)};
+        int result = db.delete(TABLE_USER_PROSPEK, selection, selectionArgs);
+        db.close();
+        return result;
+    }
+    public boolean migrateAndDeleteProspek(int prospekId, String namaProyek, double uangTandaJadi) {
         Prospek prospek = getProspekById(prospekId);
         if (prospek != null) {
-            // Tambahkan ke user_prospek
+            // Tambahkan ke user_prospek dengan struktur baru
             long result = addUserProspek(
-                    prospek.getProspekId(),
-                    prospek.getPenginput(),
-                    prospek.getNama(),
-                    prospek.getEmail(),
-                    prospek.getNoHp(),
-                    prospek.getAlamat(),
-                    prospek.getReferensi(),
-                    uangPengadaan,
-                    prospek.getTanggalBuat()
+                    prospek.getPenginput(),      // penginput
+                    prospek.getNama(),           // nama
+                    prospek.getEmail(),          // email
+                    prospek.getNoHp(),           // noHp
+                    prospek.getAlamat(),         // alamat
+                    namaProyek,                  // namaProyek (parameter baru)
+                    uangTandaJadi                // uangTandaJadi (ganti dari uangPengadaan)
             );
 
             // Hapus dari prospek jika berhasil ditambahkan ke user_prospek
@@ -619,42 +652,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         return false;
     }
-
     public static class UserProspek {
         private int userProspekId;
-        private int prospekId;
         private String penginput;
         private String nama;
         private String email;
         private String noHp;
         private String alamat;
-        private String referensi;
-        private double uangPengadaan;
+        private String namaProyek; // Kolom baru
+        private double uangTandaJadi; // Ganti nama variabel
         private String tanggalBuat;
-        private String tanggalUpdate;
 
-        public UserProspek(int userProspekId, int prospekId, String penginput, String nama,
-                           String email, String noHp, String alamat, String referensi,
-                           double uangPengadaan, String tanggalBuat, String tanggalUpdate) {
+        public UserProspek(int userProspekId, String penginput, String nama,
+                           String email, String noHp, String alamat, String namaProyek,
+                           double uangTandaJadi, String tanggalBuat) {
             this.userProspekId = userProspekId;
-            this.prospekId = prospekId;
             this.penginput = penginput;
             this.nama = nama;
             this.email = email;
             this.noHp = noHp;
             this.alamat = alamat;
-            this.referensi = referensi;
-            this.uangPengadaan = uangPengadaan;
+            this.namaProyek = namaProyek;
+            this.uangTandaJadi = uangTandaJadi;
             this.tanggalBuat = tanggalBuat;
-            this.tanggalUpdate = tanggalUpdate;
         }
 
         // Getter dan Setter methods
         public int getUserProspekId() { return userProspekId; }
         public void setUserProspekId(int userProspekId) { this.userProspekId = userProspekId; }
-
-        public int getProspekId() { return prospekId; }
-        public void setProspekId(int prospekId) { this.prospekId = prospekId; }
 
         public String getPenginput() { return penginput; }
         public void setPenginput(String penginput) { this.penginput = penginput; }
@@ -671,17 +696,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public String getAlamat() { return alamat; }
         public void setAlamat(String alamat) { this.alamat = alamat; }
 
-        public String getReferensi() { return referensi; }
-        public void setReferensi(String referensi) { this.referensi = referensi; }
+        public String getNamaProyek() { return namaProyek; }
+        public void setNamaProyek(String namaProyek) { this.namaProyek = namaProyek; }
 
-        public double getUangPengadaan() { return uangPengadaan; }
-        public void setUangPengadaan(double uangPengadaan) { this.uangPengadaan = uangPengadaan; }
+        public double getUangTandaJadi() { return uangTandaJadi; }
+        public void setUangTandaJadi(double uangTandaJadi) { this.uangTandaJadi = uangTandaJadi; }
 
         public String getTanggalBuat() { return tanggalBuat; }
         public void setTanggalBuat(String tanggalBuat) { this.tanggalBuat = tanggalBuat; }
-
-        public String getTanggalUpdate() { return tanggalUpdate; }
-        public void setTanggalUpdate(String tanggalUpdate) { this.tanggalUpdate = tanggalUpdate; }
     }
 //===== proyek method ====
 public static class Proyek {
