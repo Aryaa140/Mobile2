@@ -151,6 +151,66 @@
                     android:background="@android:drawable/edit_text"
                     android:drawablePadding="8dp" />
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="16dp"
+                    android:text="Pilih Unit Hunian Proyek"
+                    android:textColor="@android:color/black"
+                    android:textSize="15sp" />
+
+                <Spinner
+                    android:id="@+id/spinnerRoleUnitHuniah"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawablePadding="8dp"
+                    android:entries="@array/opsi_spinnerTipeUnitHunian"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="16dp"
+                    android:text="Pilih Tipe Unit Hunian Proyek"
+                    android:textColor="@android:color/black"
+                    android:textSize="15sp" />
+
+                <Spinner
+                    android:id="@+id/spinnerRoleStatusPembayaran"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawablePadding="8dp"
+                    android:entries="@array/opsi_spinnerTipeUnitHunian"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="16dp"
+                    android:text="Pilih Status Pembayaran"
+                    android:textColor="@android:color/black"
+                    android:textSize="15sp" />
+
+                <Spinner
+                    android:id="@+id/spinnerRoleTipeHuniah"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawablePadding="8dp"
+                    android:entries="@array/opsi_spinnerStatusPembayaran"/>
+
                 <EditText
                     android:id="@+id/editTextUangPengadaan"
                     android:layout_width="match_parent"

@@ -67,6 +67,7 @@ public class InputDataFasilitasActivity extends AppCompatActivity {
             long result = dbHelper.addFasilitas(namaFasilitas, namaProyek, lokasiFasilitas, statusFasilitas);
             if (result != -1) {
                 Toast.makeText(this, "Fasilitas berhasil ditambahkan!", Toast.LENGTH_SHORT).show();
+
                 finish(); // kembali ke activity sebelumnya
             } else {
                 Toast.makeText(this, "Gagal menambahkan fasilitas", Toast.LENGTH_SHORT).show();
@@ -75,7 +76,13 @@ public class InputDataFasilitasActivity extends AppCompatActivity {
 
         // Button Batal
         Batal.setOnClickListener(v -> {
-            Intent intent = new Intent(InputDataFasilitasActivity.this, InputActivity.class);
+            Intent intent = new Intent(InputDataFasilitasActivity.this, BerandaActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
+        TopAppBar.setNavigationOnClickListener(v -> {
+            Intent intent = new Intent(InputDataFasilitasActivity.this, BerandaActivity.class);
             startActivity(intent);
             finish();
         });

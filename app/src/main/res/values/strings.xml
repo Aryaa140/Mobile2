@@ -8,7 +8,6 @@
     </string-array>
 
     <string-array name="opsi_spinnerProspek">
-        <item>Pilih Refrensi Prospek</item>
         <item>Pameran</item>
         <item>Sosial Media</item>
         <item>User Get User</item>
@@ -25,6 +24,17 @@
     <string-array name="opsi_spinnerStatusFasilitas">
         <item>Selesai</item>
         <item>On Progress</item>
+    </string-array>
+
+    <string-array name="opsi_spinnerStatusPembayaran">
+        <item>Angsuran/KPR</item>
+        <item>Lunas</item>
+    </string-array>
+
+    <string-array name="opsi_spinnerTipeUnitHunian">
+        <item>Balcony A Type</item>
+        <item>Balcony B Type</item>
+        <item> </item>
     </string-array>
 
 </resources>

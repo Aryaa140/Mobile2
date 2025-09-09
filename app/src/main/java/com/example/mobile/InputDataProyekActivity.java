@@ -51,18 +51,21 @@ public class InputDataProyekActivity extends AppCompatActivity {
         // Simpan data proyek
         btnSimpan.setOnClickListener(v -> {
             simpanDataProyek();
+            Intent intent = new Intent(InputDataProyekActivity.this, BerandaActivity.class);
+            startActivity(intent);
+            finish();
         });
 
         // Batal input
         btnBatal.setOnClickListener(v -> {
-            Intent intent = new Intent(InputDataProyekActivity.this, InputActivity.class);
+            Intent intent = new Intent(InputDataProyekActivity.this, BerandaActivity.class);
             startActivity(intent);
             finish();
         });
 
         // Navigasi toolbar
         TopAppBar.setNavigationOnClickListener(v -> {
-            Intent intent = new Intent(InputDataProyekActivity.this, InputActivity.class);
+            Intent intent = new Intent(InputDataProyekActivity.this, BerandaActivity.class);
             startActivity(intent);
             finish();
         });
@@ -72,7 +75,7 @@ public class InputDataProyekActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
-                startActivity(new Intent(this, MainActivity.class));
+                startActivity(new Intent(this, BerandaActivity.class));
                 overridePendingTransition(0, 0);
                 return true;
             } else if (id == R.id.nav_folder) {
