@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/biru_ungu"
-    tools:context=".TambahUserpActivity">
+    tools:context=".EditDataUserpActivity">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
@@ -46,6 +46,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
+                <!-- Nama User Prospek (BISA DIUBAH) -->
                 <EditText
                     android:id="@+id/editTextNamaProspek"
                     android:layout_width="match_parent"
@@ -56,10 +57,11 @@
                     android:background="@android:drawable/edit_text"
                     android:drawableStart="@drawable/ic_username"
                     android:drawablePadding="8dp"
-                    android:hint="'"
-                    android:padding="12dp" />
+                    android:hint="Nama User Prospek"
+                    android:padding="12dp"
+                    android:inputType="textPersonName"/>
 
-
+                <!-- Nama Penginput (BISA DIUBAH) -->
                 <EditText
                     android:id="@+id/editTextPenginput"
                     android:layout_width="match_parent"
@@ -70,8 +72,9 @@
                     android:background="@android:drawable/edit_text"
                     android:drawableStart="@drawable/ic_pin_person"
                     android:drawablePadding="8dp"
-                    android:hint="'"
-                    android:padding="12dp" />
+                    android:hint="Nama Penginput"
+                    android:padding="12dp"
+                    android:inputType="textPersonName"/>
 
                 <EditText
                     android:id="@+id/editTextEmail"
@@ -83,7 +86,7 @@
                     android:background="@android:drawable/edit_text"
                     android:drawableStart="@drawable/ic_request"
                     android:drawablePadding="8dp"
-                    android:hint="'"
+                    android:hint="Alamat Email"
                     android:padding="12dp"
                     android:inputType="textEmailAddress"/>
 
@@ -97,7 +100,7 @@
                     android:background="@android:drawable/edit_text"
                     android:drawableStart="@drawable/ic_phonec"
                     android:drawablePadding="8dp"
-                    android:hint="'"
+                    android:hint="Nomor Handphone"
                     android:padding="12dp"
                     android:inputType="phone"/>
 
@@ -111,7 +114,7 @@
                     android:background="@android:drawable/edit_text"
                     android:drawableStart="@drawable/ic_home"
                     android:drawablePadding="8dp"
-                    android:hint="'"
+                    android:hint="Alamat Rumah"
                     android:padding="12dp"/>
 
                 <TextView
@@ -119,7 +122,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
                     android:layout_marginLeft="16dp"
-                    android:text="Pilih Refrensi Proyek"
+                    android:text="Pilih Referensi Proyek"
                     android:textColor="@android:color/black"
                     android:textSize="15sp" />
 
@@ -143,8 +146,9 @@
                     android:background="@android:drawable/edit_text"
                     android:drawableStart="@drawable/ic_money"
                     android:drawablePadding="8dp"
-                    android:hint="'"
-                    android:padding="12dp"/>
+                    android:hint="Jumlah Uang Tanda Jadi"
+                    android:padding="12dp"
+                    android:inputType="numberDecimal"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
