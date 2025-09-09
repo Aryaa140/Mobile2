@@ -24,7 +24,6 @@ public class EditDataUserpActivity extends AppCompatActivity {
     private DatabaseHelper dbHelper;
     private int userProspekId;
     private String selectedNamaProyek;
-    private String nama; // SIMPAN NAMA DARI INTENT
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +37,7 @@ public class EditDataUserpActivity extends AppCompatActivity {
         Intent intent = getIntent();
         userProspekId = intent.getIntExtra("USER_PROSPEK_ID", -1);
         String penginput = intent.getStringExtra("PENGINPUT");
-        nama = intent.getStringExtra("NAMA"); // AMBIL NAMA DARI INTENT
+        String nama = intent.getStringExtra("NAMA");
         String email = intent.getStringExtra("EMAIL");
         String noHp = intent.getStringExtra("NO_HP");
         String alamat = intent.getStringExtra("ALAMAT");
@@ -47,6 +46,7 @@ public class EditDataUserpActivity extends AppCompatActivity {
 
         // Initialize views
         Toolbar toolbar = findViewById(R.id.topAppBar);
+        EditText editTextNamaProspek = findViewById(R.id.editTextNamaProspek);
         EditText editTextPenginput = findViewById(R.id.editTextPenginput);
         EditText editTextEmail = findViewById(R.id.editTextEmail);
         EditText editTextNoHp = findViewById(R.id.editTextNoHp);
@@ -56,17 +56,24 @@ public class EditDataUserpActivity extends AppCompatActivity {
         Button btnSimpan = findViewById(R.id.btnSimpan);
         Button btnBatal = findViewById(R.id.btnBatal);
 
-        // Set data to views - pastikan semua field terisi
+        // Set data to views - pastikan semua field terisi dengan data lama
+        if (nama != null) editTextNamaProspek.setText(nama);
         if (penginput != null) editTextPenginput.setText(penginput);
         if (email != null) editTextEmail.setText(email);
         if (noHp != null) editTextNoHp.setText(noHp);
         if (alamat != null) editTextAlamat.setText(alamat);
         if (uangTandaJadi > 0) editTextUangTandaJadi.setText(String.valueOf(uangTandaJadi));
 
-        // Disable penginput field
-        editTextPenginput.setEnabled(false);
+        // Enable semua field (bisa diubah)
+        editTextNamaProspek.setEnabled(true);
+        editTextPenginput.setEnabled(true);
+        editTextEmail.setEnabled(true);
+        editTextNoHp.setEnabled(true);
+        editTextAlamat.setEnabled(true);
+        editTextUangTandaJadi.setEnabled(true);
 
         // Set hint yang jelas
+        editTextNamaProspek.setHint("Nama User Prospek");
         editTextPenginput.setHint("Nama Penginput");
         editTextEmail.setHint("Alamat Email");
         editTextNoHp.setHint("Nomor Handphone");
@@ -86,9 +93,9 @@ public class EditDataUserpActivity extends AppCompatActivity {
                 int position = adapter.getPosition(namaProyek);
                 if (position >= 0) {
                     spinnerProyek.setSelection(position);
+                    selectedNamaProyek = namaProyek;
                 }
             }
-            selectedNamaProyek = namaProyek;
         } else {
             Toast.makeText(this, "Tidak ada data proyek tersedia", Toast.LENGTH_SHORT).show();
         }
@@ -110,10 +117,23 @@ public class EditDataUserpActivity extends AppCompatActivity {
 
         // Button listeners
         btnSimpan.setOnClickListener(v -> {
+            String newNama = editTextNamaProspek.getText().toString().trim();
+            String newPenginput = editTextPenginput.getText().toString().trim();
             String newEmail = editTextEmail.getText().toString().trim();
             String newNoHp = editTextNoHp.getText().toString().trim();
             String newAlamat = editTextAlamat.getText().toString().trim();
             String uangStr = editTextUangTandaJadi.getText().toString().trim();
+
+            // Validasi input
+            if (newNama.isEmpty()) {
+                Toast.makeText(this, "Nama user prospek harus diisi", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (newPenginput.isEmpty()) {
+                Toast.makeText(this, "Nama penginput harus diisi", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             if (uangStr.isEmpty()) {
                 Toast.makeText(this, "Uang tanda jadi harus diisi", Toast.LENGTH_SHORT).show();
@@ -128,11 +148,11 @@ public class EditDataUserpActivity extends AppCompatActivity {
             try {
                 double newUangTandaJadi = Double.parseDouble(uangStr);
 
-                // Gunakan nama dari intent (tidak diubah)
+                // Update data dengan semua field yang bisa diubah
                 int result = dbHelper.updateUserProspek(
                         userProspekId,
-                        penginput, // penginput tidak berubah
-                        nama,      // nama tidak berubah (diambil dari intent)
+                        newPenginput, // penginput bisa diubah
+                        newNama,      // nama bisa diubah
                         newEmail,
                         newNoHp,
                         newAlamat,
