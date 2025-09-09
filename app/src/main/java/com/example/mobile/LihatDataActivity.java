@@ -31,8 +31,7 @@ public class LihatDataActivity extends AppCompatActivity {
         cardFasilitas = findViewById(R.id.cardFasilitas);
         cardProyek = findViewById(R.id.cardProyek);
         cardProspek = findViewById(R.id.cardProspek);
-        cardBooking = findViewById(R.id.cardBooking);
-        cardPromo = findViewById(R.id.cardPromo);
+
 
         TopAppBar.setNavigationOnClickListener(v -> {
             Intent intent = new Intent(LihatDataActivity.this, BerandaActivity.class);
