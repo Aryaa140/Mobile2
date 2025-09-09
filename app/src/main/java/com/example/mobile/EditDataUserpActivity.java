@@ -24,6 +24,7 @@ public class EditDataUserpActivity extends AppCompatActivity {
     private DatabaseHelper dbHelper;
     private int userProspekId;
     private String selectedNamaProyek;
+    private String nama; // SIMPAN NAMA DARI INTENT
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +38,7 @@ public class EditDataUserpActivity extends AppCompatActivity {
         Intent intent = getIntent();
         userProspekId = intent.getIntExtra("USER_PROSPEK_ID", -1);
         String penginput = intent.getStringExtra("PENGINPUT");
+        nama = intent.getStringExtra("NAMA"); // AMBIL NAMA DARI INTENT
         String email = intent.getStringExtra("EMAIL");
         String noHp = intent.getStringExtra("NO_HP");
         String alamat = intent.getStringExtra("ALAMAT");
@@ -54,31 +56,42 @@ public class EditDataUserpActivity extends AppCompatActivity {
         Button btnSimpan = findViewById(R.id.btnSimpan);
         Button btnBatal = findViewById(R.id.btnBatal);
 
-        // Set data to views
-        editTextPenginput.setText(penginput);
-        editTextEmail.setText(email);
-        editTextNoHp.setText(noHp);
-        editTextAlamat.setText(alamat);
-        editTextUangTandaJadi.setText(String.valueOf(uangTandaJadi));
+        // Set data to views - pastikan semua field terisi
+        if (penginput != null) editTextPenginput.setText(penginput);
+        if (email != null) editTextEmail.setText(email);
+        if (noHp != null) editTextNoHp.setText(noHp);
+        if (alamat != null) editTextAlamat.setText(alamat);
+        if (uangTandaJadi > 0) editTextUangTandaJadi.setText(String.valueOf(uangTandaJadi));
 
         // Disable penginput field
         editTextPenginput.setEnabled(false);
 
+        // Set hint yang jelas
+        editTextPenginput.setHint("Nama Penginput");
+        editTextEmail.setHint("Alamat Email");
+        editTextNoHp.setHint("Nomor Handphone");
+        editTextAlamat.setHint("Alamat Rumah");
+        editTextUangTandaJadi.setHint("Jumlah Uang Tanda Jadi");
+
         // Load proyek data
         List<String> proyekList = dbHelper.getAllNamaProyek();
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_item, proyekList);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerProyek.setAdapter(adapter);
+        if (proyekList != null && !proyekList.isEmpty()) {
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                    this, android.R.layout.simple_spinner_item, proyekList);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerProyek.setAdapter(adapter);
 
-        // Set selected proyek
-        if (namaProyek != null && !namaProyek.isEmpty()) {
-            int position = adapter.getPosition(namaProyek);
-            if (position >= 0) {
-                spinnerProyek.setSelection(position);
+            // Set selected proyek
+            if (namaProyek != null && !namaProyek.isEmpty()) {
+                int position = adapter.getPosition(namaProyek);
+                if (position >= 0) {
+                    spinnerProyek.setSelection(position);
+                }
             }
+            selectedNamaProyek = namaProyek;
+        } else {
+            Toast.makeText(this, "Tidak ada data proyek tersedia", Toast.LENGTH_SHORT).show();
         }
-        selectedNamaProyek = namaProyek;
 
         spinnerProyek.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -107,7 +120,7 @@ public class EditDataUserpActivity extends AppCompatActivity {
                 return;
             }
 
-            if (selectedNamaProyek.isEmpty()) {
+            if (selectedNamaProyek == null || selectedNamaProyek.isEmpty()) {
                 Toast.makeText(this, "Pilih proyek terlebih dahulu", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -115,10 +128,11 @@ public class EditDataUserpActivity extends AppCompatActivity {
             try {
                 double newUangTandaJadi = Double.parseDouble(uangStr);
 
+                // Gunakan nama dari intent (tidak diubah)
                 int result = dbHelper.updateUserProspek(
                         userProspekId,
-                        penginput,
-                        penginput, // Nama tetap menggunakan penginput (karena field nama dihapus)
+                        penginput, // penginput tidak berubah
+                        nama,      // nama tidak berubah (diambil dari intent)
                         newEmail,
                         newNoHp,
                         newAlamat,

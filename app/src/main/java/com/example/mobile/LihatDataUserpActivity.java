@@ -119,6 +119,7 @@ public class LihatDataUserpActivity extends AppCompatActivity {
         Intent intent = new Intent(LihatDataUserpActivity.this, EditDataUserpActivity.class);
         intent.putExtra("USER_PROSPEK_ID", userProspek.getUserProspekId());
         intent.putExtra("PENGINPUT", userProspek.getPenginput());
+        intent.putExtra("NAMA", userProspek.getNama()); // TETAP KIRIM NAMA MESKIPUN TIDAK DITAMPILKAN
         intent.putExtra("EMAIL", userProspek.getEmail());
         intent.putExtra("NO_HP", userProspek.getNoHp());
         intent.putExtra("ALAMAT", userProspek.getAlamat());
