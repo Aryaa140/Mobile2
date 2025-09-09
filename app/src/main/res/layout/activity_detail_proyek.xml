@@ -84,7 +84,7 @@
                                 android:id="@+id/txtLokasi"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Gamping, Kec. Krian"
+                                android:text="Gamping Wetan, Gamping, Kecamatan Krian, Kabupaten Sidoarjo, Jawa Timur"
                                 android:paddingTop="4dp" />
 
                         </LinearLayout>
@@ -94,7 +94,8 @@
                         android:id="@+id/txtDeskripsi"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Deskripsi"
+                        android:text="Perumahan The Quality Riverside mengusung konsep hijau yang asri. The Quality Riverside merupakan proyek terbaru dari PT Bumi Jati Kalang Sejahtera. Properti ini hadir dengan keunggulan lokasi yang strategis, desain kekinian, dan spesifikasi yang mumpuni.  Dengan lingkungan yang mampu menampung lebih dari 1.000 kepala keluarga"
+
                         android:paddingTop="8dp" />
 
                     <com.google.android.material.button.MaterialButton
@@ -138,7 +139,6 @@
                         android:layout_gravity="center"
                         android:paddingBottom="8dp"/>
 
-                    <!-- Tambahin HorizontalScrollView -->
                     <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -149,7 +149,6 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal">
 
-                            <!-- Transportasi -->
                             <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -188,7 +187,6 @@
                                     android:textColor="@android:color/black"/>
                             </LinearLayout>
 
-                            <!-- Sekolah -->
                             <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -227,6 +225,153 @@
                                     android:textColor="@android:color/black"/>
                             </LinearLayout>
 
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:padding="8dp"
+                                android:gravity="center_horizontal">
+
+                                <ImageView
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:src="@drawable/ic_mall"
+                                    android:layout_marginBottom="4dp"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Belanja"
+                                    android:textStyle="bold"
+                                    android:textSize="16sp"
+                                    android:textColor="@android:color/black"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Mall Ramayana Krian (19 menit)"
+                                    android:textColor="@android:color/black"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Pasar Baru Krian (19 menit)"
+                                    android:textColor="@android:color/black"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Toserba Jakarta 2 (20 menit)"
+                                    android:textColor="@android:color/black"/>
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:padding="8dp"
+                                android:gravity="center_horizontal">
+
+                                <ImageView
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:src="@drawable/ic_hospital"
+                                    android:layout_marginBottom="4dp"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Kesehatan"
+                                    android:textStyle="bold"
+                                    android:textSize="16sp"
+                                    android:textColor="@android:color/black"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="RSU Al-Islam H. M. Mawardi (9 menit)"
+                                    android:textColor="@android:color/black"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="RSUD Sidoarjo Barat (17 menit)"
+                                    android:textColor="@android:color/black"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Puskesmas Krian (19 menit)"
+                                    android:textColor="@android:color/black"/>
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:padding="8dp"
+                                android:gravity="center_horizontal">
+
+                                <ImageView
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:src="@drawable/ic_kolam"
+                                    android:layout_marginBottom="4dp"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Tempat Wisata"
+                                    android:textStyle="bold"
+                                    android:textSize="16sp"
+                                    android:textColor="@android:color/black"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Kraton Waterpark (24 menit)"
+                                    android:textColor="@android:color/black"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Kolam Renang Jedong Cangkring (20 menit)"
+                                    android:textColor="@android:color/black"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Kebun Coklat (32 menit)"
+                                    android:textColor="@android:color/black"/>
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:padding="8dp"
+                                android:gravity="center_horizontal">
+
+                                <ImageView
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:src="@drawable/ic_info"
+                                    android:layout_marginBottom="4dp"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Lainnya"
+                                    android:textStyle="bold"
+                                    android:textSize="16sp"
+                                    android:textColor="@android:color/black"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="ATM BTN (1 menit)"
+                                    android:textColor="@android:color/black"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="SPBU Pertamina (11 menit)"
+                                    android:textColor="@android:color/black"/>
+
+                            </LinearLayout>
 
                         </LinearLayout>
                     </HorizontalScrollView>
