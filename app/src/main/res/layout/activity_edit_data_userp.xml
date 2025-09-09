@@ -47,21 +47,7 @@
                 android:padding="16dp">
 
                 <!-- Nama User Prospek (BISA DIUBAH) -->
-                <EditText
-                    android:id="@+id/editTextNamaProspek"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:background="@android:drawable/edit_text"
-                    android:drawableStart="@drawable/ic_username"
-                    android:drawablePadding="8dp"
-                    android:hint="Nama User Prospek"
-                    android:padding="12dp"
-                    android:inputType="textPersonName"/>
 
-                <!-- Nama Penginput (BISA DIUBAH) -->
                 <EditText
                     android:id="@+id/editTextPenginput"
                     android:layout_width="match_parent"
@@ -73,6 +59,20 @@
                     android:drawableStart="@drawable/ic_pin_person"
                     android:drawablePadding="8dp"
                     android:hint="Nama Penginput"
+                    android:padding="12dp"
+                    android:inputType="textPersonName"/>
+
+                <EditText
+                    android:id="@+id/editTextNamaProspek"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawableStart="@drawable/ic_username"
+                    android:drawablePadding="8dp"
+                    android:hint="Nama User Prospek"
                     android:padding="12dp"
                     android:inputType="textPersonName"/>
 

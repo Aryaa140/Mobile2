@@ -158,7 +158,7 @@
                                         android:textColor="@android:color/black"/>
                                 </LinearLayout>
 
-                                <!-- Garasi -->
+                                <!-- KamarMandi -->
                                 <LinearLayout
                                     android:orientation="horizontal"
                                     android:layout_width="wrap_content"
@@ -168,7 +168,7 @@
                                     <ImageView
                                         android:layout_width="16dp"
                                         android:layout_height="16dp"
-                                        android:src="@drawable/ic_car"/>
+                                        android:src="@drawable/ic_kamarmandi"/>
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
@@ -302,7 +302,7 @@
                                         android:textColor="@android:color/black"/>
                                 </LinearLayout>
 
-                                <!-- Garasi -->
+                                <!-- Kamar Mandi -->
                                 <LinearLayout
                                     android:orientation="horizontal"
                                     android:layout_width="wrap_content"
@@ -312,7 +312,7 @@
                                     <ImageView
                                         android:layout_width="16dp"
                                         android:layout_height="16dp"
-                                        android:src="@drawable/ic_car"/>
+                                        android:src="@drawable/ic_kamarmandi"/>
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
@@ -446,7 +446,7 @@
                                         android:textColor="@android:color/black"/>
                                 </LinearLayout>
 
-                                <!-- Garasi -->
+                                <!-- Kamar Mandi -->
                                 <LinearLayout
                                     android:orientation="horizontal"
                                     android:layout_width="wrap_content"
@@ -456,7 +456,7 @@
                                     <ImageView
                                         android:layout_width="16dp"
                                         android:layout_height="16dp"
-                                        android:src="@drawable/ic_car"/>
+                                        android:src="@drawable/ic_kamarmandi"/>
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
@@ -542,7 +542,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="72 m²"
+                                        android:text="96 m²"
                                         android:textSize="12sp"
                                         android:layout_marginStart="4dp"
                                         android:textColor="@android:color/black"/>
@@ -563,7 +563,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="53 m²"
+                                        android:text="55 m²"
                                         android:textSize="12sp"
                                         android:layout_marginStart="4dp"
                                         android:textColor="@android:color/black"/>
@@ -590,7 +590,7 @@
                                         android:textColor="@android:color/black"/>
                                 </LinearLayout>
 
-                                <!-- Garasi -->
+                                <!-- Kamar Mandi -->
                                 <LinearLayout
                                     android:orientation="horizontal"
                                     android:layout_width="wrap_content"
@@ -600,7 +600,7 @@
                                     <ImageView
                                         android:layout_width="16dp"
                                         android:layout_height="16dp"
-                                        android:src="@drawable/ic_car"/>
+                                        android:src="@drawable/ic_kamarmandi"/>
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
@@ -638,8 +638,7 @@
                         <ImageView
                             android:layout_width="150dp"
                             android:layout_height="150dp"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/quality_riverside" />
+                            android:src="@drawable/irish" />
 
                         <LinearLayout
                             android:orientation="vertical"
@@ -687,7 +686,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="72 m²"
+                                        android:text="84 m²"
                                         android:textSize="12sp"
                                         android:layout_marginStart="4dp"
                                         android:textColor="@android:color/black"/>
@@ -708,7 +707,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="53 m²"
+                                        android:text="49 m²"
                                         android:textSize="12sp"
                                         android:layout_marginStart="4dp"
                                         android:textColor="@android:color/black"/>
@@ -729,13 +728,13 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="3"
+                                        android:text="2"
                                         android:textSize="12sp"
                                         android:layout_marginStart="4dp"
                                         android:textColor="@android:color/black"/>
                                 </LinearLayout>
 
-                                <!-- Garasi -->
+                                <!-- Kamar Mandi -->
                                 <LinearLayout
                                     android:orientation="horizontal"
                                     android:layout_width="wrap_content"
@@ -745,11 +744,11 @@
                                     <ImageView
                                         android:layout_width="16dp"
                                         android:layout_height="16dp"
-                                        android:src="@drawable/ic_car"/>
+                                        android:src="@drawable/ic_kamarmandi"/>
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="2"
+                                        android:text="1"
                                         android:textSize="12sp"
                                         android:layout_marginStart="4dp"
                                         android:textColor="@android:color/black"/>
@@ -783,8 +782,7 @@
                         <ImageView
                             android:layout_width="150dp"
                             android:layout_height="150dp"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/quality_riverside" />
+                            android:src="@drawable/neo_gladiol" />
 
                         <LinearLayout
                             android:orientation="vertical"
@@ -832,7 +830,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="72 m²"
+                                        android:text="90 m²"
                                         android:textSize="12sp"
                                         android:layout_marginStart="4dp"
                                         android:textColor="@android:color/black"/>
@@ -853,7 +851,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="53 m²"
+                                        android:text="45 m²"
                                         android:textSize="12sp"
                                         android:layout_marginStart="4dp"
                                         android:textColor="@android:color/black"/>
@@ -874,13 +872,13 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="3"
+                                        android:text="2"
                                         android:textSize="12sp"
                                         android:layout_marginStart="4dp"
                                         android:textColor="@android:color/black"/>
                                 </LinearLayout>
 
-                                <!-- Garasi -->
+                                <!-- Kamar Mandi -->
                                 <LinearLayout
                                     android:orientation="horizontal"
                                     android:layout_width="wrap_content"
@@ -890,11 +888,11 @@
                                     <ImageView
                                         android:layout_width="16dp"
                                         android:layout_height="16dp"
-                                        android:src="@drawable/ic_car"/>
+                                        android:src="@drawable/ic_kamarmandi"/>
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="2"
+                                        android:text="1"
                                         android:textSize="12sp"
                                         android:layout_marginStart="4dp"
                                         android:textColor="@android:color/black"/>
@@ -928,8 +926,7 @@
                         <ImageView
                             android:layout_width="150dp"
                             android:layout_height="150dp"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/quality_riverside" />
+                            android:src="@drawable/lily" />
 
                         <LinearLayout
                             android:orientation="vertical"
@@ -998,7 +995,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="53 m²"
+                                        android:text="42 m²"
                                         android:textSize="12sp"
                                         android:layout_marginStart="4dp"
                                         android:textColor="@android:color/black"/>
@@ -1019,13 +1016,13 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="3"
+                                        android:text="2"
                                         android:textSize="12sp"
                                         android:layout_marginStart="4dp"
                                         android:textColor="@android:color/black"/>
                                 </LinearLayout>
 
-                                <!-- Garasi -->
+                                <!-- Kamar Mandi -->
                                 <LinearLayout
                                     android:orientation="horizontal"
                                     android:layout_width="wrap_content"
@@ -1035,7 +1032,7 @@
                                     <ImageView
                                         android:layout_width="16dp"
                                         android:layout_height="16dp"
-                                        android:src="@drawable/ic_car"/>
+                                        android:src="@drawable/ic_kamarmandi"/>
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
@@ -1073,8 +1070,7 @@
                         <ImageView
                             android:layout_width="150dp"
                             android:layout_height="150dp"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/quality_riverside" />
+                            android:src="@drawable/raffflesia" />
 
                         <LinearLayout
                             android:orientation="vertical"
@@ -1122,7 +1118,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="72 m²"
+                                        android:text="96 m²"
                                         android:textSize="12sp"
                                         android:layout_marginStart="4dp"
                                         android:textColor="@android:color/black"/>
@@ -1143,7 +1139,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="53 m²"
+                                        android:text="63 m²"
                                         android:textSize="12sp"
                                         android:layout_marginStart="4dp"
                                         android:textColor="@android:color/black"/>
@@ -1170,7 +1166,7 @@
                                         android:textColor="@android:color/black"/>
                                 </LinearLayout>
 
-                                <!-- Garasi -->
+                                <!-- Kamar Mandi -->
                                 <LinearLayout
                                     android:orientation="horizontal"
                                     android:layout_width="wrap_content"
@@ -1180,7 +1176,7 @@
                                     <ImageView
                                         android:layout_width="16dp"
                                         android:layout_height="16dp"
-                                        android:src="@drawable/ic_car"/>
+                                        android:src="@drawable/ic_kamarmandi"/>
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
@@ -1218,8 +1214,7 @@
                         <ImageView
                             android:layout_width="150dp"
                             android:layout_height="150dp"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/quality_riverside" />
+                            android:src="@drawable/ruko_tulip" />
 
                         <LinearLayout
                             android:orientation="vertical"
@@ -1267,7 +1262,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="72 m²"
+                                        android:text="60 m²"
                                         android:textSize="12sp"
                                         android:layout_marginStart="4dp"
                                         android:textColor="@android:color/black"/>
@@ -1288,7 +1283,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="53 m²"
+                                        android:text="80 m²"
                                         android:textSize="12sp"
                                         android:layout_marginStart="4dp"
                                         android:textColor="@android:color/black"/>
@@ -1309,13 +1304,13 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="3"
+                                        android:text="-"
                                         android:textSize="12sp"
                                         android:layout_marginStart="4dp"
                                         android:textColor="@android:color/black"/>
                                 </LinearLayout>
 
-                                <!-- Garasi -->
+                                <!-- Kamar Mandi -->
                                 <LinearLayout
                                     android:orientation="horizontal"
                                     android:layout_width="wrap_content"
@@ -1329,7 +1324,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="2"
+                                        android:text="1"
                                         android:textSize="12sp"
                                         android:layout_marginStart="4dp"
                                         android:textColor="@android:color/black"/>
