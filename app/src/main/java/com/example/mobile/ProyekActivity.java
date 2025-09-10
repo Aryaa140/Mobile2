@@ -38,18 +38,23 @@ public class ProyekActivity extends AppCompatActivity {
 
         cardRiverside.setOnClickListener(v -> {
             Intent intent = new Intent(ProyekActivity.this, DetailProyekRiversideActivity.class);
+            startActivity(intent);
         });
         cardHarmony.setOnClickListener(v -> {
             Intent intent = new Intent(ProyekActivity.this, DetailProyekHarmonyActivity.class);
+            startActivity(intent);
         });
         cardView.setOnClickListener(v -> {
             Intent intent = new Intent(ProyekActivity.this, DetailProyekViewActivity.class);
+            startActivity(intent);
         });
         cardGardenResidence.setOnClickListener(v -> {
             Intent intent = new Intent(ProyekActivity.this, DetailProyekGardenActivity.class);
+            startActivity(intent);
         });
         cardResidence.setOnClickListener(v -> {
             Intent intent = new Intent(ProyekActivity.this, DetailProyekResidenceActivity.class);
+            startActivity(intent);
         });
 
 

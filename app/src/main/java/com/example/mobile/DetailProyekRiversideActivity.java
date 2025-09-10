@@ -32,6 +32,11 @@ public class DetailProyekRiversideActivity extends AppCompatActivity {
         bottomNavigationView.setSelectedItemId(R.id.nav_folder);
         btnLihatUnit = findViewById(R.id.btnLihatUnit);
 
+        btnLihatUnit.setOnClickListener(v -> {
+            Intent intent = new Intent(DetailProyekRiversideActivity.this, UnitRiversideActivity.class);
+            startActivity(intent);
+        });
+
         TopAppBar.setNavigationOnClickListener(v -> {
             Intent intent = new Intent(DetailProyekRiversideActivity.this, ProyekActivity.class);
             startActivity(intent);

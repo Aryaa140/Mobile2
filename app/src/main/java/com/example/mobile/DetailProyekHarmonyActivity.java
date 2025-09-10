@@ -29,6 +29,11 @@ public class DetailProyekHarmonyActivity extends AppCompatActivity {
         bottomNavigationView.setSelectedItemId(R.id.nav_folder);
         btnLihatUnit = findViewById(R.id.btnLihatUnit);
 
+        btnLihatUnit.setOnClickListener(v -> {
+            Intent intent = new Intent(DetailProyekHarmonyActivity.this, UnitHarmonyActivity.class);
+            startActivity(intent);
+        });
+
         TopAppBar.setNavigationOnClickListener(v -> {
             Intent intent = new Intent(DetailProyekHarmonyActivity.this, ProyekActivity.class);
             startActivity(intent);
