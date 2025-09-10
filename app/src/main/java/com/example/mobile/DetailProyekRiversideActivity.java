@@ -2,6 +2,7 @@ package com.example.mobile;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -11,10 +12,14 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 public class DetailProyekRiversideActivity extends AppCompatActivity {
 
-    ImageView imgProyek;
-    TextView txtNama, txtLokasi, txtDeskripsi;
+    Button btnLihatUnit;
+    MaterialToolbar TopAppBar;
+    BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,23 +27,33 @@ public class DetailProyekRiversideActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_detail_proyek_riverside);
 
-        imgProyek = findViewById(R.id.imgProyek);
-        txtNama = findViewById(R.id.txtNama);
-        txtLokasi = findViewById(R.id.txtLokasi);
-        txtDeskripsi = findViewById(R.id.txtDeskripsi);
+        TopAppBar = findViewById(R.id.topAppBar);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setSelectedItemId(R.id.nav_folder);
+        btnLihatUnit = findViewById(R.id.btnLihatUnit);
 
-        Intent intent = getIntent();
-        String nama = intent.getStringExtra("nama");
-        String lokasi = intent.getStringExtra("lokasi");
-        int gambar = intent.getIntExtra("gambar", 0);
+        TopAppBar.setNavigationOnClickListener(v -> {
+            Intent intent = new Intent(DetailProyekRiversideActivity.this, ProyekActivity.class);
+            startActivity(intent);
+            finish();
+        });
 
-        txtNama.setText(nama);
-        txtLokasi.setText(lokasi);
-        imgProyek.setImageResource(gambar);
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
 
-        if(nama.equals("The Quality Riverside")) {
-            txtDeskripsi.setText("Proyek ini berlokasi strategis dekat jalan raya, ...");
-        }
+            if (id == R.id.nav_home) {
+                startActivity(new Intent(this, BerandaActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_folder) {
+                return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            }
+            return false;
+        });
 
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {

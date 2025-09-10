@@ -94,8 +94,16 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="The Quality View, merupakan proyek Quality Group yang berlokasi di kota batu malang. Dapatkan Villa impian dengan harga terjangkau, fasilitas lengkap, dan keindahan yang mengagumkan."
-
                         android:paddingTop="8dp" />
+
+                    <TextView
+                        android:id="@+id/txtStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginLeft="0dp"
+                        android:text="SOLD OUT."
+                        android:paddingTop="4dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnLihatUnit"
@@ -112,6 +120,7 @@
                         android:layout_marginTop="12dp"
                         android:layout_marginLeft="200dp"
                         android:layout_marginRight="0dp"/>
+
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

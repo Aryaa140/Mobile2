@@ -16,7 +16,7 @@
         android:background="@android:color/transparent"
         app:navigationIcon="@drawable/ic_back"
         app:navigationIconTint="@android:color/white"
-        app:title="Detail Proyek Garden"
+        app:title="Detail Proyek Residence"
         app:titleCentered="true"
         app:titleTextColor="@android:color/white"
         app:layout_constraintTop_toTopOf="parent"
@@ -62,7 +62,7 @@
                             android:id="@+id/imgProyek"
                             android:layout_width="120dp"
                             android:layout_height="80dp"
-                            android:src="@drawable/quality_garden" />
+                            android:src="@drawable/quality_residence" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -75,7 +75,7 @@
                                 android:id="@+id/txtNama"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="The Quality Garden Residence"
+                                android:text="The Quality Residence"
                                 android:textStyle="bold"
                                 android:textSize="18sp" />
 
@@ -83,7 +83,7 @@
                                 android:id="@+id/txtLokasi"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Gamping Wetan, Gamping, Kec. Krian, Kabupaten Sidoarjo, Jawa Timur"
+                                android:text="Sawah, Jatikalang, Kec. Krian, Kabupaten Sidoarjo, Jawa Timur"
                                 android:paddingTop="4dp" />
 
                         </LinearLayout>
@@ -93,7 +93,7 @@
                         android:id="@+id/txtDeskripsi"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="The Quality Garden Residence, merupakan  perumahan di Krian, Sidoarjo, Jawa Timur, yang menawarkan hunian terjangkau dengan desain modern minimalis, dan fasilitas seperti keamanan 24 jam, taman, dan area bermain"
+                        android:text="The Quality Residence, merupakan  perumahan di Krian, Sidoarjo, Jawa Timur, yang menawarkan hunian terjangkau dengan desain modern minimalis."
                         android:paddingTop="8dp" />
 
                     <TextView
@@ -102,7 +102,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginRight="5dp"
                         android:layout_marginLeft="0dp"
-                        android:text="Pengembangan Sekitar 700 Unit, sisa 5-10 Unit."
+                        android:text="SOLD OUT, Tahun 2012"
                         android:paddingTop="4dp" />
 
                 </LinearLayout>

@@ -81,12 +81,6 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="(1000 Unit, on progress)"
-                        android:textColor="@android:color/white"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
                         android:text="Gamping, Kec. Krian"
                         android:textColor="@android:color/white"/>
                 </LinearLayout>
@@ -113,12 +107,6 @@
                         android:text="The Quality Harmony"
                         android:textColor="@android:color/white"
                         android:textStyle="bold"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="(200 unit))"
-                        android:textColor="@android:color/white"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -153,12 +141,6 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="(Sold Out)"
-                        android:textColor="@android:color/white"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
                         android:text="Kec. Junrejo, Kota Batu"
                         android:textColor="@android:color/white"/>
                 </LinearLayout>
@@ -184,12 +166,6 @@
                         android:text="The Quality Garden Residence"
                         android:textColor="@android:color/white"
                         android:textStyle="bold"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="(700 Unit, sisa 5-10 Unit)"
-                        android:textColor="@android:color/white"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -223,19 +199,12 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="(Sold Out 2012)"
-                        android:textColor="@android:color/white"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
                         android:text="Sawah, Jatikalang, Kec. Krian, Kabupaten Sidoarjo, Jawa Timur "
                         android:textColor="@android:color/white"/>
                 </LinearLayout>
 
             </GridLayout>
         </androidx.core.widget.NestedScrollView>
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView

@@ -95,8 +95,16 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="The Quality Harmony, merupakan proyek terbaru Quality Group, dengan mengusung tema jepang menjadikan The Quality Harmony satu-satunya perumahan bertema jepang dengan harga termurah di Sidoarjo."
-
                         android:paddingTop="8dp" />
+
+                    <TextView
+                        android:id="@+id/txtStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginLeft="0dp"
+                        android:text="Pengembangan sekitar 200 Unit."
+                        android:paddingTop="4dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnLihatUnit"
