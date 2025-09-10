@@ -60,11 +60,9 @@
                 android:padding="16dp">
 
                 <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
                     android:src="@drawable/jogging_track"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/oval_bg"
                     android:clipToOutline="true"/>
 
                 <TextView
@@ -96,11 +94,9 @@
                 android:padding="16dp">
 
                 <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
                     android:src="@drawable/masjid_barokah"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/oval_bg"
                     android:clipToOutline="true"/>
 
                 <TextView
@@ -132,11 +128,9 @@
                 android:padding="16dp">
 
                 <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
                     android:src="@drawable/atm"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/oval_bg"
                     android:clipToOutline="true"/>
 
                 <TextView
@@ -168,11 +162,9 @@
                 android:padding="16dp">
 
                 <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
                     android:src="@drawable/taman_icon"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/oval_bg"
                     android:clipToOutline="true"/>
 
                 <TextView
@@ -204,11 +196,9 @@
                 android:padding="16dp">
 
                 <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
                     android:src="@drawable/security"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/oval_bg"
                     android:clipToOutline="true"/>
 
                 <TextView
@@ -240,11 +230,9 @@
                 android:padding="16dp">
 
                 <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
                     android:src="@drawable/playground"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/oval_bg"
                     android:clipToOutline="true"/>
 
                 <TextView
@@ -276,11 +264,9 @@
                 android:padding="16dp">
 
                 <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
                     android:src="@drawable/row_8_12_m"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/oval_bg"
                     android:clipToOutline="true"/>
 
                 <TextView
@@ -312,11 +298,9 @@
                 android:padding="16dp">
 
                 <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
                     android:src="@drawable/makam"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/oval_bg"
                     android:clipToOutline="true"/>
 
                 <TextView
@@ -348,11 +332,9 @@
                 android:padding="16dp">
 
                 <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
                     android:src="@drawable/cctv"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/oval_bg"
                     android:clipToOutline="true"/>
 
                 <TextView
@@ -384,11 +366,9 @@
                 android:padding="16dp">
 
                 <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
                     android:src="@drawable/water_park_swimming_pool"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/oval_bg"
                     android:clipToOutline="true"/>
 
                 <TextView

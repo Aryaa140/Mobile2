@@ -1,5 +1,6 @@
 package com.example.mobile;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.List;
 
@@ -25,6 +27,8 @@ public class LihatDataPemohonActivity extends AppCompatActivity {
     private DatabaseHelper databaseHelper;
     private EditText searchEditText;
     private List<DatabaseHelper.Pemohon> pemohonList;
+    MaterialToolbar TopAppBar;
+    BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,12 +42,11 @@ public class LihatDataPemohonActivity extends AppCompatActivity {
         });
 
         // Inisialisasi views
-        MaterialToolbar topAppBar = findViewById(R.id.topAppBar);
+        TopAppBar = findViewById(R.id.topAppBar);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setSelectedItemId(R.id.nav_folder);
         searchEditText = findViewById(R.id.searchEditText);
         recyclerView = findViewById(R.id.recyclerProspek);
-
-        // Setup toolbar
-        topAppBar.setNavigationOnClickListener(v -> finish());
 
         // Inisialisasi database helper
         databaseHelper = new DatabaseHelper(this);
@@ -53,6 +56,29 @@ public class LihatDataPemohonActivity extends AppCompatActivity {
 
         // Load data pemohon
         loadPemohonData();
+
+        TopAppBar.setNavigationOnClickListener(v -> {
+            Intent intent = new Intent(LihatDataPemohonActivity.this, LihatDataActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.nav_home) {
+                startActivity(new Intent(this, BerandaActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_folder) {
+                return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            }
+            return false;
+        });
 
         // Setup search functionality
         searchEditText.addTextChangedListener(new TextWatcher() {
