@@ -120,10 +120,12 @@
                 android:id="@+id/cardFasilitasSarana"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                android:background="@android:color/white"
-                android:layout_marginTop="2dp">
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="2dp"
+                android:layout_marginTop="5dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp"
+                android:background="@android:color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -132,251 +134,121 @@
                     android:padding="16dp">
 
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="FASILITAS SEKITAR"
-                        android:textStyle="bold"
-                        android:textSize="18sp"
-                        android:layout_gravity="center"
-                        android:paddingBottom="8dp"/>
-
-                    <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:scrollbars="none">
+                        android:text="Fasilitas dan Sarana Prasarana"
+                        android:textStyle="bold"
+                        android:textSize="20sp"
+                        android:textColor="@color/black"
+                        android:gravity="center"
+                        android:paddingBottom="8dp"/>
+
+                    <GridLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="0dp"
+                        android:columnCount="2"
+                        android:alignmentMode="alignMargins"
+                        android:columnOrderPreserved="false">
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal">
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp"
+                            android:gravity="center">
 
-                            <LinearLayout
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="120dp"
+                                android:src="@drawable/one_gate_system_rfid"
+                                android:background="@drawable/bg_card_rounded"/>
+
+                            <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:padding="8dp"
-                                android:gravity="center_horizontal">
-
-                                <ImageView
-                                    android:layout_width="32dp"
-                                    android:layout_height="50dp"
-                                    android:src="@drawable/one_gate_system_rfid"
-                                    android:layout_marginBottom="4dp"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Transportasi"
-                                    android:textStyle="bold"
-                                    android:textSize="16sp"
-                                    android:textColor="@android:color/black"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Terminal Krian (15 menit)"
-                                    android:textColor="@android:color/black"/>
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Stasiun Krian (10 menit)"
-                                    android:textColor="@android:color/black"/>
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Tol Manyar-Mojokerto (30 menit)"
-                                    android:textColor="@android:color/black"/>
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:padding="8dp"
-                                android:gravity="center_horizontal">
-
-                                <ImageView
-                                    android:layout_width="32dp"
-                                    android:layout_height="32dp"
-                                    android:src="@drawable/ic_sekolah"
-                                    android:layout_marginBottom="4dp"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Sekolah"
-                                    android:textStyle="bold"
-                                    android:textSize="16sp"
-                                    android:textColor="@android:color/black"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="SMA Al-Islam Krian (9 menit)"
-                                    android:textColor="@android:color/black"/>
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="SMAN 1 Krian (23 menit)"
-                                    android:textColor="@android:color/black"/>
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Universitas Anwar Medika (27 menit)"
-                                    android:textColor="@android:color/black"/>
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:padding="8dp"
-                                android:gravity="center_horizontal">
-
-                                <ImageView
-                                    android:layout_width="32dp"
-                                    android:layout_height="32dp"
-                                    android:src="@drawable/ic_mall"
-                                    android:layout_marginBottom="4dp"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Belanja"
-                                    android:textStyle="bold"
-                                    android:textSize="16sp"
-                                    android:textColor="@android:color/black"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Mall Ramayana Krian (19 menit)"
-                                    android:textColor="@android:color/black"/>
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Pasar Baru Krian (19 menit)"
-                                    android:textColor="@android:color/black"/>
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Toserba Jakarta 2 (20 menit)"
-                                    android:textColor="@android:color/black"/>
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:padding="8dp"
-                                android:gravity="center_horizontal">
-
-                                <ImageView
-                                    android:layout_width="32dp"
-                                    android:layout_height="32dp"
-                                    android:src="@drawable/ic_hospital"
-                                    android:layout_marginBottom="4dp"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Kesehatan"
-                                    android:textStyle="bold"
-                                    android:textSize="16sp"
-                                    android:textColor="@android:color/black"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="RSU Al-Islam H. M. Mawardi (9 menit)"
-                                    android:textColor="@android:color/black"/>
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="RSUD Sidoarjo Barat (17 menit)"
-                                    android:textColor="@android:color/black"/>
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Puskesmas Krian (19 menit)"
-                                    android:textColor="@android:color/black"/>
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:padding="8dp"
-                                android:gravity="center_horizontal">
-
-                                <ImageView
-                                    android:layout_width="32dp"
-                                    android:layout_height="32dp"
-                                    android:src="@drawable/ic_kolam"
-                                    android:layout_marginBottom="4dp"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Tempat Wisata"
-                                    android:textStyle="bold"
-                                    android:textSize="16sp"
-                                    android:textColor="@android:color/black"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Kraton Waterpark (24 menit)"
-                                    android:textColor="@android:color/black"/>
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Kolam Renang Jedong Cangkring (20 menit)"
-                                    android:textColor="@android:color/black"/>
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Kebun Coklat (32 menit)"
-                                    android:textColor="@android:color/black"/>
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:padding="8dp"
-                                android:gravity="center_horizontal">
-
-                                <ImageView
-                                    android:layout_width="32dp"
-                                    android:layout_height="32dp"
-                                    android:src="@drawable/ic_info"
-                                    android:layout_marginBottom="4dp"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Lainnya"
-                                    android:textStyle="bold"
-                                    android:textSize="16sp"
-                                    android:textColor="@android:color/black"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="ATM BTN (1 menit)"
-                                    android:textColor="@android:color/black"/>
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="SPBU Pertamina (11 menit)"
-                                    android:textColor="@android:color/black"/>
-
-                            </LinearLayout>
-
+                                android:text="One Gate System RFID"
+                                android:textSize="14sp"
+                                android:textColor="@android:color/black"
+                                android:gravity="center"
+                                android:layout_marginTop="6dp"/>
                         </LinearLayout>
-                    </HorizontalScrollView>
 
+                        <!-- Item 2 -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="120dp"
+                                android:src="@drawable/masjid"
+                                android:background="@drawable/bg_card_rounded"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Masjid Quality Harmony"
+                                android:textSize="14sp"
+                                android:textColor="@android:color/black"
+                                android:gravity="center"
+                                android:layout_marginTop="6dp"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="100dp"
+                                android:src="@drawable/play_ground"
+                                android:background="@drawable/bg_card_rounded"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Playground"
+                                android:textSize="14sp"
+                                android:textColor="@android:color/black"
+                                android:gravity="center"
+                                android:layout_marginTop="6dp"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:padding="8dp"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="100dp"
+                                android:src="@drawable/taman"
+                                android:background="@drawable/bg_card_rounded"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Taman"
+                                android:textSize="14sp"
+                                android:textColor="@android:color/black"
+                                android:gravity="center"
+                                android:layout_marginTop="6dp"/>
+                        </LinearLayout>
+
+                    </GridLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -384,10 +256,12 @@
                 android:id="@+id/cardFasilitas"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="2dp"
+                android:layout_marginTop="12dp"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="4dp"
-                android:background="@android:color/white"
-                android:layout_marginTop="10dp">
+                android:background="@android:color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
