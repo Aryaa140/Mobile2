@@ -75,6 +75,7 @@
                                 android:id="@+id/txtNama"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:textColor="@android:color/black"
                                 android:text="The Quality View"
                                 android:textStyle="bold"
                                 android:textSize="18sp" />
@@ -83,6 +84,7 @@
                                 android:id="@+id/txtLokasi"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:textColor="@android:color/black"
                                 android:text="Jl. Hasanudin, Junrejo, Kec. Junrejo, Kota Batu, Jawa Timur"
                                 android:paddingTop="4dp" />
 
@@ -93,6 +95,7 @@
                         android:id="@+id/txtDeskripsi"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:textColor="@android:color/black"
                         android:text="The Quality View, merupakan proyek Quality Group yang berlokasi di kota batu malang. Dapatkan Villa impian dengan harga terjangkau, fasilitas lengkap, dan keindahan yang mengagumkan."
                         android:paddingTop="8dp" />
 
@@ -100,6 +103,7 @@
                         android:id="@+id/txtStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:textColor="@android:color/black"
                         android:layout_marginRight="5dp"
                         android:layout_marginLeft="0dp"
                         android:text="SOLD OUT."

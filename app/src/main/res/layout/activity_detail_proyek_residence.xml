@@ -75,6 +75,7 @@
                                 android:id="@+id/txtNama"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:textColor="@android:color/black"
                                 android:text="The Quality Residence"
                                 android:textStyle="bold"
                                 android:textSize="18sp" />
@@ -83,6 +84,7 @@
                                 android:id="@+id/txtLokasi"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:textColor="@android:color/black"
                                 android:text="Sawah, Jatikalang, Kec. Krian, Kabupaten Sidoarjo, Jawa Timur"
                                 android:paddingTop="4dp" />
 
@@ -93,6 +95,7 @@
                         android:id="@+id/txtDeskripsi"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:textColor="@android:color/black"
                         android:text="The Quality Residence, merupakan  perumahan di Krian, Sidoarjo, Jawa Timur, yang menawarkan hunian terjangkau dengan desain modern minimalis."
                         android:paddingTop="8dp" />
 
@@ -100,6 +103,7 @@
                         android:id="@+id/txtStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:textColor="@android:color/black"
                         android:layout_marginRight="5dp"
                         android:layout_marginLeft="0dp"
                         android:text="SOLD OUT, Tahun 2012"
@@ -112,6 +116,7 @@
                 android:id="@+id/cardFasilitasSarana"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@android:color/black"
                 android:layout_marginLeft="2dp"
                 android:layout_marginRight="2dp"
                 android:layout_marginTop="5dp"
