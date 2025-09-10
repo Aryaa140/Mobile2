@@ -62,6 +62,7 @@
                     android:layout_marginBottom="15dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
+                    android:textColor="@android:color/black"
                     android:background="@android:drawable/edit_text"
                     android:drawablePadding="8dp" />
 
@@ -139,6 +140,7 @@
                     android:layout_marginBottom="15dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
+                    android:textColor="@android:color/black"
                     android:background="@android:drawable/edit_text"
                     android:drawablePadding="8dp" />
 
@@ -158,6 +160,7 @@
                     android:layout_marginBottom="15dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
+                    android:textColor="@android:color/black"
                     android:background="@android:drawable/edit_text"
                     android:drawablePadding="8dp" />
 
@@ -177,6 +180,7 @@
                     android:layout_marginBottom="15dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
+                    android:textColor="@android:color/black"
                     android:background="@android:drawable/edit_text"
                     android:drawablePadding="8dp"
                     android:entries="@array/opsi_spinnerTipeUnitHunian"/>
@@ -197,6 +201,7 @@
                     android:layout_marginBottom="15dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
+                    android:textColor="@android:color/black"
                     android:background="@android:drawable/edit_text"
                     android:drawablePadding="8dp"
                     android:entries="@array/opsi_spinnerStatusPembayaran"/>
