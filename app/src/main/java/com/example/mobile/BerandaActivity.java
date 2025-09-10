@@ -79,6 +79,10 @@ public class BerandaActivity extends AppCompatActivity {
             Intent intent = new Intent(BerandaActivity.this, InputDataProyekActivity.class);
             startActivity(intent);
         });
+        cardInputDataUnitHunianM.setOnClickListener(v -> {
+            Intent intent = new Intent(BerandaActivity.this, InputDataHunianActivity.class);
+            startActivity(intent);
+        });
 
 
 
