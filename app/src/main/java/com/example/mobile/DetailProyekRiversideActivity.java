@@ -11,7 +11,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class DetailProyekActivity extends AppCompatActivity {
+public class DetailProyekRiversideActivity extends AppCompatActivity {
 
     ImageView imgProyek;
     TextView txtNama, txtLokasi, txtDeskripsi;
@@ -20,7 +20,7 @@ public class DetailProyekActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_detail_proyek);
+        setContentView(R.layout.activity_detail_proyek_riverside);
 
         imgProyek = findViewById(R.id.imgProyek);
         txtNama = findViewById(R.id.txtNama);

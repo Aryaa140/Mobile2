@@ -86,6 +86,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/cardHarmony"
                     android:orientation="vertical"
                     android:background="@drawable/bg_card"
                     android:padding="8dp"
@@ -116,6 +117,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/cardView"
                     android:orientation="vertical"
                     android:background="@drawable/bg_card"
                     android:padding="8dp"
@@ -127,7 +129,6 @@
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="100dp"
-                        android:scaleType="centerCrop"
                         android:src="@drawable/quality_view"/>
 
                     <TextView
@@ -145,6 +146,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/cardGardenResidence"
                     android:orientation="vertical"
                     android:background="@drawable/bg_card"
                     android:padding="8dp"
@@ -156,7 +158,6 @@
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="100dp"
-                        android:scaleType="centerCrop"
                         android:src="@drawable/quality_garden"/>
 
                     <TextView
@@ -174,6 +175,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/cardResidence"
                     android:orientation="vertical"
                     android:background="@drawable/bg_card"
                     android:padding="8dp"
@@ -185,7 +187,6 @@
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="100dp"
-                        android:scaleType="centerCrop"
                         android:src="@drawable/quality_residence"/>
 
                     <TextView
@@ -202,151 +203,6 @@
                         android:textColor="@android:color/white"/>
                 </LinearLayout>
 
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:background="@drawable/bg_card"
-                    android:padding="8dp"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_margin="15dp">
-
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="100dp"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/quality_residence"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="The Quality"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="-"
-                        android:textColor="@android:color/white"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:background="@drawable/bg_card"
-                    android:padding="8dp"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_margin="15dp">
-
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="100dp"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/quality_residence"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="The Quality"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="-"
-                        android:textColor="@android:color/white"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:background="@drawable/bg_card"
-                    android:padding="8dp"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_margin="15dp">
-
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="100dp"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/quality_residence"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="The Quality"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="-"
-                        android:textColor="@android:color/white"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:background="@drawable/bg_card"
-                    android:padding="8dp"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_margin="15dp">
-
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="100dp"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/quality_residence"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="The Quality"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="-"
-                        android:textColor="@android:color/white"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:background="@drawable/bg_card"
-                    android:padding="8dp"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_margin="15dp">
-
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="100dp"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/quality_residence"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="The Quality"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="-"
-                        android:textColor="@android:color/white"/>
-
-                </LinearLayout>
             </GridLayout>
         </androidx.core.widget.NestedScrollView>
 

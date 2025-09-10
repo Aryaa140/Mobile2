@@ -18,7 +18,7 @@
         android:theme="@style/ToolbarWhiteIcons"
         app:navigationIcon="@drawable/ic_back"
         app:navigationIconTint="@android:color/white"
-        app:title="Menu Unit Hunian"
+        app:title="Unit Hunian Riverside"
         app:titleCentered="true"
         app:titleTextColor="@android:color/white"
         app:menu="@menu/top_app_bar_menu"
@@ -184,6 +184,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:text="DETAIL"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                                 android:textColor="@android:color/white"
                                 android:backgroundTint="#2E7D32"/>
                         </LinearLayout>
@@ -328,6 +329,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:text="DETAIL"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                                 android:textColor="@android:color/white"
                                 android:backgroundTint="#2E7D32"/>
                         </LinearLayout>
@@ -472,6 +474,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:text="DETAIL"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                                 android:textColor="@android:color/white"
                                 android:backgroundTint="#2E7D32"/>
                         </LinearLayout>
@@ -616,6 +619,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:text="DETAIL"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                                 android:textColor="@android:color/white"
                                 android:backgroundTint="#2E7D32"/>
                         </LinearLayout>
@@ -760,6 +764,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:text="DETAIL"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                                 android:textColor="@android:color/white"
                                 android:backgroundTint="#2E7D32"/>
                         </LinearLayout>
@@ -904,6 +909,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:text="DETAIL"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                                 android:textColor="@android:color/white"
                                 android:backgroundTint="#2E7D32"/>
                         </LinearLayout>
@@ -1048,6 +1054,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:text="DETAIL"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                                 android:textColor="@android:color/white"
                                 android:backgroundTint="#2E7D32"/>
                         </LinearLayout>
@@ -1192,6 +1199,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:text="DETAIL"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                                 android:textColor="@android:color/white"
                                 android:backgroundTint="#2E7D32"/>
                         </LinearLayout>
@@ -1336,6 +1344,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
                                 android:text="DETAIL"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                                 android:textColor="@android:color/white"
                                 android:backgroundTint="#2E7D32"/>
                         </LinearLayout>
