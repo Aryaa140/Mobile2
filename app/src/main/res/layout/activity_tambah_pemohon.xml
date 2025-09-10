@@ -26,11 +26,12 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/cardForm"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_margin="18dp"
         app:cardCornerRadius="16dp"
         app:cardElevation="6dp"
         app:layout_constraintTop_toBottomOf="@id/topAppBar"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -76,20 +77,6 @@
                     android:drawablePadding="8dp"
                     android:hint="Masukkan Nama Penginput Prospek"
                     android:padding="12dp" />
-
-                <EditText
-                    android:id="@+id/editTextNama"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:background="@android:drawable/edit_text"
-                    android:drawableStart="@drawable/ic_username"
-                    android:drawablePadding="8dp"
-                    android:hint="Masukkan Nama Lengkap"
-                    android:padding="12dp"
-                    android:inputType="textPersonName"/>
 
                 <EditText
                     android:id="@+id/editTextEmail"
@@ -168,8 +155,7 @@
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
                     android:background="@android:drawable/edit_text"
-                    android:drawablePadding="8dp"
-                    android:entries="@array/opsi_spinnerTipeUnitHunian"/>
+                    android:drawablePadding="8dp" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -181,7 +167,7 @@
                     android:textSize="15sp" />
 
                 <Spinner
-                    android:id="@+id/spinnerRoleStatusPembayaran"
+                    android:id="@+id/spinnerRoleTipeUnit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="15dp"
@@ -201,7 +187,7 @@
                     android:textSize="15sp" />
 
                 <Spinner
-                    android:id="@+id/spinnerRoleTipeHuniah"
+                    android:id="@+id/spinnerRoleStatusPembayaran"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="15dp"
@@ -212,7 +198,7 @@
                     android:entries="@array/opsi_spinnerStatusPembayaran"/>
 
                 <EditText
-                    android:id="@+id/editTextUangPengadaan"
+                    android:id="@+id/editTextUangMuka"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="15dp"

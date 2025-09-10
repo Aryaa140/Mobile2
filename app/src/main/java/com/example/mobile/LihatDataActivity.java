@@ -63,6 +63,7 @@ public class LihatDataActivity extends AppCompatActivity {
 
         cardUnitHunian.setOnClickListener(v -> {
             Intent intent = new Intent(LihatDataActivity.this, LihatDataUnitHunianActivity.class);
+            startActivity(intent);
         });
 
 
