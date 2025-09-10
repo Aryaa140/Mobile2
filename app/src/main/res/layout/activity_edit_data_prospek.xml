@@ -152,7 +152,7 @@
                         android:paddingRight="24dp"
                         android:paddingTop="10dp"
                         android:paddingBottom="10dp"
-                        android:text="Edit Data"
+                        android:text="Edit"
                         android:textColor="@android:color/black"
                         android:backgroundTint="@android:color/white"
                         android:layout_marginEnd="12dp"/>
