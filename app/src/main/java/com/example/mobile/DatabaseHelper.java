@@ -12,7 +12,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "login.db";
-    private static final int DATABASE_VERSION = 10; // Tingkatkan versi database
+    private static final int DATABASE_VERSION = 11; // Tingkatkan versi database
 
     // tabel prospek
     public static final String TABLE_PROSPEK = "prospek";
@@ -111,6 +111,34 @@ public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
             + COLUMN_REFERENSI_PROYEK + " TEXT NOT NULL,"
             + COLUMN_HARGA_UNIT + " REAL NOT NULL,"
             + "FOREIGN KEY (" + COLUMN_REFERENSI_PROYEK + ") REFERENCES " + TABLE_PROYEK + "(" + COLUMN_NAMA_PROYEK + ")" + ")";
+    // tabel pemohon
+    public static final String TABLE_PEMOHON = "pemohon";
+    public static final String COLUMN_PEMOHON_ID = "pemohon_id";
+    public static final String COLUMN_NAMA_PEMOHON = "nama_pemohon";
+    public static final String COLUMN_EMAIL_PEMOHON = "email_pemohon";
+    public static final String COLUMN_NO_HP_PEMOHON = "no_hp_pemohon";
+    public static final String COLUMN_ALAMAT_PEMOHON = "alamat_pemohon";
+    public static final String COLUMN_REFERENSI_PROYEK_PEMOHON = "referensi_proyek";
+    public static final String COLUMN_REFERENSI_UNIT_HUNIAN = "referensi_unit_hunian";
+    public static final String COLUMN_TIPE_UNIT_HUNIAN = "tipe_unit_hunian";
+    public static final String COLUMN_STATUS_PEMBAYARAN = "status_pembayaran";
+    public static final String COLUMN_UANG_MUKA = "uang_muka";
+    public static final String COLUMN_TANGGAL_PENGAJUAN = "tanggal_pengajuan";
+
+    private static final String CREATE_TABLE_PEMOHON = "CREATE TABLE " + TABLE_PEMOHON + "("
+            + COLUMN_PEMOHON_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            + COLUMN_NAMA_PEMOHON + " TEXT NOT NULL,"
+            + COLUMN_EMAIL_PEMOHON + " TEXT,"
+            + COLUMN_NO_HP_PEMOHON + " TEXT,"
+            + COLUMN_ALAMAT_PEMOHON + " TEXT,"
+            + COLUMN_REFERENSI_PROYEK_PEMOHON + " TEXT NOT NULL,"
+            + COLUMN_REFERENSI_UNIT_HUNIAN + " TEXT NOT NULL,"
+            + COLUMN_TIPE_UNIT_HUNIAN + " TEXT NOT NULL,"
+            + COLUMN_STATUS_PEMBAYARAN + " TEXT NOT NULL,"
+            + COLUMN_UANG_MUKA + " REAL DEFAULT 0,"
+            + COLUMN_TANGGAL_PENGAJUAN + " DATETIME DEFAULT CURRENT_TIMESTAMP,"
+            + "FOREIGN KEY (" + COLUMN_REFERENSI_PROYEK_PEMOHON + ") REFERENCES " + TABLE_PROYEK + "(" + COLUMN_NAMA_PROYEK + "),"
+            + "FOREIGN KEY (" + COLUMN_REFERENSI_UNIT_HUNIAN + ") REFERENCES " + TABLE_UNIT_HUNIAN + "(" + COLUMN_NAMA_UNIT + ")" + ")";
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -124,7 +152,7 @@ public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
         db.execSQL(CREATE_TABLE_USER_PROSPEK);
         db.execSQL(CREATE_TABLE_FASILITAS);
         db.execSQL(CREATE_TABLE_UNIT_HUNIAN);
-
+        db.execSQL(CREATE_TABLE_PEMOHON);
         // User contoh Marketing
         ContentValues values = new ContentValues();
         values.put(COLUMN_USERNAME, "admin");
@@ -172,7 +200,9 @@ public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
         if (oldVersion < 10) {
             db.execSQL(CREATE_TABLE_UNIT_HUNIAN);
         }
-
+        if (oldVersion < 11) {
+            db.execSQL(CREATE_TABLE_PEMOHON);
+        }
         Log.d("DatabaseHelper", "Database upgraded from version " + oldVersion + " to " + newVersion);
     }
 
@@ -1293,5 +1323,365 @@ public static class Proyek {
         }
 
         return unitList;
+    }
+    //==== method pemohon =====
+    public static class Pemohon {
+        private int pemohonId;
+        private String namaPemohon;
+        private String emailPemohon;
+        private String noHpPemohon;
+        private String alamatPemohon;
+        private String referensiProyek;
+        private String referensiUnitHunian;
+        private String tipeUnitHunian;
+        private String statusPembayaran;
+        private double uangMuka;
+        private String tanggalPengajuan;
+
+        public Pemohon(int pemohonId, String namaPemohon, String emailPemohon, String noHpPemohon,
+                       String alamatPemohon, String referensiProyek, String referensiUnitHunian,
+                       String tipeUnitHunian, String statusPembayaran, double uangMuka, String tanggalPengajuan) {
+            this.pemohonId = pemohonId;
+            this.namaPemohon = namaPemohon;
+            this.emailPemohon = emailPemohon;
+            this.noHpPemohon = noHpPemohon;
+            this.alamatPemohon = alamatPemohon;
+            this.referensiProyek = referensiProyek;
+            this.referensiUnitHunian = referensiUnitHunian;
+            this.tipeUnitHunian = tipeUnitHunian;
+            this.statusPembayaran = statusPembayaran;
+            this.uangMuka = uangMuka;
+            this.tanggalPengajuan = tanggalPengajuan;
+        }
+
+        public Pemohon(String namaPemohon, String emailPemohon, String noHpPemohon,
+                       String alamatPemohon, String referensiProyek, String referensiUnitHunian,
+                       String tipeUnitHunian, String statusPembayaran, double uangMuka) {
+            this.namaPemohon = namaPemohon;
+            this.emailPemohon = emailPemohon;
+            this.noHpPemohon = noHpPemohon;
+            this.alamatPemohon = alamatPemohon;
+            this.referensiProyek = referensiProyek;
+            this.referensiUnitHunian = referensiUnitHunian;
+            this.tipeUnitHunian = tipeUnitHunian;
+            this.statusPembayaran = statusPembayaran;
+            this.uangMuka = uangMuka;
+        }
+
+        // Getter dan Setter methods
+        public int getPemohonId() { return pemohonId; }
+        public void setPemohonId(int pemohonId) { this.pemohonId = pemohonId; }
+
+        public String getNamaPemohon() { return namaPemohon; }
+        public void setNamaPemohon(String namaPemohon) { this.namaPemohon = namaPemohon; }
+
+        public String getEmailPemohon() { return emailPemohon; }
+        public void setEmailPemohon(String emailPemohon) { this.emailPemohon = emailPemohon; }
+
+        public String getNoHpPemohon() { return noHpPemohon; }
+        public void setNoHpPemohon(String noHpPemohon) { this.noHpPemohon = noHpPemohon; }
+
+        public String getAlamatPemohon() { return alamatPemohon; }
+        public void setAlamatPemohon(String alamatPemohon) { this.alamatPemohon = alamatPemohon; }
+
+        public String getReferensiProyek() { return referensiProyek; }
+        public void setReferensiProyek(String referensiProyek) { this.referensiProyek = referensiProyek; }
+
+        public String getReferensiUnitHunian() { return referensiUnitHunian; }
+        public void setReferensiUnitHunian(String referensiUnitHunian) { this.referensiUnitHunian = referensiUnitHunian; }
+
+        public String getTipeUnitHunian() { return tipeUnitHunian; }
+        public void setTipeUnitHunian(String tipeUnitHunian) { this.tipeUnitHunian = tipeUnitHunian; }
+
+        public String getStatusPembayaran() { return statusPembayaran; }
+        public void setStatusPembayaran(String statusPembayaran) { this.statusPembayaran = statusPembayaran; }
+
+        public double getUangMuka() { return uangMuka; }
+        public void setUangMuka(double uangMuka) { this.uangMuka = uangMuka; }
+
+        public String getTanggalPengajuan() { return tanggalPengajuan; }
+        public void setTanggalPengajuan(String tanggalPengajuan) { this.tanggalPengajuan = tanggalPengajuan; }
+    }
+    // ====== PEMOHON METHODS ======
+    public long addPemohon(String namaPemohon, String emailPemohon, String noHpPemohon,
+                           String alamatPemohon, String referensiProyek, String referensiUnitHunian,
+                           String tipeUnitHunian, String statusPembayaran, double uangMuka) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NAMA_PEMOHON, namaPemohon);
+        values.put(COLUMN_EMAIL_PEMOHON, emailPemohon);
+        values.put(COLUMN_NO_HP_PEMOHON, noHpPemohon);
+        values.put(COLUMN_ALAMAT_PEMOHON, alamatPemohon);
+        values.put(COLUMN_REFERENSI_PROYEK_PEMOHON, referensiProyek);
+        values.put(COLUMN_REFERENSI_UNIT_HUNIAN, referensiUnitHunian);
+        values.put(COLUMN_TIPE_UNIT_HUNIAN, tipeUnitHunian);
+        values.put(COLUMN_STATUS_PEMBAYARAN, statusPembayaran);
+        values.put(COLUMN_UANG_MUKA, uangMuka);
+
+        long result = db.insert(TABLE_PEMOHON, null, values);
+        db.close();
+        return result;
+    }
+
+    public List<Pemohon> getAllPemohon() {
+        List<Pemohon> pemohonList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+
+        try {
+            String[] columns = {
+                    COLUMN_PEMOHON_ID,
+                    COLUMN_NAMA_PEMOHON,
+                    COLUMN_EMAIL_PEMOHON,
+                    COLUMN_NO_HP_PEMOHON,
+                    COLUMN_ALAMAT_PEMOHON,
+                    COLUMN_REFERENSI_PROYEK_PEMOHON,
+                    COLUMN_REFERENSI_UNIT_HUNIAN,
+                    COLUMN_TIPE_UNIT_HUNIAN,
+                    COLUMN_STATUS_PEMBAYARAN,
+                    COLUMN_UANG_MUKA,
+                    COLUMN_TANGGAL_PENGAJUAN
+            };
+
+            cursor = db.query(TABLE_PEMOHON, columns, null, null, null, null, COLUMN_TANGGAL_PENGAJUAN + " DESC");
+
+            Log.d("DatabaseHelper", "Jumlah data pemohon: " + cursor.getCount());
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    try {
+                        Pemohon pemohon = new Pemohon(
+                                cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PEMOHON_ID)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA_PEMOHON)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL_PEMOHON)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NO_HP_PEMOHON)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ALAMAT_PEMOHON)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI_PROYEK_PEMOHON)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI_UNIT_HUNIAN)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIPE_UNIT_HUNIAN)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_PEMBAYARAN)),
+                                cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_UANG_MUKA)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_PENGAJUAN))
+                        );
+                        pemohonList.add(pemohon);
+                    } catch (Exception e) {
+                        Log.e("DatabaseHelper", "Error parsing data pemohon: " + e.getMessage());
+                    }
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            Log.e("DatabaseHelper", "Error getAllPemohon: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+
+        return pemohonList;
+    }
+
+    public Pemohon getPemohonById(int pemohonId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns = {
+                COLUMN_PEMOHON_ID,
+                COLUMN_NAMA_PEMOHON,
+                COLUMN_EMAIL_PEMOHON,
+                COLUMN_NO_HP_PEMOHON,
+                COLUMN_ALAMAT_PEMOHON,
+                COLUMN_REFERENSI_PROYEK_PEMOHON,
+                COLUMN_REFERENSI_UNIT_HUNIAN,
+                COLUMN_TIPE_UNIT_HUNIAN,
+                COLUMN_STATUS_PEMBAYARAN,
+                COLUMN_UANG_MUKA,
+                COLUMN_TANGGAL_PENGAJUAN
+        };
+        String selection = COLUMN_PEMOHON_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(pemohonId)};
+
+        Cursor cursor = db.query(TABLE_PEMOHON, columns, selection, selectionArgs, null, null, null);
+
+        Pemohon pemohon = null;
+        if (cursor != null && cursor.moveToFirst()) {
+            pemohon = new Pemohon(
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PEMOHON_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA_PEMOHON)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL_PEMOHON)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NO_HP_PEMOHON)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ALAMAT_PEMOHON)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI_PROYEK_PEMOHON)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI_UNIT_HUNIAN)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIPE_UNIT_HUNIAN)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_PEMBAYARAN)),
+                    cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_UANG_MUKA)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_PENGAJUAN))
+            );
+            cursor.close();
+        }
+
+        db.close();
+        return pemohon;
+    }
+
+    public int updatePemohon(int pemohonId, String namaPemohon, String emailPemohon, String noHpPemohon,
+                             String alamatPemohon, String referensiProyek, String referensiUnitHunian,
+                             String tipeUnitHunian, String statusPembayaran, double uangMuka) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NAMA_PEMOHON, namaPemohon);
+        values.put(COLUMN_EMAIL_PEMOHON, emailPemohon);
+        values.put(COLUMN_NO_HP_PEMOHON, noHpPemohon);
+        values.put(COLUMN_ALAMAT_PEMOHON, alamatPemohon);
+        values.put(COLUMN_REFERENSI_PROYEK_PEMOHON, referensiProyek);
+        values.put(COLUMN_REFERENSI_UNIT_HUNIAN, referensiUnitHunian);
+        values.put(COLUMN_TIPE_UNIT_HUNIAN, tipeUnitHunian);
+        values.put(COLUMN_STATUS_PEMBAYARAN, statusPembayaran);
+        values.put(COLUMN_UANG_MUKA, uangMuka);
+
+        String selection = COLUMN_PEMOHON_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(pemohonId)};
+        int result = db.update(TABLE_PEMOHON, values, selection, selectionArgs);
+        db.close();
+        return result;
+    }
+
+    public int updateStatusPembayaran(int pemohonId, String statusPembayaran) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_STATUS_PEMBAYARAN, statusPembayaran);
+
+        String selection = COLUMN_PEMOHON_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(pemohonId)};
+        int result = db.update(TABLE_PEMOHON, values, selection, selectionArgs);
+        db.close();
+        return result;
+    }
+
+    public int deletePemohon(int pemohonId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String selection = COLUMN_PEMOHON_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(pemohonId)};
+        int result = db.delete(TABLE_PEMOHON, selection, selectionArgs);
+        db.close();
+        return result;
+    }
+
+    public List<Pemohon> getPemohonByProyek(String namaProyek) {
+        List<Pemohon> pemohonList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+
+        try {
+            String[] columns = {
+                    COLUMN_PEMOHON_ID,
+                    COLUMN_NAMA_PEMOHON,
+                    COLUMN_EMAIL_PEMOHON,
+                    COLUMN_NO_HP_PEMOHON,
+                    COLUMN_ALAMAT_PEMOHON,
+                    COLUMN_REFERENSI_PROYEK_PEMOHON,
+                    COLUMN_REFERENSI_UNIT_HUNIAN,
+                    COLUMN_TIPE_UNIT_HUNIAN,
+                    COLUMN_STATUS_PEMBAYARAN,
+                    COLUMN_UANG_MUKA,
+                    COLUMN_TANGGAL_PENGAJUAN
+            };
+
+            String selection = COLUMN_REFERENSI_PROYEK_PEMOHON + " = ?";
+            String[] selectionArgs = {namaProyek};
+
+            cursor = db.query(TABLE_PEMOHON, columns, selection, selectionArgs, null, null, COLUMN_TANGGAL_PENGAJUAN + " DESC");
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    try {
+                        Pemohon pemohon = new Pemohon(
+                                cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PEMOHON_ID)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA_PEMOHON)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL_PEMOHON)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NO_HP_PEMOHON)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ALAMAT_PEMOHON)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI_PROYEK_PEMOHON)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI_UNIT_HUNIAN)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIPE_UNIT_HUNIAN)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_PEMBAYARAN)),
+                                cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_UANG_MUKA)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_PENGAJUAN))
+                        );
+                        pemohonList.add(pemohon);
+                    } catch (Exception e) {
+                        Log.e("DatabaseHelper", "Error parsing data pemohon: " + e.getMessage());
+                    }
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            Log.e("DatabaseHelper", "Error getPemohonByProyek: " + e.getMessage());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+
+        return pemohonList;
+    }
+
+    public List<Pemohon> getPemohonByStatusPembayaran(String statusPembayaran) {
+        List<Pemohon> pemohonList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+
+        try {
+            String[] columns = {
+                    COLUMN_PEMOHON_ID,
+                    COLUMN_NAMA_PEMOHON,
+                    COLUMN_EMAIL_PEMOHON,
+                    COLUMN_NO_HP_PEMOHON,
+                    COLUMN_ALAMAT_PEMOHON,
+                    COLUMN_REFERENSI_PROYEK_PEMOHON,
+                    COLUMN_REFERENSI_UNIT_HUNIAN,
+                    COLUMN_TIPE_UNIT_HUNIAN,
+                    COLUMN_STATUS_PEMBAYARAN,
+                    COLUMN_UANG_MUKA,
+                    COLUMN_TANGGAL_PENGAJUAN
+            };
+
+            String selection = COLUMN_STATUS_PEMBAYARAN + " = ?";
+            String[] selectionArgs = {statusPembayaran};
+
+            cursor = db.query(TABLE_PEMOHON, columns, selection, selectionArgs, null, null, COLUMN_TANGGAL_PENGAJUAN + " DESC");
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    try {
+                        Pemohon pemohon = new Pemohon(
+                                cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PEMOHON_ID)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA_PEMOHON)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL_PEMOHON)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NO_HP_PEMOHON)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ALAMAT_PEMOHON)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI_PROYEK_PEMOHON)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI_UNIT_HUNIAN)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIPE_UNIT_HUNIAN)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_PEMBAYARAN)),
+                                cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_UANG_MUKA)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_PENGAJUAN))
+                        );
+                        pemohonList.add(pemohon);
+                    } catch (Exception e) {
+                        Log.e("DatabaseHelper", "Error parsing data pemohon: " + e.getMessage());
+                    }
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            Log.e("DatabaseHelper", "Error getPemohonByStatusPembayaran: " + e.getMessage());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+
+        return pemohonList;
     }
 }
