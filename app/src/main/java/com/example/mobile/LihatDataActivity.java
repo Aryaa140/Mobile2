@@ -55,6 +55,11 @@ public class LihatDataActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        cardProyek.setOnClickListener(v -> {
+            Intent intent = new Intent(LihatDataActivity.this, LihatDataProyekActivity.class);
+            startActivity(intent);
+        });
+
 
         bottomNavigationView.setSelectedItemId(R.id.nav_folder);
 
