@@ -12,7 +12,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "login.db";
-    private static final int DATABASE_VERSION = 9; // Tingkatkan versi database
+    private static final int DATABASE_VERSION = 10; // Tingkatkan versi database
 
     // tabel prospek
     public static final String TABLE_PROSPEK = "prospek";
@@ -98,7 +98,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + COLUMN_STATUS_FASILITAS + " TEXT NOT NULL,"
             + "FOREIGN KEY (" + COLUMN_NAMA_PROYEK_FASILITAS + ") REFERENCES " + TABLE_PROYEK + "(" + COLUMN_NAMA_PROYEK + ")" + ")";
 
+// tabel unit hunian
+public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
+    public static final String COLUMN_UNIT_ID = "unit_id";
+    public static final String COLUMN_NAMA_UNIT = "nama_unit";
+    public static final String COLUMN_REFERENSI_PROYEK = "referensi_proyek";
+    public static final String COLUMN_HARGA_UNIT = "harga_unit";
 
+    private static final String CREATE_TABLE_UNIT_HUNIAN = "CREATE TABLE " + TABLE_UNIT_HUNIAN + "("
+            + COLUMN_UNIT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            + COLUMN_NAMA_UNIT + " TEXT NOT NULL,"
+            + COLUMN_REFERENSI_PROYEK + " TEXT NOT NULL,"
+            + COLUMN_HARGA_UNIT + " REAL NOT NULL,"
+            + "FOREIGN KEY (" + COLUMN_REFERENSI_PROYEK + ") REFERENCES " + TABLE_PROYEK + "(" + COLUMN_NAMA_PROYEK + ")" + ")";
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -111,6 +123,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_PROYEK);
         db.execSQL(CREATE_TABLE_USER_PROSPEK);
         db.execSQL(CREATE_TABLE_FASILITAS);
+        db.execSQL(CREATE_TABLE_UNIT_HUNIAN);
 
         // User contoh Marketing
         ContentValues values = new ContentValues();
@@ -155,6 +168,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_PROSPEK);
             // Buat tabel baru dengan struktur yang diperbarui
             db.execSQL(CREATE_TABLE_USER_PROSPEK);
+        }
+        if (oldVersion < 10) {
+            db.execSQL(CREATE_TABLE_UNIT_HUNIAN);
         }
 
         Log.d("DatabaseHelper", "Database upgraded from version " + oldVersion + " to " + newVersion);
@@ -1066,5 +1082,216 @@ public static class Proyek {
         }
 
         return proyekList;
+    }
+    //==== method unit hunian ====
+    public static class UnitHunian {
+        private int unitId;
+        private String namaUnit;
+        private String referensiProyek;
+        private double hargaUnit;
+
+        public UnitHunian(int unitId, String namaUnit, String referensiProyek, double hargaUnit) {
+            this.unitId = unitId;
+            this.namaUnit = namaUnit;
+            this.referensiProyek = referensiProyek;
+            this.hargaUnit = hargaUnit;
+        }
+
+        public UnitHunian(String namaUnit, String referensiProyek, double hargaUnit) {
+            this.namaUnit = namaUnit;
+            this.referensiProyek = referensiProyek;
+            this.hargaUnit = hargaUnit;
+        }
+
+        // Getter dan Setter methods
+        public int getUnitId() { return unitId; }
+        public void setUnitId(int unitId) { this.unitId = unitId; }
+
+        public String getNamaUnit() { return namaUnit; }
+        public void setNamaUnit(String namaUnit) { this.namaUnit = namaUnit; }
+
+        public String getReferensiProyek() { return referensiProyek; }
+        public void setReferensiProyek(String referensiProyek) { this.referensiProyek = referensiProyek; }
+
+        public double getHargaUnit() { return hargaUnit; }
+        public void setHargaUnit(double hargaUnit) { this.hargaUnit = hargaUnit; }
+    }
+
+    public long addUnitHunian(String namaUnit, String referensiProyek, double hargaUnit) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NAMA_UNIT, namaUnit);
+        values.put(COLUMN_REFERENSI_PROYEK, referensiProyek);
+        values.put(COLUMN_HARGA_UNIT, hargaUnit);
+
+        long result = db.insert(TABLE_UNIT_HUNIAN, null, values);
+        db.close();
+        return result;
+    }
+
+    public List<UnitHunian> getAllUnitHunian() {
+        List<UnitHunian> unitHunianList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+
+        try {
+            String[] columns = {
+                    COLUMN_UNIT_ID,
+                    COLUMN_NAMA_UNIT,
+                    COLUMN_REFERENSI_PROYEK,
+                    COLUMN_HARGA_UNIT
+            };
+
+            cursor = db.query(TABLE_UNIT_HUNIAN, columns, null, null, null, null, COLUMN_NAMA_UNIT + " ASC");
+
+            Log.d("DatabaseHelper", "Jumlah data unit hunian: " + cursor.getCount());
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    try {
+                        UnitHunian unitHunian = new UnitHunian(
+                                cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_UNIT_ID)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA_UNIT)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI_PROYEK)),
+                                cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_HARGA_UNIT))
+                        );
+                        unitHunianList.add(unitHunian);
+                    } catch (Exception e) {
+                        Log.e("DatabaseHelper", "Error parsing data unit hunian: " + e.getMessage());
+                    }
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            Log.e("DatabaseHelper", "Error getAllUnitHunian: " + e.getMessage());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+
+        return unitHunianList;
+    }
+
+    public List<UnitHunian> getUnitHunianByProyek(String namaProyek) {
+        List<UnitHunian> unitHunianList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+
+        try {
+            String[] columns = {
+                    COLUMN_UNIT_ID,
+                    COLUMN_NAMA_UNIT,
+                    COLUMN_REFERENSI_PROYEK,
+                    COLUMN_HARGA_UNIT
+            };
+
+            String selection = COLUMN_REFERENSI_PROYEK + " = ?";
+            String[] selectionArgs = {namaProyek};
+
+            cursor = db.query(TABLE_UNIT_HUNIAN, columns, selection, selectionArgs, null, null, COLUMN_NAMA_UNIT + " ASC");
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    try {
+                        UnitHunian unitHunian = new UnitHunian(
+                                cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_UNIT_ID)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA_UNIT)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI_PROYEK)),
+                                cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_HARGA_UNIT))
+                        );
+                        unitHunianList.add(unitHunian);
+                    } catch (Exception e) {
+                        Log.e("DatabaseHelper", "Error parsing data unit hunian: " + e.getMessage());
+                    }
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            Log.e("DatabaseHelper", "Error getUnitHunianByProyek: " + e.getMessage());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+
+        return unitHunianList;
+    }
+
+    public UnitHunian getUnitHunianById(int unitId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns = {
+                COLUMN_UNIT_ID,
+                COLUMN_NAMA_UNIT,
+                COLUMN_REFERENSI_PROYEK,
+                COLUMN_HARGA_UNIT
+        };
+        String selection = COLUMN_UNIT_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(unitId)};
+
+        Cursor cursor = db.query(TABLE_UNIT_HUNIAN, columns, selection, selectionArgs, null, null, null);
+
+        UnitHunian unitHunian = null;
+        if (cursor != null && cursor.moveToFirst()) {
+            unitHunian = new UnitHunian(
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_UNIT_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA_UNIT)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI_PROYEK)),
+                    cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_HARGA_UNIT))
+            );
+            cursor.close();
+        }
+
+        db.close();
+        return unitHunian;
+    }
+
+    public int updateUnitHunian(int unitId, String namaUnit, String referensiProyek, double hargaUnit) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NAMA_UNIT, namaUnit);
+        values.put(COLUMN_REFERENSI_PROYEK, referensiProyek);
+        values.put(COLUMN_HARGA_UNIT, hargaUnit);
+
+        String selection = COLUMN_UNIT_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(unitId)};
+        int result = db.update(TABLE_UNIT_HUNIAN, values, selection, selectionArgs);
+        db.close();
+        return result;
+    }
+
+    public int deleteUnitHunian(int unitId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String selection = COLUMN_UNIT_ID + " = ?";
+        String[] selectionArgs = {String.valueOf(unitId)};
+        int result = db.delete(TABLE_UNIT_HUNIAN, selection, selectionArgs);
+        db.close();
+        return result;
+    }
+
+    public List<String> getAllNamaUnitHunian() {
+        List<String> unitList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+
+        try {
+            String[] columns = {COLUMN_NAMA_UNIT};
+            cursor = db.query(TABLE_UNIT_HUNIAN, columns, null, null, null, null, COLUMN_NAMA_UNIT + " ASC");
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    unitList.add(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA_UNIT)));
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            Log.e("DatabaseHelper", "Error getAllNamaUnitHunian: " + e.getMessage());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+
+        return unitList;
     }
 }
