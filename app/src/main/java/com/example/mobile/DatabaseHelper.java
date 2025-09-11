@@ -698,6 +698,109 @@ public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
         }
         return false;
     }
+    // Di DatabaseHelper class
+    public boolean isProspekExists(String nama, String noHp) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_PROSPEK +
+                " WHERE " + COLUMN_NAMA + " = ? OR " + COLUMN_NO_HP + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{nama, noHp});
+
+        boolean exists = (cursor.getCount() > 0);
+        cursor.close();
+        db.close();
+
+        return exists;
+    }
+
+    public boolean isProspekExistsExcludingCurrent(int prospekId, String nama, String noHp) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_PROSPEK +
+                " WHERE (" + COLUMN_NAMA + " = ? OR " + COLUMN_NO_HP + " = ?) AND " +
+                COLUMN_PROSPEK_ID + " != ?";
+        Cursor cursor = db.rawQuery(query, new String[]{nama, noHp, String.valueOf(prospekId)});
+
+        boolean exists = (cursor.getCount() > 0);
+        cursor.close();
+        db.close();
+
+        return exists;
+    }
+    public boolean isProspekExistsByName(String nama) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_PROSPEK + " WHERE " + COLUMN_NAMA + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{nama});
+
+        boolean exists = (cursor.getCount() > 0);
+        cursor.close();
+        db.close();
+
+        return exists;
+    }
+
+    public boolean isProspekExistsByNoHp(String noHp) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_PROSPEK + " WHERE " + COLUMN_NO_HP + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{noHp});
+
+        boolean exists = (cursor.getCount() > 0);
+        cursor.close();
+        db.close();
+
+        return exists;
+    }
+    // Filter berdasarkan nama (partial match)
+    public List<Prospek> filterProspekByName(String nama) {
+        List<Prospek> prospekList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT * FROM " + TABLE_PROSPEK +
+                " WHERE " + COLUMN_NAMA + " LIKE ?" +
+                " ORDER BY " + COLUMN_TANGGAL_BUAT + " DESC";
+        Cursor cursor = db.rawQuery(query, new String[]{"%" + nama + "%"});
+
+        // Process cursor and populate list
+        // ...
+
+        cursor.close();
+        db.close();
+        return prospekList;
+    }
+
+    // Filter berdasarkan referensi
+  /*  public List<Prospek> filterProspekByReferensi(String referensi) {
+        List<Prospek> prospekList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT * FROM " + TABLE_PROSPEK +
+                " WHERE " + COLUMN_REFERENSI + " = ?" +
+                " ORDER BY " + COLUMN_TANGGAL_BUAT + " DESC";
+        Cursor cursor = db.rawQuery(query, new String[]{referensi});
+
+        // Process cursor and populate list
+        // ...
+
+        cursor.close();
+        db.close();
+        return prospekList;
+    }*/
+
+    // Filter berdasarkan tanggal
+    public List<Prospek> filterProspekByDate(String tanggalAwal, String tanggalAkhir) {
+        List<Prospek> prospekList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT * FROM " + TABLE_PROSPEK +
+                " WHERE date(" + COLUMN_TANGGAL_BUAT + ") BETWEEN ? AND ?" +
+                " ORDER BY " + COLUMN_TANGGAL_BUAT + " DESC";
+        Cursor cursor = db.rawQuery(query, new String[]{tanggalAwal, tanggalAkhir});
+
+        // Process cursor and populate list
+        // ...
+
+        cursor.close();
+        db.close();
+        return prospekList;
+    }
     public static class UserProspek {
         private int userProspekId;
         private String penginput;

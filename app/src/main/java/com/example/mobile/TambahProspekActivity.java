@@ -75,7 +75,7 @@ public class TambahProspekActivity extends AppCompatActivity {
     }
 
     private void simpanDataProspek() {
-        // Ambil data dari form - TAMBAH penginput
+        // Ambil data dari form
         String penginput = editTextPenginput.getText().toString().trim();
         String nama = editTextNama.getText().toString().trim();
         String email = editTextEmail.getText().toString().trim();
@@ -83,7 +83,7 @@ public class TambahProspekActivity extends AppCompatActivity {
         String alamat = editTextAlamat.getText().toString().trim();
         String referensi = spinnerReferensi.getSelectedItem().toString();
 
-        // Validasi input - TAMBAH validasi penginput
+        // Validasi input
         if (penginput.isEmpty()) {
             editTextPenginput.setError("Nama penginput harus diisi");
             editTextPenginput.requestFocus();
@@ -93,12 +93,6 @@ public class TambahProspekActivity extends AppCompatActivity {
         if (nama.isEmpty()) {
             editTextNama.setError("Nama lengkap harus diisi");
             editTextNama.requestFocus();
-            return;
-        }
-
-        if (email.isEmpty()) {
-            editTextEmail.setError("Email harus diisi");
-            editTextEmail.requestFocus();
             return;
         }
 
@@ -114,21 +108,35 @@ public class TambahProspekActivity extends AppCompatActivity {
             return;
         }
 
-        // Validasi format email
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        // Validasi format email (hanya jika email tidak kosong)
+        if (!email.isEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             editTextEmail.setError("Format email tidak valid");
             editTextEmail.requestFocus();
             return;
         }
 
-        // Simpan data ke database - TAMBAH parameter penginput
+        // Validasi duplikasi data
+        if (databaseHelper.isProspekExists(nama, noHp)) {
+            // Cek apakah duplikat nama atau nomor HP
+            if (databaseHelper.isProspekExistsByName(nama)) {
+                editTextNama.setError("Nama prospek sudah terdaftar");
+                editTextNama.requestFocus();
+            } else {
+                editTextNoHp.setError("Nomor HP sudah terdaftar");
+                editTextNoHp.requestFocus();
+            }
+            return;
+        }
+
+        // Simpan data ke database
         long result = databaseHelper.addProspek(penginput, nama, email, noHp, alamat, referensi);
 
         if (result != -1) {
             Toast.makeText(this, "Data prospek berhasil disimpan", Toast.LENGTH_SHORT).show();
             clearForm();
 
-            Intent intent = new Intent(TambahProspekActivity.this, TambahProspekActivity.class);
+            // Kembali ke BerandaActivity setelah berhasil menyimpan
+            Intent intent = new Intent(TambahProspekActivity.this, BerandaActivity.class);
             startActivity(intent);
             finish();
         } else {
