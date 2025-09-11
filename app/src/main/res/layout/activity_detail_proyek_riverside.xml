@@ -76,6 +76,7 @@
                                 android:id="@+id/txtNama"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:textColor="@android:color/black"
                                 android:text="The Quality Riverside"
                                 android:textStyle="bold"
                                 android:textSize="18sp" />
@@ -84,6 +85,7 @@
                                 android:id="@+id/txtLokasi"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:textColor="@android:color/black"
                                 android:text="Gamping Wetan, Gamping, Kecamatan Krian, Kabupaten Sidoarjo, Jawa Timur"
                                 android:paddingTop="4dp" />
 
@@ -94,6 +96,7 @@
                         android:id="@+id/txtDeskripsi"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:textColor="@android:color/black"
                         android:text="The Quality Riverside merupakan perumahan yang mengusung konsep hijau yang asri. Properti ini hadir dengan keunggulan lokasi yang strategis, desain kekinian, dan spesifikasi yang mumpuni."
                         android:paddingTop="8dp" />
 
@@ -101,6 +104,7 @@
                         android:id="@+id/txtStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:textColor="@android:color/black"
                         android:layout_marginRight="5dp"
                         android:layout_marginLeft="0dp"
                         android:text="Pengembangan sekitar 1000 Unit (On Progress)."

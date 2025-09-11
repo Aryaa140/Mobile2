@@ -61,6 +61,7 @@
                 android:layout_marginBottom="15dp"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
+                android:textColor="@android:color/black"
                 android:background="@android:drawable/edit_text"
                 android:drawableStart="@drawable/ic_pin_person"
                 android:drawablePadding="8dp"
@@ -74,6 +75,7 @@
                 android:layout_marginBottom="15dp"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
+                android:textColor="@android:color/black"
                 android:background="@android:drawable/edit_text"
                 android:drawableStart="@drawable/ic_username"
                 android:drawablePadding="8dp"
@@ -88,6 +90,7 @@
                 android:layout_marginBottom="15dp"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
+                android:textColor="@android:color/black"
                 android:background="@android:drawable/edit_text"
                 android:drawableStart="@drawable/ic_request"
                 android:drawablePadding="8dp"
@@ -102,6 +105,7 @@
                 android:layout_marginBottom="15dp"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
+                android:textColor="@android:color/black"
                 android:background="@android:drawable/edit_text"
                 android:drawableStart="@drawable/ic_phonec"
                 android:drawablePadding="8dp"
@@ -116,12 +120,12 @@
                 android:layout_marginBottom="15dp"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
+                android:textColor="@android:color/black"
                 android:background="@android:drawable/edit_text"
                 android:drawableStart="@drawable/ic_home"
                 android:drawablePadding="8dp"
                 android:hint="Masukkan Alamat Rumah"
                 android:padding="12dp"/>
-
 
             <TextView
                 android:layout_width="match_parent"
@@ -139,6 +143,7 @@
                 android:layout_marginBottom="5dp"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
+                android:textColor="@android:color/black"
                 android:background="@android:drawable/edit_text"
                 android:drawablePadding="8dp"
                 android:entries="@array/opsi_spinnerProspek"/>

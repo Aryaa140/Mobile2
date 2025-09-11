@@ -16,7 +16,7 @@ import com.google.android.material.card.MaterialCardView;
 public class LihatDataActivity extends AppCompatActivity {
 
     MaterialToolbar TopAppBar;
-    MaterialCardView cardFasilitas, cardProyek, cardUserpM, cardProspek, cardPemohonM, cardUnitHunian;
+    MaterialCardView cardProyek, cardUserpM, cardProspek, cardPemohonM, cardUnitHunian;
     BottomNavigationView bottomNavigationView;
 
     @Override
@@ -28,7 +28,6 @@ public class LihatDataActivity extends AppCompatActivity {
         TopAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-        cardFasilitas = findViewById(R.id.cardFasilitas);
         cardProyek = findViewById(R.id.cardProyek);
         cardProspek = findViewById(R.id.cardProspek);
         cardUserpM = findViewById(R.id.cardUserpM);

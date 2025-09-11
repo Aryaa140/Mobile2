@@ -61,9 +61,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="0dp"
-                android:layout_marginRight="35dp"
-                android:layout_marginLeft="35dp"
-                android:text="Silahkan Masukkan No. NIP Akun"
+                android:layout_marginRight="45dp"
+                android:layout_marginLeft="55dp"
+                android:text="Silahkan Masukkan No. NIP"
                 android:textColor="@android:color/black"
                 android:textSize="18sp" />
 
@@ -73,9 +73,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="20dp"
-                android:layout_marginRight="95dp"
-                android:layout_marginLeft="95dp"
-                android:text="yang ingin diubah!"
+                android:layout_marginRight="45dp"
+                android:layout_marginLeft="67dp"
+                android:text="Akun yang ingin diubah!"
                 android:textColor="@android:color/black"
                 android:textSize="18sp" />
 
@@ -93,6 +93,7 @@
                 android:id="@+id/noNip"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@android:color/black"
                 android:layout_marginBottom="12dp"
                 android:hint="Masukkan No. NIP"
                 android:inputType="phone"
@@ -112,6 +113,7 @@
                 android:id="@+id/username"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@android:color/black"
                 android:layout_marginBottom="20dp"
                 android:inputType="textPersonName"
                 android:minHeight="48dp"
@@ -132,6 +134,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
+                android:textColor="@android:color/black"
                 android:background="@android:drawable/edit_text"
                 android:entries="@array/opsi_spinner"
                 android:minHeight="48dp"/>
