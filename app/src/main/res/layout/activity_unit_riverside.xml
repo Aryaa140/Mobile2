@@ -181,6 +181,7 @@
                             </LinearLayout>
 
                             <Button
+                                android:id="@+id/btnClusterA"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
@@ -327,6 +328,7 @@
                             </LinearLayout>
 
                             <Button
+                                android:id="@+id/btnClusterB"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
@@ -473,6 +475,7 @@
                             </LinearLayout>
 
                             <Button
+                                android:id="@+id/btnCamelia"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
@@ -619,6 +622,7 @@
                             </LinearLayout>
 
                             <Button
+                                android:id="@+id/btnOrchid"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
@@ -765,6 +769,7 @@
                             </LinearLayout>
 
                             <Button
+                                android:id="@+id/btnIrish"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
@@ -911,6 +916,7 @@
                             </LinearLayout>
 
                             <Button
+                                android:id="@+id/btnNeoGladiol"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
@@ -1057,6 +1063,7 @@
                             </LinearLayout>
 
                             <Button
+                                android:id="@+id/btnlily"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
@@ -1203,6 +1210,7 @@
                             </LinearLayout>
 
                             <Button
+                                android:id="@+id/btnRaflesia"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
@@ -1349,6 +1357,7 @@
                             </LinearLayout>
 
                             <Button
+                                android:id="@+id/btnRukoTulip"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"

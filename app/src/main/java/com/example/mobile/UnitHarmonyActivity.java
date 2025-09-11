@@ -2,6 +2,7 @@ package com.example.mobile;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
@@ -12,11 +13,13 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import androidx.cardview.widget.CardView;
 
 public class UnitHarmonyActivity extends AppCompatActivity {
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
-    LinearLayout cardOsaka, cardNarita, cardYokohama;
+    CardView cardOsaka, cardNarita, cardYokohama;
+    Button btnOsaka, btnNarita, btnYokohama;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +34,9 @@ public class UnitHarmonyActivity extends AppCompatActivity {
         cardOsaka = findViewById(R.id.cardOsaka);
         cardNarita = findViewById(R.id.cardNarita);
         cardYokohama = findViewById(R.id.cardYokohama);
+        btnOsaka = findViewById(R.id.btnOsaka);
+        btnNarita = findViewById(R.id.btnNarita);
+        btnYokohama = findViewById(R.id.btnYokohama);
 
         cardOsaka.setOnClickListener(v -> {
             Intent intent = new Intent(UnitHarmonyActivity.this, DetailUnitOsakaActivity.class);
@@ -43,6 +49,22 @@ public class UnitHarmonyActivity extends AppCompatActivity {
         });
 
         cardYokohama.setOnClickListener(v -> {
+            Intent intent = new Intent(UnitHarmonyActivity.this, DetailUnitYokohamaActivity.class);
+            startActivity(intent);
+        });
+
+
+        btnOsaka.setOnClickListener(v -> {
+            Intent intent = new Intent(UnitHarmonyActivity.this, DetailUnitOsakaActivity.class);
+            startActivity(intent);
+        });
+
+        btnNarita.setOnClickListener(v -> {
+            Intent intent = new Intent(UnitHarmonyActivity.this, DetailUnitNaritaActivity.class);
+            startActivity(intent);
+        });
+
+        btnYokohama.setOnClickListener(v -> {
             Intent intent = new Intent(UnitHarmonyActivity.this, DetailUnitYokohamaActivity.class);
             startActivity(intent);
         });

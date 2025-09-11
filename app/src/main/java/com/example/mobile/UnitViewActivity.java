@@ -2,6 +2,7 @@ package com.example.mobile;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
@@ -12,11 +13,13 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import androidx.cardview.widget.CardView;
 
 public class UnitViewActivity extends AppCompatActivity {
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
-    LinearLayout cardVillaDiamond;
+    CardView cardVillaDiamond;
+    Button btnVillaDiamond;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,8 +32,14 @@ public class UnitViewActivity extends AppCompatActivity {
         bottomNavigationView.setSelectedItemId(R.id.nav_folder);
 
         cardVillaDiamond = findViewById(R.id.cardVillaDiamond);
+        btnVillaDiamond = findViewById(R.id.btnVillaDiamond);
 
         cardVillaDiamond.setOnClickListener(v -> {
+            Intent intent  = new Intent(UnitViewActivity.this, DetailUnitVillaDiamondActivity.class);
+            startActivity(intent);
+        });
+
+        btnVillaDiamond.setOnClickListener(v -> {
             Intent intent  = new Intent(UnitViewActivity.this, DetailUnitVillaDiamondActivity.class);
             startActivity(intent);
         });
