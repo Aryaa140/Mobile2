@@ -12,7 +12,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "login.db";
-    private static final int DATABASE_VERSION = 11; // Tingkatkan versi database
+    private static final int DATABASE_VERSION = 12; // Tingkatkan versi database
 
     // tabel prospek
     public static final String TABLE_PROSPEK = "prospek";
@@ -24,16 +24,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_REFERENSI = "referensi";
     public static final String COLUMN_PENGINPUT = "penginput";
     public static final String COLUMN_TANGGAL_BUAT = "tanggal_buat";
-
+    public static final String COLUMN_STATUS_NPWP = "status_npwp";
+    public static final String COLUMN_STATUS_BPJS = "status_bpjs";
 
     private static final String CREATE_TABLE_PROSPEK = "CREATE TABLE " + TABLE_PROSPEK + "("
             + COLUMN_PROSPEK_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-            + COLUMN_PENGINPUT + " TEXT NOT NULL," // TAMBAHAN BARU
+            + COLUMN_PENGINPUT + " TEXT NOT NULL,"
             + COLUMN_NAMA + " TEXT NOT NULL,"
             + COLUMN_EMAIL + " TEXT,"
             + COLUMN_NO_HP + " TEXT,"
             + COLUMN_ALAMAT + " TEXT,"
             + COLUMN_REFERENSI + " TEXT,"
+            + COLUMN_STATUS_NPWP + " TEXT DEFAULT 'Tidak Ada'," // TAMBAHAN: Status NPWP
+            + COLUMN_STATUS_BPJS + " TEXT DEFAULT 'Tidak Ada'," // TAMBAHAN: Status BPJS
             + COLUMN_TANGGAL_BUAT + " DATETIME DEFAULT CURRENT_TIMESTAMP" + ")";
 
     // tabel users
@@ -202,6 +205,11 @@ public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
         }
         if (oldVersion < 11) {
             db.execSQL(CREATE_TABLE_PEMOHON);
+        }
+        if (oldVersion < 12) {
+            // Upgrade untuk menambahkan kolom status_npwp dan status_bpjs
+            db.execSQL("ALTER TABLE " + TABLE_PROSPEK + " ADD COLUMN " + COLUMN_STATUS_NPWP + " TEXT DEFAULT 'Tidak Ada'");
+            db.execSQL("ALTER TABLE " + TABLE_PROSPEK + " ADD COLUMN " + COLUMN_STATUS_BPJS + " TEXT DEFAULT 'Tidak Ada'");
         }
         Log.d("DatabaseHelper", "Database upgraded from version " + oldVersion + " to " + newVersion);
     }
@@ -381,20 +389,28 @@ public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
 
     // ======== PROSPEK METHODS ========
 
-    public long addProspek(String penginput, String nama, String email, String noHp, String alamat, String referensi) {
+    public long addProspek(String penginput, String nama, String email, String noHp,
+                           String alamat, String referensi, String statusNpwp, String statusBpjs) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_PENGINPUT, penginput); // TAMBAHAN
+        values.put(COLUMN_PENGINPUT, penginput);
         values.put(COLUMN_NAMA, nama);
         values.put(COLUMN_EMAIL, email);
         values.put(COLUMN_NO_HP, noHp);
         values.put(COLUMN_ALAMAT, alamat);
         values.put(COLUMN_REFERENSI, referensi);
-        // COLUMN_TANGGAL_BUAT otomatis terisi karena DEFAULT CURRENT_TIMESTAMP
+        values.put(COLUMN_STATUS_NPWP, statusNpwp); // TAMBAHAN
+        values.put(COLUMN_STATUS_BPJS, statusBpjs); // TAMBAHAN
 
         long result = db.insert(TABLE_PROSPEK, null, values);
         db.close();
         return result;
+    }
+
+    // Overload method untuk backward compatibility
+    public long addProspek(String penginput, String nama, String email, String noHp,
+                           String alamat, String referensi) {
+        return addProspek(penginput, nama, email, noHp, alamat, referensi, "Tidak Ada", "Tidak Ada");
     }
 
     public List<Prospek> getAllProspek() {
@@ -421,6 +437,8 @@ public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
                                 cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NO_HP)),
                                 cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ALAMAT)),
                                 cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_BUAT)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_BPJS)), // TAMBAHAN
                                 cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_BUAT))
                         );
                         prospekList.add(prospek);
@@ -441,10 +459,21 @@ public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
         return prospekList;
     }
 
+    // Modifikasi method getProspekById untuk include kolom baru
     public Prospek getProspekById(int prospekId) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String[] columns = {COLUMN_PROSPEK_ID, COLUMN_PENGINPUT, COLUMN_NAMA, COLUMN_EMAIL,
-                COLUMN_NO_HP, COLUMN_ALAMAT, COLUMN_REFERENSI, COLUMN_TANGGAL_BUAT};
+        String[] columns = {
+                COLUMN_PROSPEK_ID,
+                COLUMN_PENGINPUT,
+                COLUMN_NAMA,
+                COLUMN_EMAIL,
+                COLUMN_NO_HP,
+                COLUMN_ALAMAT,
+                COLUMN_REFERENSI,
+                COLUMN_STATUS_NPWP, // TAMBAHAN
+                COLUMN_STATUS_BPJS, // TAMBAHAN
+                COLUMN_TANGGAL_BUAT
+        };
         String selection = COLUMN_PROSPEK_ID + " = ?";
         String[] selectionArgs = {String.valueOf(prospekId)};
 
@@ -454,13 +483,15 @@ public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
         if (cursor != null && cursor.moveToFirst()) {
             prospek = new Prospek(
                     cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PROSPEK_ID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PENGINPUT)), // TAMBAHAN
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PENGINPUT)),
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA)),
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)),
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NO_HP)),
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ALAMAT)),
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_BUAT)) // TAMBAHAN
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_NPWP)), // TAMBAHAN
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_BPJS)), // TAMBAHAN
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_BUAT))
             );
             cursor.close();
         }
@@ -468,23 +499,32 @@ public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
         db.close();
         return prospek;
     }
-
+    // Ganti method updateProspek dengan parameter tambahan
     public int updateProspek(int prospekId, String penginput, String nama, String email,
-                             String noHp, String alamat, String referensi) {
+                             String noHp, String alamat, String referensi,
+                             String statusNpwp, String statusBpjs) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_PENGINPUT, penginput); // TAMBAHAN
+        values.put(COLUMN_PENGINPUT, penginput);
         values.put(COLUMN_NAMA, nama);
         values.put(COLUMN_EMAIL, email);
         values.put(COLUMN_NO_HP, noHp);
         values.put(COLUMN_ALAMAT, alamat);
         values.put(COLUMN_REFERENSI, referensi);
+        values.put(COLUMN_STATUS_NPWP, statusNpwp); // TAMBAHAN
+        values.put(COLUMN_STATUS_BPJS, statusBpjs); // TAMBAHAN
 
         String selection = COLUMN_PROSPEK_ID + " = ?";
         String[] selectionArgs = {String.valueOf(prospekId)};
         int result = db.update(TABLE_PROSPEK, values, selection, selectionArgs);
         db.close();
         return result;
+    }
+
+    // Overload method untuk backward compatibility
+    public int updateProspek(int prospekId, String penginput, String nama, String email,
+                             String noHp, String alamat, String referensi) {
+        return updateProspek(prospekId, penginput, nama, email, noHp, alamat, referensi, "Tidak Ada", "Tidak Ada");
     }
 
     public int deleteProspek(int prospekId) {
@@ -623,10 +663,21 @@ public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
         return userProspekList;
     }
 
+    // Modifikasi method getProspekByNama untuk include kolom baru
     public Prospek getProspekByNama(String nama) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String[] columns = {COLUMN_PROSPEK_ID, COLUMN_PENGINPUT, COLUMN_NAMA, COLUMN_EMAIL,
-                COLUMN_NO_HP, COLUMN_ALAMAT, COLUMN_REFERENSI, COLUMN_TANGGAL_BUAT};
+        String[] columns = {
+                COLUMN_PROSPEK_ID,
+                COLUMN_PENGINPUT,
+                COLUMN_NAMA,
+                COLUMN_EMAIL,
+                COLUMN_NO_HP,
+                COLUMN_ALAMAT,
+                COLUMN_REFERENSI,
+                COLUMN_STATUS_NPWP, // TAMBAHAN
+                COLUMN_STATUS_BPJS, // TAMBAHAN
+                COLUMN_TANGGAL_BUAT
+        };
         String selection = COLUMN_NAMA + " = ?";
         String[] selectionArgs = {nama};
 
@@ -642,6 +693,8 @@ public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NO_HP)),
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ALAMAT)),
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_NPWP)), // TAMBAHAN
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_BPJS)), // TAMBAHAN
                     cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_BUAT))
             );
             cursor.close();
@@ -758,10 +811,29 @@ public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
                 " ORDER BY " + COLUMN_TANGGAL_BUAT + " DESC";
         Cursor cursor = db.rawQuery(query, new String[]{"%" + nama + "%"});
 
-        // Process cursor and populate list
-        // ...
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                try {
+                    Prospek prospek = new Prospek(
+                            cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PROSPEK_ID)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PENGINPUT)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NO_HP)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ALAMAT)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_NPWP)), // TAMBAHAN
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_BPJS)), // TAMBAHAN
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_BUAT))
+                    );
+                    prospekList.add(prospek);
+                } catch (Exception e) {
+                    Log.e("DatabaseHelper", "Error parsing data: " + e.getMessage());
+                }
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
 
-        cursor.close();
         db.close();
         return prospekList;
     }

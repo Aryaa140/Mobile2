@@ -48,6 +48,7 @@ public class LihatDataActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+
         bottomNavigationView.setSelectedItemId(R.id.nav_folder);
 
         bottomNavigationView.setOnItemSelectedListener(item -> {

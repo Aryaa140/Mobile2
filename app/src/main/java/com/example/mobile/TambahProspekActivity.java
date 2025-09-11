@@ -21,7 +21,7 @@ public class TambahProspekActivity extends AppCompatActivity {
     Button Simpan, Batal;
     MaterialToolbar TopAppBar;
     private EditText editTextPenginput, editTextNama, editTextEmail, editTextNoHp, editTextAlamat;
-    private Spinner spinnerReferensi;
+    private Spinner spinnerReferensi, spinnerNPWP, spinnerBPJS; // TAMBAHAN: Spinner untuk NPWP dan BPJS
     private Button btnSimpan, btnBatal;
     private DatabaseHelper databaseHelper;
 
@@ -55,17 +55,20 @@ public class TambahProspekActivity extends AppCompatActivity {
 
         databaseHelper = new DatabaseHelper(this);
 
+        // Inisialisasi view
         editTextPenginput = findViewById(R.id.editTextProspek);
         editTextNama = findViewById(R.id.editTextNama);
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextNoHp = findViewById(R.id.editTextNoHp);
         editTextAlamat = findViewById(R.id.editTextAlamat);
         spinnerReferensi = findViewById(R.id.spinnerRole);
+        spinnerNPWP = findViewById(R.id.spinnerNPWP); // TAMBAHAN: Inisialisasi spinner NPWP
+        spinnerBPJS = findViewById(R.id.spinnerBPJS); // TAMBAHAN: Inisialisasi spinner BPJS
 
         btnSimpan = findViewById(R.id.btnSimpan);
         btnBatal = findViewById(R.id.btnBatal);
 
-        // Setup listeners - LANGSUNG di onCreate
+        // Setup listeners
         btnSimpan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -82,6 +85,8 @@ public class TambahProspekActivity extends AppCompatActivity {
         String noHp = editTextNoHp.getText().toString().trim();
         String alamat = editTextAlamat.getText().toString().trim();
         String referensi = spinnerReferensi.getSelectedItem().toString();
+        String statusNpwp = spinnerNPWP.getSelectedItem().toString(); // TAMBAHAN: Ambil status NPWP
+        String statusBpjs = spinnerBPJS.getSelectedItem().toString(); // TAMBAHAN: Ambil status BPJS
 
         // Validasi input
         if (penginput.isEmpty()) {
@@ -115,7 +120,7 @@ public class TambahProspekActivity extends AppCompatActivity {
             return;
         }
 
-        // Validasi duplikasi data
+        // Validasi duplikasi data - TIDAK DIUBAH (SUDAH BENAR)
         if (databaseHelper.isProspekExists(nama, noHp)) {
             // Cek apakah duplikat nama atau nomor HP
             if (databaseHelper.isProspekExistsByName(nama)) {
@@ -128,8 +133,8 @@ public class TambahProspekActivity extends AppCompatActivity {
             return;
         }
 
-        // Simpan data ke database
-        long result = databaseHelper.addProspek(penginput, nama, email, noHp, alamat, referensi);
+        // Simpan data ke database dengan parameter baru
+        long result = databaseHelper.addProspek(penginput, nama, email, noHp, alamat, referensi, statusNpwp, statusBpjs);
 
         if (result != -1) {
             Toast.makeText(this, "Data prospek berhasil disimpan", Toast.LENGTH_SHORT).show();
@@ -145,12 +150,14 @@ public class TambahProspekActivity extends AppCompatActivity {
     }
 
     private void clearForm() {
-        editTextPenginput.setText(""); // TAMBAHAN
+        editTextPenginput.setText("");
         editTextNama.setText("");
         editTextEmail.setText("");
         editTextNoHp.setText("");
         editTextAlamat.setText("");
         spinnerReferensi.setSelection(0); // Reset ke pilihan pertama
+        spinnerNPWP.setSelection(0); // TAMBAHAN: Reset spinner NPWP
+        spinnerBPJS.setSelection(0); // TAMBAHAN: Reset spinner BPJS
     }
 
     @Override

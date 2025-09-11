@@ -8,6 +8,8 @@ public class Prospek {
     private String noHp;
     private String alamat;
     private String referensi;
+    private String statusNpwp; // TAMBAHAN
+    private String statusBpjs; // TAMBAHAN
     private String tanggalBuat;
 
     // Constructor
@@ -15,8 +17,16 @@ public class Prospek {
         // Constructor kosong
     }
 
+    // Constructor lama untuk backward compatibility
     public Prospek(int prospekId, String penginput, String nama, String email,
                    String noHp, String alamat, String referensi, String tanggalBuat) {
+        this(prospekId, penginput, nama, email, noHp, alamat, referensi, "Tidak Ada", "Tidak Ada", tanggalBuat);
+    }
+
+    // Constructor baru dengan status NPWP dan BPJS
+    public Prospek(int prospekId, String penginput, String nama, String email,
+                   String noHp, String alamat, String referensi,
+                   String statusNpwp, String statusBpjs, String tanggalBuat) {
         this.prospekId = prospekId;
         this.penginput = penginput;
         this.nama = nama;
@@ -24,6 +34,8 @@ public class Prospek {
         this.noHp = noHp;
         this.alamat = alamat;
         this.referensi = referensi;
+        this.statusNpwp = statusNpwp;
+        this.statusBpjs = statusBpjs;
         this.tanggalBuat = tanggalBuat;
     }
 
@@ -48,6 +60,12 @@ public class Prospek {
 
     public String getReferensi() { return referensi; }
     public void setReferensi(String referensi) { this.referensi = referensi; }
+
+    public String getStatusNpwp() { return statusNpwp; } // TAMBAHAN
+    public void setStatusNpwp(String statusNpwp) { this.statusNpwp = statusNpwp; } // TAMBAHAN
+
+    public String getStatusBpjs() { return statusBpjs; } // TAMBAHAN
+    public void setStatusBpjs(String statusBpjs) { this.statusBpjs = statusBpjs; } // TAMBAHAN
 
     public String getTanggalBuat() { return tanggalBuat; }
     public void setTanggalBuat(String tanggalBuat) { this.tanggalBuat = tanggalBuat; }
