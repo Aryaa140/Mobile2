@@ -17,6 +17,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -26,6 +27,7 @@ public class TambahProspekActivity extends AppCompatActivity {
 
     Button Simpan, Batal;
     MaterialToolbar TopAppBar;
+    BottomNavigationView bottomNavigationView;
     private EditText editTextPenginput, editTextNama, editTextEmail, editTextNoHp, editTextAlamat;
     private Spinner spinnerReferensi, spinnerNPWP, spinnerBPJS;
     private Button btnSimpan, btnBatal;
@@ -46,6 +48,7 @@ public class TambahProspekActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
         TopAppBar = findViewById(R.id.topAppBar);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
         Simpan = findViewById(R.id.btnSimpan);
         Batal = findViewById(R.id.btnBatal);
 
@@ -59,6 +62,29 @@ public class TambahProspekActivity extends AppCompatActivity {
             Intent intent = new Intent(TambahProspekActivity.this, BerandaActivity.class);
             startActivity(intent);
             finish();
+        });
+
+        bottomNavigationView.setSelectedItemId(R.id.nav_home);
+
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.nav_home) {
+                return true;
+            } else if (id == R.id.nav_folder) {
+                startActivity(new Intent(this, LihatDataActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_news) {
+                startActivity(new Intent(this, NewsActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            }
+            return false;
         });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
