@@ -2,6 +2,7 @@ package com.example.mobile;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +17,9 @@ public class UnitRiversideActivity extends AppCompatActivity {
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
 
+    LinearLayout cardClusterA, cardClusterB, cardCamelia, cardOrchid, cardIrish,
+            cardNeoGladial, cardLily, cardRaflesia, cardRukoTulip;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,6 +29,44 @@ public class UnitRiversideActivity extends AppCompatActivity {
         TopAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.nav_folder);
+
+        cardClusterA = findViewById(R.id.cardClusterA);
+        cardClusterB = findViewById(R.id.cardClusterB);
+        cardCamelia = findViewById(R.id.cardCamelia);
+        cardOrchid = findViewById(R.id.cardOrchid);
+        cardIrish = findViewById(R.id.cardIrish);
+        cardNeoGladial = findViewById(R.id.cardNeoGladial);
+        cardLily = findViewById(R.id.cardLily);
+        cardRaflesia = findViewById(R.id.cardRaflesia);
+        cardRukoTulip = findViewById(R.id.cardRukoTulip);
+
+        cardClusterA.setOnClickListener(v -> {
+            Intent intent = new Intent(UnitRiversideActivity.this, DetailUnitClusterHerittageAActivity.class);
+        });
+        cardClusterB.setOnClickListener(v -> {
+            Intent intent = new Intent(UnitRiversideActivity.this, DetailUnitClusterHerittageBActivity.class);
+        });
+        cardCamelia.setOnClickListener(v -> {
+            Intent intent = new Intent(UnitRiversideActivity.this, DetailUnitCameliaActivity.class);
+        });
+        cardOrchid.setOnClickListener(v -> {
+            Intent intent = new Intent(UnitRiversideActivity.this, DetailUnitOrchidActivity.class);
+        });
+        cardIrish.setOnClickListener(v -> {
+            Intent intent = new Intent(UnitRiversideActivity.this, DetailUnitIrishActivity.class);
+        });
+        cardNeoGladial.setOnClickListener(v -> {
+            Intent intent = new Intent(UnitRiversideActivity.this, DetailUnitNeoGladiolActivity.class);
+        });
+        cardLily.setOnClickListener(v -> {
+            Intent intent = new Intent(UnitRiversideActivity.this, DetailUnitLilyActivity.class);
+        });
+        cardRaflesia.setOnClickListener(v -> {
+            Intent intent = new Intent(UnitRiversideActivity.this, DetailUnitRaffflesiaActivity.class);
+        });
+        cardRukoTulip.setOnClickListener(v -> {
+            Intent intent = new Intent(UnitRiversideActivity.this, DetailUnitRukoTulipActivity.class);
+        });
 
         TopAppBar.setNavigationOnClickListener(v -> {
             Intent intent = new Intent(UnitRiversideActivity.this, DetailProyekRiversideActivity.class);

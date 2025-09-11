@@ -61,7 +61,7 @@
                         android:layout_height="200dp"
                         android:scaleType="centerCrop"
                         android:adjustViewBounds="true"
-                        android:src="@drawable/ruko_tulip"
+                        android:src="@drawable/villa_diamond"
                         android:contentDescription="Gambar Proyek" />
 
                     <TextView
@@ -69,7 +69,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="RUKO TULIP"
+                        android:text="VILLA DIAMOND"
                         android:textStyle="bold"
                         android:textColor="@android:color/black"
                         android:textSize="18sp"
@@ -80,7 +80,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="The Quality Riverside Krian Sidoarjo"
+                        android:text="The Quality View Batu Malang"
                         android:textColor="@color/teal_700"
                         android:textStyle="bold"
                         android:padding="6dp"
@@ -109,7 +109,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Luas Tanah: 60 m²"
+                                android:text="Luas Tanah: 124 m²"
                                 android:textColor="@android:color/black"
                                 android:layout_marginStart="8dp"/>
                         </LinearLayout>
@@ -129,7 +129,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Kamar Tidur: -"
+                                android:text="Kamar Tidur: 2"
                                 android:textColor="@android:color/black"
                                 android:layout_marginStart="8dp"/>
                         </LinearLayout>
@@ -150,7 +150,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Luas Bangunan: 80 m²"
+                                android:text="Luas Bangunan: 69 m²"
                                 android:textColor="@android:color/black"
                                 android:layout_marginStart="8dp"/>
                         </LinearLayout>
@@ -171,7 +171,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Kamar Mandi: 1"
+                                android:text="Kamar Mandi: 2"
                                 android:textColor="@android:color/black"
                                 android:layout_marginStart="8dp"/>
                         </LinearLayout>
@@ -181,57 +181,21 @@
                         android:id="@+id/txtDeskripsi"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Ruko Tulip adalah Ruko Dua Lantai di Perumahan The Quality Riverside Krian Sidoarjo, Berlokasi strategis di Krian Kota Jl.Raya Kemasan Krian, terletak di depan fasum waterpark Quality dan masjid al barokah masjid kedua persembahan dari The Quality Group, sudah dipastikan menjadi tempat titik kumpul dan keramaian di Perumahan The Quality Riverside Krian Sidoarjo dengan luas tanah 60, luas bangunan 80."
+                        android:text="Villa Mewah Berkonsep Modern Minimalis di Pusat kota Batu Malang dengan Luas Tanah 124 dan Luas Bangunan 69. Dekat dengan kantor DPRD kota Batu , Polres batu dan SMAN 2 Batu. Hanya 5 menit saja ke Jatim Park 2, Jatim park 3, dan BNS ( Batu Night Spectacular )"
                         android:textColor="@android:color/black"
                         android:paddingTop="12dp"/>
 
-                    <TextView
-                        android:id="@+id/txtDeskripsi2"
+                    <Button
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Segera miliki Ruko Dua lantai di Perumahan The Quality Riverside Krian ini karena unitnya Sangat Terbatas."
-                        android:textColor="@android:color/black"
-                        android:paddingTop="12dp"/>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardGallery"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="6dp"
-                android:background="@android:color/white">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="200dp"
-                        android:src="@drawable/rukotulipdetail"
-                        android:contentDescription="Foto Tambahan"/>
-
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnLihatKavling"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Lihat Kavling"
-                        android:textColor="@android:color/black"
-                        android:backgroundTint="@android:color/white"
-                        app:cornerRadius="50dp"
-                        app:icon="@drawable/ic_arrow_right"
-                        app:iconGravity="textEnd"
-                        app:iconTint="@android:color/black"
+                        android:layout_weight="1"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginLeft="200dp"
+                        android:layout_marginRight="20dp"
+                        android:text="SOLD OUT"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_marginTop="12dp"
-                        android:layout_marginLeft="180dp"
-                        android:layout_marginRight="5dp"/>
+                        android:textColor="@android:color/white"
+                        android:backgroundTint="#B71C1C"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

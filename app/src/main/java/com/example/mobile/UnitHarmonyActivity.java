@@ -2,6 +2,7 @@ package com.example.mobile;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,6 +16,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 public class UnitHarmonyActivity extends AppCompatActivity {
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
+    LinearLayout cardOsaka, cardNarita, cardYokohama;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +27,22 @@ public class UnitHarmonyActivity extends AppCompatActivity {
         TopAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.nav_folder);
+
+        cardOsaka = findViewById(R.id.cardOsaka);
+        cardNarita = findViewById(R.id.cardNarita);
+        cardYokohama = findViewById(R.id.cardYokohama);
+
+        cardOsaka.setOnClickListener(v -> {
+            Intent intent = new Intent(UnitHarmonyActivity.this, DetailUnitOsakaActivity.class);
+        });
+
+        cardNarita.setOnClickListener(v -> {
+            Intent intent = new Intent(UnitHarmonyActivity.this, DetailUnitNaritaActivity.class);
+        });
+
+        cardYokohama.setOnClickListener(v -> {
+            Intent intent = new Intent(UnitHarmonyActivity.this, DetailUnitYokohamaActivity.class);
+        });
 
         TopAppBar.setNavigationOnClickListener(v -> {
             Intent intent = new Intent(UnitHarmonyActivity.this, DetailProyekHarmonyActivity.class);

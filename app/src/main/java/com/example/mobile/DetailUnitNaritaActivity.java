@@ -2,7 +2,6 @@ package com.example.mobile;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,29 +12,21 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class UnitViewActivity extends AppCompatActivity {
+public class DetailUnitNaritaActivity extends AppCompatActivity {
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
-    LinearLayout cardVillaDiamond;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_unit_view);
+        setContentView(R.layout.activity_detail_unit_narita);
 
         TopAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.nav_folder);
 
-        cardVillaDiamond = findViewById(R.id.cardVillaDiamond);
-
-        cardVillaDiamond.setOnClickListener(v -> {
-            Intent intent  = new Intent(UnitViewActivity.this, DetailUnitVillaDiamondActivity.class);
-        });
-
         TopAppBar.setNavigationOnClickListener(v -> {
-            Intent intent = new Intent(UnitViewActivity.this, DetailProyekViewActivity.class);
+            Intent intent = new Intent(DetailUnitNaritaActivity.this, UnitHarmonyActivity.class);
             startActivity(intent);
             finish();
         });

@@ -2,7 +2,6 @@ package com.example.mobile;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,29 +12,20 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class UnitViewActivity extends AppCompatActivity {
+public class DetailUnitYokohamaActivity extends AppCompatActivity {
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
-    LinearLayout cardVillaDiamond;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_unit_view);
 
         TopAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.nav_folder);
 
-        cardVillaDiamond = findViewById(R.id.cardVillaDiamond);
-
-        cardVillaDiamond.setOnClickListener(v -> {
-            Intent intent  = new Intent(UnitViewActivity.this, DetailUnitVillaDiamondActivity.class);
-        });
-
         TopAppBar.setNavigationOnClickListener(v -> {
-            Intent intent = new Intent(UnitViewActivity.this, DetailProyekViewActivity.class);
+            Intent intent = new Intent(DetailUnitYokohamaActivity.this, UnitHarmonyActivity.class);
             startActivity(intent);
             finish();
         });
@@ -57,6 +47,7 @@ public class UnitViewActivity extends AppCompatActivity {
             return false;
         });
 
+        setContentView(R.layout.activity_detail_unit_yokohama);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);

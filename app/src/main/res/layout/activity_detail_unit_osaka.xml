@@ -61,7 +61,7 @@
                         android:layout_height="200dp"
                         android:scaleType="centerCrop"
                         android:adjustViewBounds="true"
-                        android:src="@drawable/ruko_tulip"
+                        android:src="@drawable/osaka"
                         android:contentDescription="Gambar Proyek" />
 
                     <TextView
@@ -69,7 +69,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="RUKO TULIP"
+                        android:text="OSAKA"
                         android:textStyle="bold"
                         android:textColor="@android:color/black"
                         android:textSize="18sp"
@@ -80,7 +80,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="The Quality Riverside Krian Sidoarjo"
+                        android:text="The Quality Harmony Krian Sidoarjo"
                         android:textColor="@color/teal_700"
                         android:textStyle="bold"
                         android:padding="6dp"
@@ -109,7 +109,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Luas Tanah: 60 m²"
+                                android:text="Luas Tanah: 90 m²"
                                 android:textColor="@android:color/black"
                                 android:layout_marginStart="8dp"/>
                         </LinearLayout>
@@ -129,7 +129,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Kamar Tidur: -"
+                                android:text="Kamar Tidur: 2"
                                 android:textColor="@android:color/black"
                                 android:layout_marginStart="8dp"/>
                         </LinearLayout>
@@ -150,7 +150,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Luas Bangunan: 80 m²"
+                                android:text="Luas Bangunan: 42 m²"
                                 android:textColor="@android:color/black"
                                 android:layout_marginStart="8dp"/>
                         </LinearLayout>
@@ -181,17 +181,10 @@
                         android:id="@+id/txtDeskripsi"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Ruko Tulip adalah Ruko Dua Lantai di Perumahan The Quality Riverside Krian Sidoarjo, Berlokasi strategis di Krian Kota Jl.Raya Kemasan Krian, terletak di depan fasum waterpark Quality dan masjid al barokah masjid kedua persembahan dari The Quality Group, sudah dipastikan menjadi tempat titik kumpul dan keramaian di Perumahan The Quality Riverside Krian Sidoarjo dengan luas tanah 60, luas bangunan 80."
+                        android:text="Hunian berkonsep jepang minmalis dengan luas tanah 90, luas bangunan 42, Menggunakan atap bahan galvalum serta kusen aluminium, akses jalan lebar, One gate system, Scurity dan cctv 24 jam."
                         android:textColor="@android:color/black"
                         android:paddingTop="12dp"/>
 
-                    <TextView
-                        android:id="@+id/txtDeskripsi2"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Segera miliki Ruko Dua lantai di Perumahan The Quality Riverside Krian ini karena unitnya Sangat Terbatas."
-                        android:textColor="@android:color/black"
-                        android:paddingTop="12dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -213,9 +206,8 @@
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="200dp"
-                        android:src="@drawable/rukotulipdetail"
+                        android:src="@drawable/detailosaka"
                         android:contentDescription="Foto Tambahan"/>
-
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnLihatKavling"
