@@ -32,6 +32,7 @@ public class UnitViewActivity extends AppCompatActivity {
 
         cardVillaDiamond.setOnClickListener(v -> {
             Intent intent  = new Intent(UnitViewActivity.this, DetailUnitVillaDiamondActivity.class);
+            startActivity(intent);
         });
 
         TopAppBar.setNavigationOnClickListener(v -> {

@@ -34,14 +34,17 @@ public class UnitHarmonyActivity extends AppCompatActivity {
 
         cardOsaka.setOnClickListener(v -> {
             Intent intent = new Intent(UnitHarmonyActivity.this, DetailUnitOsakaActivity.class);
+            startActivity(intent);
         });
 
         cardNarita.setOnClickListener(v -> {
             Intent intent = new Intent(UnitHarmonyActivity.this, DetailUnitNaritaActivity.class);
+            startActivity(intent);
         });
 
         cardYokohama.setOnClickListener(v -> {
             Intent intent = new Intent(UnitHarmonyActivity.this, DetailUnitYokohamaActivity.class);
+            startActivity(intent);
         });
 
         TopAppBar.setNavigationOnClickListener(v -> {
