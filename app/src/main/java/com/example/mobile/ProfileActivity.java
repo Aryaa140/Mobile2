@@ -1,7 +1,9 @@
 package com.example.mobile;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,12 +17,20 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 public class ProfileActivity extends AppCompatActivity {
     BottomNavigationView bottomNavigationView;
     CardView cardEditProfil, cardGantiPW, cardHapusAkun, cardLogout;
+    private SharedPreferences sharedPreferences;
+
+    // Keys untuk SharedPreferences
+    private static final String PREFS_NAME = "LoginPrefs";
+    private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile);
+
+        // Inisialisasi SharedPreferences
+        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         cardLogout = findViewById(R.id.card_logout);
@@ -32,28 +42,29 @@ public class ProfileActivity extends AppCompatActivity {
 
         cardEditProfil.setOnClickListener(v -> {
             Intent intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
-            finish();
         });
 
         cardGantiPW.setOnClickListener(v -> {
             Intent intent = new Intent(ProfileActivity.this, GantiPasswordActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
-            finish();
         });
 
         cardHapusAkun.setOnClickListener(v -> {
             Intent intent = new Intent(ProfileActivity.this, HapusAkunActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
-            finish();
         });
 
         cardLogout.setOnClickListener(v -> {
+            // Hapus status login dari SharedPreferences
+            logout();
+
+            // Tampilkan pesan logout berhasil
+            Toast.makeText(ProfileActivity.this, "Logout berhasil", Toast.LENGTH_SHORT).show();
+
+            // Redirect ke MainActivity
             Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
         });
@@ -75,12 +86,40 @@ public class ProfileActivity extends AppCompatActivity {
             return false;
         });
 
-
-
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    // Method untuk logout
+    private void logout() {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(KEY_IS_LOGGED_IN);
+        editor.remove("username");
+        editor.remove("division");
+        editor.remove("nip");
+        editor.apply();
+    }
+
+    // Method untuk mendapatkan data user yang login
+    public DatabaseHelper.User getLoggedInUser() {
+        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+
+        String username = sharedPreferences.getString("username", "");
+        String division = sharedPreferences.getString("division", "");
+        String nip = sharedPreferences.getString("nip", "");
+
+        if (username.isEmpty()) {
+            return null; // User belum login
+        }
+
+        DatabaseHelper.User user = new DatabaseHelper.User();
+        user.setUsername(username);
+        user.setDivision(division);
+        user.setNip(nip);
+
+        return user;
     }
 }
