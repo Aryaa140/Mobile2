@@ -2,7 +2,7 @@ package com.example.mobile;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,9 +15,9 @@ import com.google.android.material.card.MaterialCardView;
 
 public class BerandaActivity extends AppCompatActivity {
 
-    Button button2, button3, button4, button5, button6, button7;
-    BottomNavigationView bottomNavigationView;
     MaterialCardView cardWelcome, cardProspekM, cardLihatDataM, cardFasilitasM, cardProyekM, cardUserpM;
+    BottomNavigationView bottomNavigationView;
+    TextView tvUserName; // TextView untuk menampilkan username
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,41 +25,49 @@ public class BerandaActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_beranda);
 
+        // Inisialisasi view
         cardWelcome = findViewById(R.id.cardWelcome);
         cardProspekM = findViewById(R.id.cardProspekM);
         cardLihatDataM = findViewById(R.id.cardLihatDataM);
         cardFasilitasM = findViewById(R.id.cardFasilitasM);
         cardProyekM = findViewById(R.id.cardProyekM);
         cardUserpM = findViewById(R.id.cardUserpM);
-
+        tvUserName = findViewById(R.id.tvUserName); // Inisialisasi TextView username
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
+        // TAMPILKAN USERNAME - TANPA MENGUBAH INTENT YANG SUDAH ADA
+        // Ambil data username dari Intent
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("USERNAME")) {
+            String username = intent.getStringExtra("USERNAME");
+            tvUserName.setText(username); // Set text username
+        }
+
+        // JANGAN UBAH INTENT YANG SUDAH ADA - biarkan seperti semula
         cardWelcome.setOnClickListener(v -> {
-            Intent intent = new Intent(BerandaActivity.this, ProfileActivity.class);
-            startActivity(intent);
+            Intent profileIntent = new Intent(BerandaActivity.this, ProfileActivity.class);
+            startActivity(profileIntent);
         });
         cardProspekM.setOnClickListener(v -> {
-            Intent intent = new Intent(BerandaActivity.this, TambahProspekActivity.class);
-            startActivity(intent);
+            Intent intentProspek = new Intent(BerandaActivity.this, TambahProspekActivity.class);
+            startActivity(intentProspek);
         });
         cardLihatDataM.setOnClickListener(v -> {
-            Intent intent = new Intent(BerandaActivity.this, LihatDataActivity.class);
-            startActivity(intent);
+            Intent intentLihatData = new Intent(BerandaActivity.this, LihatDataActivity.class);
+            startActivity(intentLihatData);
         });
         cardFasilitasM.setOnClickListener(v -> {
-            Intent intent = new Intent(BerandaActivity.this, FasilitasActivity.class);
-            startActivity(intent);
+            Intent intentFasilitas = new Intent(BerandaActivity.this, FasilitasActivity.class);
+            startActivity(intentFasilitas);
         });
         cardProyekM.setOnClickListener(v -> {
-            Intent intent = new Intent(BerandaActivity.this, ProyekActivity.class);
-            startActivity(intent);
+            Intent intentProyek = new Intent(BerandaActivity.this, ProyekActivity.class);
+            startActivity(intentProyek);
         });
         cardUserpM.setOnClickListener(v -> {
-            Intent intent = new Intent(BerandaActivity.this, TambahUserpActivity.class);
-            startActivity(intent);
+            Intent intentUserp = new Intent(BerandaActivity.this, TambahUserpActivity.class);
+            startActivity(intentUserp);
         });
-
-
 
         bottomNavigationView.setSelectedItemId(R.id.nav_home);
 
