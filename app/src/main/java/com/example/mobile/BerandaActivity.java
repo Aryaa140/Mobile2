@@ -17,8 +17,7 @@ public class BerandaActivity extends AppCompatActivity {
 
     Button button2, button3, button4, button5, button6, button7;
     BottomNavigationView bottomNavigationView;
-    MaterialCardView cardWelcome, cardProspekM, cardLihatDataM, cardFasilitasM, cardProyekM, cardInputDataFasilitasM,
-            cardInputDataProyekM, cardUserpM, cardPemohonM, cardInputDataUnitHunianM;
+    MaterialCardView cardWelcome, cardProspekM, cardLihatDataM, cardFasilitasM, cardProyekM, cardUserpM;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,11 +30,7 @@ public class BerandaActivity extends AppCompatActivity {
         cardLihatDataM = findViewById(R.id.cardLihatDataM);
         cardFasilitasM = findViewById(R.id.cardFasilitasM);
         cardProyekM = findViewById(R.id.cardProyekM);
-        cardInputDataProyekM = findViewById(R.id.cardInputDataProyekM);
-        cardInputDataUnitHunianM = findViewById(R.id.cardInputDataUnitHunianM);
-        cardInputDataFasilitasM = findViewById(R.id.cardInputDataFasilitasM);
         cardUserpM = findViewById(R.id.cardUserpM);
-        cardPemohonM = findViewById(R.id.cardPemohonM);
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
@@ -61,26 +56,6 @@ public class BerandaActivity extends AppCompatActivity {
         });
         cardUserpM.setOnClickListener(v -> {
             Intent intent = new Intent(BerandaActivity.this, TambahUserpActivity.class);
-            startActivity(intent);
-        });
-        cardPemohonM.setOnClickListener(v -> {
-            Intent intent = new Intent(BerandaActivity.this, TambahPemohonActivity.class);
-            startActivity(intent);
-        });
-        cardInputDataFasilitasM.setOnClickListener(v -> {
-            Intent intent = new Intent(BerandaActivity.this, InputDataFasilitasActivity.class);
-            startActivity(intent);
-        });
-        cardInputDataProyekM.setOnClickListener(v -> {
-            Intent intent = new Intent(BerandaActivity.this, InputDataHunianActivity.class);
-            startActivity(intent);
-        });
-        cardInputDataProyekM.setOnClickListener(v -> {
-            Intent intent = new Intent(BerandaActivity.this, InputDataProyekActivity.class);
-            startActivity(intent);
-        });
-        cardInputDataUnitHunianM.setOnClickListener(v -> {
-            Intent intent = new Intent(BerandaActivity.this, InputDataHunianActivity.class);
             startActivity(intent);
         });
 

@@ -404,42 +404,6 @@
                         <ImageView
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:src="@drawable/ic_userp"
-                            android:contentDescription="Lihat Data"
-                            android:tint="@color/light_blue_500" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="User"
-                            android:textSize="12sp"
-                            android:textColor="@android:color/black"
-                            android:textStyle="bold" />
-
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cardPemohonM"
-                    android:layout_width="90dp"
-                    android:layout_height="85dp"
-                    android:layout_margin="8dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="6dp"
-                    app:strokeWidth="1dp"
-                    app:strokeColor="@color/black">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="8dp">
-
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
                             android:src="@drawable/ic_prospek"
                             android:contentDescription="Lihat Data"
                             android:tint="@color/light_blue_500" />
@@ -448,116 +412,11 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:text="Pemohon"
+                            android:text="Booking"
                             android:textSize="12sp"
                             android:textColor="@android:color/black"
                             android:textStyle="bold" />
 
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cardInputDataProyekM"
-                    android:layout_width="90dp"
-                    android:layout_height="85dp"
-                    android:layout_margin="8dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="6dp"
-                    app:strokeWidth="1dp"
-                    app:strokeColor="@color/black">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="8dp">
-
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:src="@drawable/ic_input"
-                            android:contentDescription="Proyek"
-                            app:tint="@color/light_blue_500" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="Proyek"
-                            android:textSize="12sp"
-                            android:textColor="@android:color/black"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cardInputDataUnitHunianM"
-                    android:layout_width="90dp"
-                    android:layout_height="85dp"
-                    android:layout_margin="8dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="6dp"
-                    app:strokeWidth="1dp"
-                    app:strokeColor="@color/black">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="8dp">
-
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:src="@drawable/ic_hunian"
-                            android:contentDescription="Unit Hunian"
-                            app:tint="@color/light_blue_500" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="Unit Hunian"
-                            android:textSize="12sp"
-                            android:textColor="@android:color/black"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cardInputDataFasilitasM"
-                    android:layout_width="90dp"
-                    android:layout_height="85dp"
-                    android:layout_margin="8dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="6dp"
-                    app:strokeWidth="1dp"
-                    app:strokeColor="@color/black">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="8dp">
-
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:src="@drawable/ic_input"
-                            android:contentDescription="Fasilitas"
-                            app:tint="@color/light_blue_500" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="Fasilitas"
-                            android:textSize="12sp"
-                            android:textColor="@android:color/black"
-                            android:textStyle="bold" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
