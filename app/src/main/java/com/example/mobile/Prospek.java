@@ -1,5 +1,8 @@
 package com.example.mobile;
-
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 public class Prospek {
     private int prospekId;
     private String penginput;
@@ -38,7 +41,64 @@ public class Prospek {
         this.statusBpjs = statusBpjs;
         this.tanggalBuat = tanggalBuat;
     }
+    public String getTanggalBuatFormatted() {
+        if (tanggalBuat == null || tanggalBuat.isEmpty()) {
+            return "-";
+        }
 
+        try {
+            // Format input dari database (YYYY-MM-DD HH:MM:SS)
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            // Format output yang diinginkan (DD/MM/YYYY HH:MM:SS)
+            SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+
+            Date date = inputFormat.parse(tanggalBuat);
+            return outputFormat.format(date);
+        } catch (ParseException e) {
+            // Jika parsing gagal, kembalikan format asli
+            return tanggalBuat;
+        }
+    }
+
+    // Method untuk mendapatkan hanya tanggal (tanpa waktu)
+    public String getTanggalOnly() {
+        if (tanggalBuat == null || tanggalBuat.isEmpty()) {
+            return "-";
+        }
+
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
+            Date date = inputFormat.parse(tanggalBuat);
+            return outputFormat.format(date);
+        } catch (ParseException e) {
+            if (tanggalBuat.contains(" ")) {
+                return tanggalBuat.split(" ")[0]; // Ambil hanya bagian tanggal
+            }
+            return tanggalBuat;
+        }
+    }
+
+    // Method untuk mendapatkan hanya waktu
+    public String getWaktuOnly() {
+        if (tanggalBuat == null || tanggalBuat.isEmpty()) {
+            return "-";
+        }
+
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            SimpleDateFormat outputFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+
+            Date date = inputFormat.parse(tanggalBuat);
+            return outputFormat.format(date);
+        } catch (ParseException e) {
+            if (tanggalBuat.contains(" ")) {
+                return tanggalBuat.split(" ")[1]; // Ambil hanya bagian waktu
+            }
+            return "-";
+        }
+    }
     // Getter dan Setter
     public int getProspekId() { return prospekId; }
     public void setProspekId(int prospekId) { this.prospekId = prospekId; }

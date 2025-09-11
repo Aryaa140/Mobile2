@@ -22,7 +22,7 @@ public class EditDataProspekActivity extends AppCompatActivity {
     BottomNavigationView bottomNavigationView;
 
     private EditText editTextPenginput, editTextNama, editTextEmail, editTextNoHp, editTextAlamat;
-    private Spinner spinnerReferensi;
+    private Spinner spinnerReferensi, spinnerNPWP, spinnerBPJS; // TAMBAHAN: Spinner untuk NPWP dan BPJS
     private Button btnEdit, btnBatal;
     private DatabaseHelper databaseHelper;
     private int prospekId;
@@ -44,6 +44,8 @@ public class EditDataProspekActivity extends AppCompatActivity {
         editTextNoHp = findViewById(R.id.editTextNoHp);
         editTextAlamat = findViewById(R.id.editTextAlamat);
         spinnerReferensi = findViewById(R.id.spinnerRole);
+        spinnerNPWP = findViewById(R.id.spinnerRole2); // TAMBAHAN: Spinner NPWP
+        spinnerBPJS = findViewById(R.id.spinnerRole3); // TAMBAHAN: Spinner BPJS
         btnEdit = findViewById(R.id.btnEdit);
         btnBatal = findViewById(R.id.btnBatal);
 
@@ -123,18 +125,26 @@ public class EditDataProspekActivity extends AppCompatActivity {
             editTextAlamat.setText(prospek.getAlamat());
 
             // Set spinner referensi
-            String referensi = prospek.getReferensi();
-            if (referensi != null && !referensi.isEmpty()) {
-                for (int i = 0; i < spinnerReferensi.getCount(); i++) {
-                    if (spinnerReferensi.getItemAtPosition(i).toString().equals(referensi)) {
-                        spinnerReferensi.setSelection(i);
-                        break;
-                    }
-                }
-            }
+            setSpinnerSelection(spinnerReferensi, prospek.getReferensi());
+
+            // TAMBAHAN: Set spinner NPWP dan BPJS
+            setSpinnerSelection(spinnerNPWP, prospek.getStatusNpwp());
+            setSpinnerSelection(spinnerBPJS, prospek.getStatusBpjs());
         } else {
             Toast.makeText(this, "Gagal memuat data prospek", Toast.LENGTH_SHORT).show();
             finish();
+        }
+    }
+
+    // Method untuk set selection spinner berdasarkan value
+    private void setSpinnerSelection(Spinner spinner, String value) {
+        if (value != null && !value.isEmpty()) {
+            for (int i = 0; i < spinner.getCount(); i++) {
+                if (spinner.getItemAtPosition(i).toString().equals(value)) {
+                    spinner.setSelection(i);
+                    break;
+                }
+            }
         }
     }
 
@@ -146,6 +156,8 @@ public class EditDataProspekActivity extends AppCompatActivity {
         String noHp = editTextNoHp.getText().toString().trim();
         String alamat = editTextAlamat.getText().toString().trim();
         String referensi = spinnerReferensi.getSelectedItem().toString();
+        String statusNpwp = spinnerNPWP.getSelectedItem().toString(); // TAMBAHAN: Status NPWP
+        String statusBpjs = spinnerBPJS.getSelectedItem().toString(); // TAMBAHAN: Status BPJS
 
         // Validasi input
         if (penginput.isEmpty()) {
@@ -157,12 +169,6 @@ public class EditDataProspekActivity extends AppCompatActivity {
         if (nama.isEmpty()) {
             editTextNama.setError("Nama lengkap harus diisi");
             editTextNama.requestFocus();
-            return;
-        }
-
-        if (email.isEmpty()) {
-            editTextEmail.setError("Email harus diisi");
-            editTextEmail.requestFocus();
             return;
         }
 
@@ -185,8 +191,8 @@ public class EditDataProspekActivity extends AppCompatActivity {
             return;
         }
 
-        // Update data ke database
-        int result = databaseHelper.updateProspek(prospekId, penginput, nama, email, noHp, alamat, referensi);
+        // Update data ke database dengan parameter baru
+        int result = databaseHelper.updateProspek(prospekId, penginput, nama, email, noHp, alamat, referensi, statusNpwp, statusBpjs);
 
         if (result > 0) {
             Toast.makeText(this, "Data prospek berhasil diupdate", Toast.LENGTH_SHORT).show();

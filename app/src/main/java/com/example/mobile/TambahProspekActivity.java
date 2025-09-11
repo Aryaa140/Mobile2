@@ -1,7 +1,9 @@
 package com.example.mobile;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,20 +18,32 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class TambahProspekActivity extends AppCompatActivity {
 
     Button Simpan, Batal;
     MaterialToolbar TopAppBar;
     private EditText editTextPenginput, editTextNama, editTextEmail, editTextNoHp, editTextAlamat;
-    private Spinner spinnerReferensi, spinnerNPWP, spinnerBPJS; // TAMBAHAN: Spinner untuk NPWP dan BPJS
+    private Spinner spinnerReferensi, spinnerNPWP, spinnerBPJS;
     private Button btnSimpan, btnBatal;
     private DatabaseHelper databaseHelper;
+    private SharedPreferences sharedPreferences;
+
+    // Keys untuk SharedPreferences
+    private static final String PREFS_NAME = "LoginPrefs";
+    private static final String KEY_USERNAME = "username";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_tambahprospek);
+
+        // Inisialisasi SharedPreferences
+        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
         TopAppBar = findViewById(R.id.topAppBar);
         Simpan = findViewById(R.id.btnSimpan);
@@ -62,11 +76,26 @@ public class TambahProspekActivity extends AppCompatActivity {
         editTextNoHp = findViewById(R.id.editTextNoHp);
         editTextAlamat = findViewById(R.id.editTextAlamat);
         spinnerReferensi = findViewById(R.id.spinnerRole);
-        spinnerNPWP = findViewById(R.id.spinnerNPWP); // TAMBAHAN: Inisialisasi spinner NPWP
-        spinnerBPJS = findViewById(R.id.spinnerBPJS); // TAMBAHAN: Inisialisasi spinner BPJS
+        spinnerNPWP = findViewById(R.id.spinnerNPWP);
+        spinnerBPJS = findViewById(R.id.spinnerBPJS);
 
         btnSimpan = findViewById(R.id.btnSimpan);
         btnBatal = findViewById(R.id.btnBatal);
+
+        // OTOMATIS ISI NAMA PENGINPUT BERDASARKAN USER YANG LOGIN
+        String username = sharedPreferences.getString(KEY_USERNAME, "");
+        if (!TextUtils.isEmpty(username)) {
+            editTextPenginput.setText(username);
+            editTextPenginput.setEnabled(false); // Nonaktifkan edit, karena sudah otomatis terisi
+        } else {
+            // Fallback: Ambil dari intent jika tidak ada di SharedPreferences
+            Intent intent = getIntent();
+            if (intent != null && intent.hasExtra("USERNAME")) {
+                username = intent.getStringExtra("USERNAME");
+                editTextPenginput.setText(username);
+                editTextPenginput.setEnabled(false);
+            }
+        }
 
         // Setup listeners
         btnSimpan.setOnClickListener(new View.OnClickListener() {
@@ -85,8 +114,8 @@ public class TambahProspekActivity extends AppCompatActivity {
         String noHp = editTextNoHp.getText().toString().trim();
         String alamat = editTextAlamat.getText().toString().trim();
         String referensi = spinnerReferensi.getSelectedItem().toString();
-        String statusNpwp = spinnerNPWP.getSelectedItem().toString(); // TAMBAHAN: Ambil status NPWP
-        String statusBpjs = spinnerBPJS.getSelectedItem().toString(); // TAMBAHAN: Ambil status BPJS
+        String statusNpwp = spinnerNPWP.getSelectedItem().toString();
+        String statusBpjs = spinnerBPJS.getSelectedItem().toString();
 
         // Validasi input
         if (penginput.isEmpty()) {
@@ -150,14 +179,14 @@ public class TambahProspekActivity extends AppCompatActivity {
     }
 
     private void clearForm() {
-        editTextPenginput.setText("");
+        // Jangan reset editTextPenginput karena sudah terisi otomatis
         editTextNama.setText("");
         editTextEmail.setText("");
         editTextNoHp.setText("");
         editTextAlamat.setText("");
-        spinnerReferensi.setSelection(0); // Reset ke pilihan pertama
-        spinnerNPWP.setSelection(0); // TAMBAHAN: Reset spinner NPWP
-        spinnerBPJS.setSelection(0); // TAMBAHAN: Reset spinner BPJS
+        spinnerReferensi.setSelection(0);
+        spinnerNPWP.setSelection(0);
+        spinnerBPJS.setSelection(0);
     }
 
     @Override

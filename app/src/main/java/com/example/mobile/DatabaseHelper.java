@@ -9,7 +9,9 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "login.db";
     private static final int DATABASE_VERSION = 12; // Tingkatkan versi database
@@ -388,7 +390,10 @@ public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
     }
 
     // ======== PROSPEK METHODS ========
-
+    public String getCurrentTimestamp() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        return sdf.format(new Date());
+    }
     public long addProspek(String penginput, String nama, String email, String noHp,
                            String alamat, String referensi, String statusNpwp, String statusBpjs) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -399,8 +404,11 @@ public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
         values.put(COLUMN_NO_HP, noHp);
         values.put(COLUMN_ALAMAT, alamat);
         values.put(COLUMN_REFERENSI, referensi);
-        values.put(COLUMN_STATUS_NPWP, statusNpwp); // TAMBAHAN
-        values.put(COLUMN_STATUS_BPJS, statusBpjs); // TAMBAHAN
+        values.put(COLUMN_STATUS_NPWP, statusNpwp);
+        values.put(COLUMN_STATUS_BPJS, statusBpjs);
+
+        // Jika ingin menggunakan timestamp manual, uncomment baris berikut:
+        // values.put(COLUMN_TANGGAL_BUAT, getCurrentTimestamp());
 
         long result = db.insert(TABLE_PROSPEK, null, values);
         db.close();

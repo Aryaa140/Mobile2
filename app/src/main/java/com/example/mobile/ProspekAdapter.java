@@ -45,7 +45,10 @@ public class ProspekAdapter extends RecyclerView.Adapter<ProspekAdapter.ViewHold
             holder.tvEmail.setText("Email: " + (prospek.getEmail() != null ? prospek.getEmail() : "-"));
             holder.tvNoHp.setText("No. HP: " + (prospek.getNoHp() != null ? prospek.getNoHp() : "-"));
             holder.tvAlamat.setText("Alamat: " + (prospek.getAlamat() != null ? prospek.getAlamat() : "-"));
-            holder.tvTanggal.setText("Tanggal: " + formatTanggal(prospek.getTanggalBuat()));
+            holder.tvTanggal.setText("Tanggal: " + prospek.getTanggalBuatFormatted()); // Format tanggal lengkap
+            holder.tvStatusNPWP.setText("Status NPWP: " + (prospek.getStatusNpwp() != null ? prospek.getStatusNpwp() : "-")); // TAMBAHAN: Status NPWP
+            holder.tvStatusBPJS.setText("Status BPJS: " + (prospek.getStatusBpjs() != null ? prospek.getStatusBpjs() : "-")); // TAMBAHAN: Status BPJS
+
         } else {
             // Handle null data
             holder.tvPenginput.setText("Penginput: -");
@@ -54,6 +57,8 @@ public class ProspekAdapter extends RecyclerView.Adapter<ProspekAdapter.ViewHold
             holder.tvNoHp.setText("No. HP: -");
             holder.tvAlamat.setText("Alamat: -");
             holder.tvTanggal.setText("Tanggal: -");
+            holder.tvStatusNPWP.setText("Status NPWP: -"); // TAMBAHAN
+            holder.tvStatusBPJS.setText("Status BPJS: -"); // TAMBAHAN
         }
 
         // Edit button click listener
@@ -114,26 +119,13 @@ public class ProspekAdapter extends RecyclerView.Adapter<ProspekAdapter.ViewHold
         return result > 0;
     }
 
-    // Method untuk memformat tanggal
-    private String formatTanggal(String tanggal) {
-        if (tanggal == null || tanggal.isEmpty()) {
-            return "-";
-        }
-
-        // Format sederhana: jika tanggal panjang, ambil hanya bagian tanggalnya
-        if (tanggal.contains(" ")) {
-            return tanggal.split(" ")[0]; // Ambil hanya tanggal (YYYY-MM-DD)
-        }
-        return tanggal;
-    }
-
     @Override
     public int getItemCount() {
         return prospekList.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvPenginput, tvNama, tvEmail, tvNoHp, tvAlamat, tvTanggal;
+        TextView tvPenginput, tvNama, tvEmail, tvNoHp, tvAlamat, tvTanggal, tvStatusNPWP, tvStatusBPJS;
         MaterialButton btnEdit, btnDelete;
 
         public ViewHolder(@NonNull View itemView) {
@@ -144,6 +136,8 @@ public class ProspekAdapter extends RecyclerView.Adapter<ProspekAdapter.ViewHold
             tvNoHp = itemView.findViewById(R.id.tvNoHp);
             tvAlamat = itemView.findViewById(R.id.tvAlamat);
             tvTanggal = itemView.findViewById(R.id.tvTanggal);
+            tvStatusNPWP = itemView.findViewById(R.id.tvStatusNPWP); // TAMBAHAN
+            tvStatusBPJS = itemView.findViewById(R.id.tvStatusBPJS); // TAMBAHAN
             btnEdit = itemView.findViewById(R.id.btnEdit);
             btnDelete = itemView.findViewById(R.id.btnDelete);
         }
