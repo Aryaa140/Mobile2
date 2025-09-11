@@ -1,6 +1,7 @@
 package com.example.mobile;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -18,12 +19,21 @@ public class BerandaActivity extends AppCompatActivity {
     MaterialCardView cardWelcome, cardProspekM, cardLihatDataM, cardFasilitasM, cardProyekM, cardUserpM;
     BottomNavigationView bottomNavigationView;
     TextView tvUserName; // TextView untuk menampilkan username
+    private SharedPreferences sharedPreferences;
+
+    // Keys untuk SharedPreferences
+    private static final String PREFS_NAME = "LoginPrefs";
+    private static final String KEY_USERNAME = "username";
+    private static final String KEY_DIVISION = "division";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_beranda);
+
+        // Inisialisasi SharedPreferences
+        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
         // Inisialisasi view
         cardWelcome = findViewById(R.id.cardWelcome);
@@ -35,12 +45,19 @@ public class BerandaActivity extends AppCompatActivity {
         tvUserName = findViewById(R.id.tvUserName); // Inisialisasi TextView username
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-        // TAMPILKAN USERNAME - TANPA MENGUBAH INTENT YANG SUDAH ADA
-        // Ambil data username dari Intent
-        Intent intent = getIntent();
-        if (intent != null && intent.hasExtra("USERNAME")) {
-            String username = intent.getStringExtra("USERNAME");
-            tvUserName.setText(username); // Set text username
+        // TAMPILKAN USERNAME - Prioritaskan dari SharedPreferences
+        String username = sharedPreferences.getString(KEY_USERNAME, "");
+        String division = sharedPreferences.getString(KEY_DIVISION, "");
+
+        if (!username.isEmpty()) {
+            tvUserName.setText(username); // Set text username dari SharedPreferences
+        } else {
+            // Fallback: Ambil data username dari Intent (jika ada)
+            Intent intent = getIntent();
+            if (intent != null && intent.hasExtra("USERNAME")) {
+                username = intent.getStringExtra("USERNAME");
+                tvUserName.setText(username); // Set text username
+            }
         }
 
         // JANGAN UBAH INTENT YANG SUDAH ADA - biarkan seperti semula
@@ -93,5 +110,25 @@ public class BerandaActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    // Method untuk mendapatkan data user yang login
+    public DatabaseHelper.User getLoggedInUser() {
+        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+
+        String username = sharedPreferences.getString(KEY_USERNAME, "");
+        String division = sharedPreferences.getString(KEY_DIVISION, "");
+        String nip = sharedPreferences.getString("nip", ""); // Ganti "nip" dengan key yang sesuai
+
+        if (username.isEmpty()) {
+            return null; // User belum login
+        }
+
+        DatabaseHelper.User user = new DatabaseHelper.User();
+        user.setUsername(username);
+        user.setDivision(division);
+        user.setNip(nip);
+
+        return user;
     }
 }
