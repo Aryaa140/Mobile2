@@ -21,6 +21,16 @@
         <item>On Progress</item>
     </string-array>
 
+    <string-array name="opsi_spinnerNPWP">
+        <item>Punya</item>
+        <item>Tidak Punya</item>
+    </string-array>
+
+    <string-array name="opsi_spinnerBPJS">
+        <item>Punya</item>
+        <item>Tidak Punya</item>
+    </string-array>
+
     <string-array name="opsi_spinnerStatusFasilitas">
         <item>Selesai</item>
         <item>On Progress</item>
