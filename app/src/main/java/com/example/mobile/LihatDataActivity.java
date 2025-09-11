@@ -16,7 +16,7 @@ import com.google.android.material.card.MaterialCardView;
 public class LihatDataActivity extends AppCompatActivity {
 
     MaterialToolbar TopAppBar;
-    MaterialCardView cardProyek, cardUserpM, cardProspek, cardPemohonM, cardUnitHunian;
+    MaterialCardView cardProspek, cardBooking;
     BottomNavigationView bottomNavigationView;
 
     @Override
@@ -29,7 +29,7 @@ public class LihatDataActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         cardProspek = findViewById(R.id.cardProspek);
-        cardUserpM = findViewById(R.id.cardUserpM);
+        cardBooking = findViewById(R.id.cardBooking);
 
 
         TopAppBar.setNavigationOnClickListener(v -> {
@@ -38,28 +38,8 @@ public class LihatDataActivity extends AppCompatActivity {
             finish();
         });
 
-        cardProspek.setOnClickListener(v -> {
-            Intent intent = new Intent(LihatDataActivity.this, LihatDataProspekActivity.class);
-            startActivity(intent);
-        });
-
-        cardUserpM.setOnClickListener(v -> {
+        cardBooking.setOnClickListener(v -> {
             Intent intent = new Intent(LihatDataActivity.this, LihatDataUserpActivity.class);
-            startActivity(intent);
-        });
-
-        cardPemohonM.setOnClickListener(v -> {
-            Intent intent = new Intent(LihatDataActivity.this, LihatDataPemohonActivity.class);
-            startActivity(intent);
-        });
-
-        cardProyek.setOnClickListener(v -> {
-            Intent intent = new Intent(LihatDataActivity.this, LihatDataProyekActivity.class);
-            startActivity(intent);
-        });
-
-        cardUnitHunian.setOnClickListener(v -> {
-            Intent intent = new Intent(LihatDataActivity.this, LihatDataUnitHunianActivity.class);
             startActivity(intent);
         });
 
