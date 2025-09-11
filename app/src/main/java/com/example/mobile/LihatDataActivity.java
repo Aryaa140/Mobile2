@@ -38,6 +38,11 @@ public class LihatDataActivity extends AppCompatActivity {
             finish();
         });
 
+        cardProspek.setOnClickListener(v -> {
+            Intent intent = new Intent(LihatDataActivity.this, LihatDataProspekActivity.class);
+            startActivity(intent);
+        });
+
         cardBooking.setOnClickListener(v -> {
             Intent intent = new Intent(LihatDataActivity.this, LihatDataUserpActivity.class);
             startActivity(intent);
