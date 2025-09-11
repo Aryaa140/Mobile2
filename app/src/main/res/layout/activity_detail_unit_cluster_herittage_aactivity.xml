@@ -42,7 +42,9 @@
                 android:id="@+id/cardDetail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="0dp"
+                android:layout_marginRight="0dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="6dp"
                 android:background="@android:color/white">
@@ -53,7 +55,6 @@
                 android:orientation="vertical"
                 android:padding="12dp">
 
-                <!-- Gambar -->
                 <ImageView
                     android:id="@+id/imgProyek"
                     android:layout_width="match_parent"
@@ -63,22 +64,22 @@
                     android:src="@drawable/cluster_herritage"
                     android:contentDescription="Gambar Proyek" />
 
-                <!-- Nama Cluster -->
                 <TextView
                     android:id="@+id/txtNama"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:text="CLUSTER HERRITAGE BALCONY A"
                     android:textStyle="bold"
                     android:textColor="@android:color/black"
                     android:textSize="18sp"
                     android:paddingTop="8dp"/>
 
-                <!-- Lokasi dengan outline hijau -->
                 <TextView
                     android:id="@+id/txtLokasi"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:text="The Quality Riverside Krian Sidoarjo"
                     android:textColor="@color/teal_700"
                     android:textStyle="bold"
@@ -86,19 +87,20 @@
                     android:layout_marginTop="4dp"
                     android:background="@drawable/bg_outlined_green"/>
 
-                <!-- Spesifikasi -->
-                <LinearLayout
+                <GridLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
+                    android:columnCount="2"
+                    android:rowCount="2"
                     android:layout_marginTop="8dp">
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingTop="4dp">
+                        android:padding="4dp">
                         <ImageView
                             android:layout_width="20dp"
                             android:layout_height="20dp"
@@ -113,30 +115,12 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingTop="4dp">
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/ic_home"
-                            android:tint="@android:color/holo_red_dark"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Luas Bangunan: 53 m²"
-                            android:textColor="@android:color/black"
-                            android:layout_marginStart="8dp"/>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingTop="4dp">
+                        android:padding="4dp">
                         <ImageView
                             android:layout_width="20dp"
                             android:layout_height="20dp"
@@ -150,12 +134,35 @@
                             android:layout_marginStart="8dp"/>
                     </LinearLayout>
 
+                    <!-- Luas Bangunan -->
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingTop="4dp">
+                        android:padding="4dp">
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_home"
+                            android:tint="@android:color/holo_red_dark"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Luas Bangunan: 53 m²"
+                            android:textColor="@android:color/black"
+                            android:layout_marginStart="8dp"/>
+                    </LinearLayout>
+
+                    <!-- Kamar Mandi -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="4dp">
                         <ImageView
                             android:layout_width="20dp"
                             android:layout_height="20dp"
@@ -168,7 +175,7 @@
                             android:textColor="@android:color/black"
                             android:layout_marginStart="8dp"/>
                     </LinearLayout>
-                </LinearLayout>
+                </GridLayout>
 
                 <!-- Deskripsi -->
                 <TextView
@@ -179,7 +186,46 @@
                     android:textColor="@android:color/black"
                     android:paddingTop="12dp"/>
             </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardGallery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp"
+                android:background="@android:color/white">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:src="@drawable/cluster_herritage_type_balcony_a"
+                        android:contentDescription="Foto Tambahan"/>
+
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnLihatKavling"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Lihat Kavling"
+                        android:textColor="@android:color/black"
+                        android:backgroundTint="@android:color/white"
+                        app:cornerRadius="50dp"
+                        app:icon="@drawable/ic_arrow_right"
+                        app:iconGravity="textEnd"
+                        app:iconTint="@android:color/black"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginLeft="180dp"
+                        android:layout_marginRight="5dp"/>
+                </LinearLayout>
             </androidx.cardview.widget.CardView>
 
         </LinearLayout>

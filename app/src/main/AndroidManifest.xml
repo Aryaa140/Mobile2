@@ -13,6 +13,33 @@
         android:theme="@style/Theme.Mobile"
         tools:targetApi="31">
         <activity
+            android:name=".DetailUnitRukoTulipActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DetailUnitRaffflesiaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DetailUnitLilyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DetailUnitNeoGladiolActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DetailUnitIrishActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DetailUnitOrchidActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DetailUnitCameliaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity2"
+            android:exported="false" />
+        <activity
+            android:name=".DetailUnitClusterHerittageBActivity"
+            android:exported="false" />
+        <activity
             android:name=".DetailUnitClusterHerittageAActivity"
             android:exported="false" />
         <activity
