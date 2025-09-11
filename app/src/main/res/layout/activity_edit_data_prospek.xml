@@ -102,20 +102,44 @@
                     android:padding="12dp"
                     android:inputType="textEmailAddress"/>
 
-                <EditText
-                    android:id="@+id/editTextNoHp"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="15dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
-                    android:textColor="@android:color/black"
                     android:background="@android:drawable/edit_text"
-                    android:drawableStart="@drawable/ic_phonec"
-                    android:drawablePadding="8dp"
-                    android:hint="`"
-                    android:padding="12dp"
-                    android:inputType="phone"/>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="8dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_phonec"
+                        android:contentDescription="@string/app_name"
+                        android:layout_marginEnd="6dp"/>
+
+                    <TextView
+                        android:id="@+id/tvPrefixNoHp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="+62"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp"
+                        android:layout_marginEnd="6dp"/>
+
+                    <EditText
+                        android:id="@+id/editTextNoHp"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@android:color/transparent"
+                        android:hint="'"
+                        android:inputType="phone"
+                        android:minHeight="48dp"
+                        android:textColor="@android:color/black" />
+                </LinearLayout>
 
                 <EditText
                     android:id="@+id/editTextAlamat"
@@ -142,6 +166,31 @@
                     android:background="@android:drawable/edit_text"
                     android:drawablePadding="8dp"
                     android:entries="@array/opsi_spinnerProspek"/>
+
+                <Spinner
+                    android:id="@+id/spinnerRole2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:textColor="@android:color/black"
+                    android:background="@android:drawable/edit_text"
+                    android:drawablePadding="8dp"
+                    android:entries="@array/opsi_spinnerNPWP"/>
+
+
+                <Spinner
+                    android:id="@+id/spinnerRole3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:textColor="@android:color/black"
+                    android:background="@android:drawable/edit_text"
+                    android:drawablePadding="8dp"
+                    android:entries="@array/opsi_spinnerBPJS"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"

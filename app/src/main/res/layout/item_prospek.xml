@@ -97,6 +97,27 @@
                     android:textSize="14sp"
                     android:ellipsize="end"
                     android:maxLines="2" />
+
+                <TextView
+                    android:id="@+id/tvStatusNPWP"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Status Kepemilikan NPWM : -"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="14sp"
+                    android:ellipsize="end"
+                    android:singleLine="true" />
+
+                <TextView
+                    android:id="@+id/tvStatusBPJS"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Status Kepemilikan BPJS : -"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="14sp"
+                    android:ellipsize="end"
+                    android:singleLine="true" />
+
             </LinearLayout>
 
             <LinearLayout
