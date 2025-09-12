@@ -49,9 +49,6 @@
             android:name=".DetailUnitCameliaActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity2"
-            android:exported="false" />
-        <activity
             android:name=".DetailUnitClusterHerittageBActivity"
             android:exported="false" />
         <activity
@@ -109,9 +106,6 @@
             android:name=".TambahUserpActivity"
             android:exported="false" />
         <activity
-            android:name=".HapusDataProspekActivity"
-            android:exported="false" />
-        <activity
             android:name=".EditDataProspekActivity"
             android:exported="false" />
         <activity
@@ -149,9 +143,6 @@
             android:exported="false" />
         <activity
             android:name=".ProyekActivity"
-            android:exported="false" />
-        <activity
-            android:name=".BookingActivity"
             android:exported="false" />
         <activity
             android:name=".ProfileActivity"
