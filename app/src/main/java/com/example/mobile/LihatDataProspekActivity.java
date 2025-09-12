@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.activity.EdgeToEdge;
@@ -24,13 +23,14 @@ public class LihatDataProspekActivity extends AppCompatActivity {
 
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
-    Button btnEdit, btnDelete;
     private RecyclerView recyclerView;
     private ProspekAdapter adapter;
     private ArrayList<Prospek> prospekList;
     private ArrayList<Prospek> prospekListFull; // Untuk pencarian
     private DatabaseHelper dbHelper;
     private EditText searchEditText;
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -39,11 +39,11 @@ public class LihatDataProspekActivity extends AppCompatActivity {
             refreshData();
         }
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-
         setContentView(R.layout.activity_lihat_data_prospek);
 
         TopAppBar = findViewById(R.id.topAppBar);
@@ -74,8 +74,6 @@ public class LihatDataProspekActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {}
         });
-
-
 
         TopAppBar.setNavigationOnClickListener(v -> {
             Intent intent = new Intent(LihatDataProspekActivity.this, LihatDataActivity.class);
@@ -120,7 +118,9 @@ public class LihatDataProspekActivity extends AppCompatActivity {
                 if (prospek.getNama().toLowerCase().contains(lowerCaseQuery) ||
                         prospek.getEmail().toLowerCase().contains(lowerCaseQuery) ||
                         prospek.getNoHp().toLowerCase().contains(lowerCaseQuery) ||
-                        prospek.getPenginput().toLowerCase().contains(lowerCaseQuery)) {
+                        prospek.getPenginput().toLowerCase().contains(lowerCaseQuery) ||
+                        (prospek.getStatusNpwp() != null && prospek.getStatusNpwp().toLowerCase().contains(lowerCaseQuery)) || // TAMBAHAN: Cari di status NPWP
+                        (prospek.getStatusBpjs() != null && prospek.getStatusBpjs().toLowerCase().contains(lowerCaseQuery))) { // TAMBAHAN: Cari di status BPJS
                     filteredList.add(prospek);
                 }
             }
@@ -142,5 +142,16 @@ public class LihatDataProspekActivity extends AppCompatActivity {
         prospekListFull.clear();
         prospekListFull.addAll(dbHelper.getAllProspek());
         filterData(searchEditText.getText().toString());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (dbHelper != null) {
+            dbHelper.close();
+        }
+        if (adapter != null) {
+            adapter.close();
+        }
     }
 }
