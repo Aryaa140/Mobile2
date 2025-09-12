@@ -190,10 +190,13 @@ public class EditDataProspekActivity extends AppCompatActivity {
         }*/
 
         // Validasi format email
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            editTextEmail.setError("Format email tidak valid");
-            editTextEmail.requestFocus();
-            return;
+        if (!email.isEmpty()) {
+            // Jika email diisi, harus sesuai format yang valid
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                editTextEmail.setError("Format email tidak valid");
+                editTextEmail.requestFocus();
+                return;
+            }
         }
 
         // Update data ke database dengan parameter baru

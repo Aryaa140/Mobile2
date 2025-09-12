@@ -3,7 +3,9 @@ package com.example.mobile;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -108,6 +110,33 @@ public class TambahProspekActivity extends AppCompatActivity {
         btnSimpan = findViewById(R.id.btnSimpan);
         btnBatal = findViewById(R.id.btnBatal);
 
+        // TAMBAHAN: TextWatcher untuk menghilangkan karakter khusus dan spasi secara otomatis
+        editTextNoHp.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Tidak perlu diimplementasi
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Tidak perlu diimplementasi
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Hilangkan karakter khusus dan spasi secara otomatis
+                String originalString = s.toString();
+                String cleanedString = originalString.replaceAll("[\\s\\-\\.\\(\\)]", "");
+
+                if (!originalString.equals(cleanedString)) {
+                    editTextNoHp.removeTextChangedListener(this);
+                    editTextNoHp.setText(cleanedString);
+                    editTextNoHp.setSelection(cleanedString.length());
+                    editTextNoHp.addTextChangedListener(this);
+                }
+            }
+        });
+
         // OTOMATIS ISI NAMA PENGINPUT BERDASARKAN USER YANG LOGIN
         String username = sharedPreferences.getString(KEY_USERNAME, "");
         if (!TextUtils.isEmpty(username)) {
@@ -158,6 +187,13 @@ public class TambahProspekActivity extends AppCompatActivity {
 
         if (noHp.isEmpty()) {
             editTextNoHp.setError("No. Handphone harus diisi");
+            editTextNoHp.requestFocus();
+            return;
+        }
+
+        // TAMBAHAN: Validasi karakter khusus pada nomor HP
+        if (noHp.matches(".*[\\s\\-\\.\\(\\)].*")) {
+            editTextNoHp.setError("Nomor HP tidak boleh mengandung spasi, tanda hubung, titik, atau tanda kurung");
             editTextNoHp.requestFocus();
             return;
         }
