@@ -183,11 +183,11 @@ public class EditDataProspekActivity extends AppCompatActivity {
             return;
         }
 
-        if (alamat.isEmpty()) {
+        /*if (alamat.isEmpty()) {
             editTextAlamat.setError("Alamat harus diisi");
             editTextAlamat.requestFocus();
             return;
-        }
+        }*/
 
         // Validasi format email
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
