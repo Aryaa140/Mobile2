@@ -183,18 +183,18 @@ public class EditDataProspekActivity extends AppCompatActivity {
             return;
         }
 
-        if (alamat.isEmpty()) {
+        /*if (alamat.isEmpty()) {
             editTextAlamat.setError("Alamat harus diisi");
             editTextAlamat.requestFocus();
             return;
-        }
+        }*/
 
         // Validasi format email
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        /*if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             editTextEmail.setError("Format email tidak valid");
             editTextEmail.requestFocus();
             return;
-        }
+        }*/
 
         // Update data ke database dengan parameter baru
         int result = databaseHelper.updateProspek(prospekId, penginput, nama, email, noHp, alamat, referensi, statusNpwp, statusBpjs);

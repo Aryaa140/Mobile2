@@ -82,7 +82,7 @@
                     android:id="@+id/tvNoHp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="No. HP: -"
+                    android:text="No. HP (+62): -"
                     android:textColor="@android:color/darker_gray"
                     android:textSize="14sp"
                     android:ellipsize="end"
