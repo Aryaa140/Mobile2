@@ -110,8 +110,10 @@ public class TambahProspekActivity extends AppCompatActivity {
         btnSimpan = findViewById(R.id.btnSimpan);
         btnBatal = findViewById(R.id.btnBatal);
 
-        // TAMBAHAN: TextWatcher untuk menghilangkan karakter khusus dan spasi secara otomatis
+        // PERBAIKAN: TextWatcher untuk menghilangkan karakter khusus dan spasi secara otomatis
         editTextNoHp.addTextChangedListener(new TextWatcher() {
+            private boolean isFormatting = false;
+
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 // Tidak perlu diimplementasi
@@ -124,16 +126,19 @@ public class TambahProspekActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
+                if (isFormatting) return;
+
+                isFormatting = true;
+
                 // Hilangkan karakter khusus dan spasi secara otomatis
                 String originalString = s.toString();
-                String cleanedString = originalString.replaceAll("[\\s\\-\\.\\(\\)]", "");
+                String cleanedString = originalString.replaceAll("[^0-9+]", ""); // Hanya angka dan tanda +
 
                 if (!originalString.equals(cleanedString)) {
-                    editTextNoHp.removeTextChangedListener(this);
-                    editTextNoHp.setText(cleanedString);
-                    editTextNoHp.setSelection(cleanedString.length());
-                    editTextNoHp.addTextChangedListener(this);
+                    s.replace(0, s.length(), cleanedString);
                 }
+
+                isFormatting = false;
             }
         });
 
@@ -191,9 +196,9 @@ public class TambahProspekActivity extends AppCompatActivity {
             return;
         }
 
-        // TAMBAHAN: Validasi karakter khusus pada nomor HP
-        if (noHp.matches(".*[\\s\\-\\.\\(\\)].*")) {
-            editTextNoHp.setError("Nomor HP tidak boleh mengandung spasi, tanda hubung, titik, atau tanda kurung");
+        // PERBAIKAN: Validasi karakter khusus pada nomor HP
+        if (noHp.matches(".*[^0-9+].*")) {
+            editTextNoHp.setError("Nomor HP hanya boleh mengandung angka dan tanda +");
             editTextNoHp.requestFocus();
             return;
         }
