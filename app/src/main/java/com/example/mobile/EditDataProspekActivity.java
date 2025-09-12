@@ -20,7 +20,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 public class EditDataProspekActivity extends AppCompatActivity {
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
-
     private EditText editTextPenginput, editTextNama, editTextEmail, editTextNoHp, editTextAlamat;
     private Spinner spinnerReferensi, spinnerNPWP, spinnerBPJS; // TAMBAHAN: Spinner untuk NPWP dan BPJS
     private Button btnEdit, btnBatal;
@@ -97,6 +96,12 @@ public class EditDataProspekActivity extends AppCompatActivity {
                 overridePendingTransition(0, 0);
                 return true;
             } else if (id == R.id.nav_folder) {
+                startActivity(new Intent(this, LihatDataActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_news) {
+                startActivity(new Intent(this, NewsActivity.class));
+                overridePendingTransition(0, 0);
                 return true;
             } else if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));

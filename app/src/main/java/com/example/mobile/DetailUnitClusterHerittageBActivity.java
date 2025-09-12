@@ -23,7 +23,7 @@ public class DetailUnitClusterHerittageBActivity extends AppCompatActivity {
 
         TopAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setSelectedItemId(R.id.nav_folder);
+        bottomNavigationView.setSelectedItemId(R.id.nav_home);
 
         TopAppBar.setNavigationOnClickListener(v -> {
             Intent intent = new Intent(DetailUnitClusterHerittageBActivity.this, UnitRiversideActivity.class);
@@ -39,6 +39,12 @@ public class DetailUnitClusterHerittageBActivity extends AppCompatActivity {
                 overridePendingTransition(0, 0);
                 return true;
             } else if (id == R.id.nav_folder) {
+                startActivity(new Intent(this, LihatDataActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_news) {
+                startActivity(new Intent(this, NewsActivity.class));
+                overridePendingTransition(0, 0);
                 return true;
             } else if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));

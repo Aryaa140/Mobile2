@@ -42,7 +42,7 @@ public class BerandaActivity extends AppCompatActivity {
         cardFasilitasM = findViewById(R.id.cardFasilitasM);
         cardProyekM = findViewById(R.id.cardProyekM);
         cardUserpM = findViewById(R.id.cardUserpM);
-        tvUserName = findViewById(R.id.tvUserName); // Inisialisasi TextView username
+        tvUserName = findViewById(R.id.tvUserName);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         // TAMPILKAN USERNAME - Prioritaskan dari SharedPreferences

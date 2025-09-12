@@ -67,7 +67,13 @@ public class EditProfileActivity extends AppCompatActivity {
                 startActivity(new Intent(this, LihatDataActivity.class));
                 overridePendingTransition(0, 0);
                 return true;
+            } else if (id == R.id.nav_news) {
+                startActivity(new Intent(this, NewsActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
             } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                overridePendingTransition(0, 0);
                 return true;
             }
             return false;
