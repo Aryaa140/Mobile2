@@ -46,7 +46,7 @@ public class TambahUserpActivity extends AppCompatActivity {
         // Inisialisasi view
         TopAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setSelectedItemId(R.id.nav_folder);
+        bottomNavigationView.setSelectedItemId(R.id.nav_home);
         spinnerRoleProspek = findViewById(R.id.spinnerRoleProspek);
         spinnerRoleRefrensiProyek = findViewById(R.id.spinnerRoleRefrensiProyek);
         editTextPenginput = findViewById(R.id.editTextPenginput);
@@ -67,7 +67,6 @@ public class TambahUserpActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
-
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
 
@@ -77,6 +76,10 @@ public class TambahUserpActivity extends AppCompatActivity {
                 return true;
             } else if (id == R.id.nav_folder) {
                 startActivity(new Intent(this, LihatDataActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_news) {
+                startActivity(new Intent(this, NewsActivity.class));
                 overridePendingTransition(0, 0);
                 return true;
             } else if (id == R.id.nav_profile) {
