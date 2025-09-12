@@ -45,10 +45,9 @@ public class ProspekAdapter extends RecyclerView.Adapter<ProspekAdapter.ViewHold
             holder.tvEmail.setText("Email: " + (prospek.getEmail() != null ? prospek.getEmail() : "-"));
             holder.tvNoHp.setText("No. HP: " + (prospek.getNoHp() != null ? prospek.getNoHp() : "-"));
             holder.tvAlamat.setText("Alamat: " + (prospek.getAlamat() != null ? prospek.getAlamat() : "-"));
-            holder.tvTanggal.setText("Tanggal: " + prospek.getTanggalBuatFormatted()); // Format tanggal lengkap
-            holder.tvStatusNPWP.setText("Status NPWP: " + (prospek.getStatusNpwp() != null ? prospek.getStatusNpwp() : "-")); // TAMBAHAN: Status NPWP
-            holder.tvStatusBPJS.setText("Status BPJS: " + (prospek.getStatusBpjs() != null ? prospek.getStatusBpjs() : "-")); // TAMBAHAN: Status BPJS
-
+            holder.tvTanggal.setText("Tanggal: " + (prospek.getTanggalBuatFormatted() != null ? prospek.getTanggalBuatFormatted() : "-"));
+            holder.tvStatusNPWP.setText("Status NPWP: " + (prospek.getStatusNpwp() != null ? prospek.getStatusNpwp() : "-"));
+            holder.tvStatusBPJS.setText("Status BPJS: " + (prospek.getStatusBpjs() != null ? prospek.getStatusBpjs() : "-"));
         } else {
             // Handle null data
             holder.tvPenginput.setText("Penginput: -");
@@ -57,8 +56,8 @@ public class ProspekAdapter extends RecyclerView.Adapter<ProspekAdapter.ViewHold
             holder.tvNoHp.setText("No. HP: -");
             holder.tvAlamat.setText("Alamat: -");
             holder.tvTanggal.setText("Tanggal: -");
-            holder.tvStatusNPWP.setText("Status NPWP: -"); // TAMBAHAN
-            holder.tvStatusBPJS.setText("Status BPJS: -"); // TAMBAHAN
+            holder.tvStatusNPWP.setText("Status NPWP: -");
+            holder.tvStatusBPJS.setText("Status BPJS: -");
         }
 
         // Edit button click listener

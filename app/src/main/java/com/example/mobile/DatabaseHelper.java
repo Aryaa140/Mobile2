@@ -427,8 +427,19 @@ public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
         Cursor cursor = null;
 
         try {
-            String[] columns = {COLUMN_PROSPEK_ID, COLUMN_PENGINPUT, COLUMN_NAMA, COLUMN_EMAIL,
-                    COLUMN_NO_HP, COLUMN_ALAMAT, COLUMN_REFERENSI, COLUMN_TANGGAL_BUAT};
+            // TAMBAHKAN kolom status_npwp dan status_bpjs
+            String[] columns = {
+                    COLUMN_PROSPEK_ID,
+                    COLUMN_PENGINPUT,
+                    COLUMN_NAMA,
+                    COLUMN_EMAIL,
+                    COLUMN_NO_HP,
+                    COLUMN_ALAMAT,
+                    COLUMN_REFERENSI,
+                    COLUMN_STATUS_NPWP, // TAMBAHAN: Kolom status NPWP
+                    COLUMN_STATUS_BPJS, // TAMBAHAN: Kolom status BPJS
+                    COLUMN_TANGGAL_BUAT
+            };
 
             cursor = db.query(TABLE_PROSPEK, columns, null, null, null, null, COLUMN_TANGGAL_BUAT + " DESC");
 
@@ -445,18 +456,21 @@ public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
                                 cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NO_HP)),
                                 cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ALAMAT)),
                                 cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI)),
-                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_BUAT)),
-                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_BPJS)), // TAMBAHAN
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_NPWP)), // TAMBAHAN: Status NPWP
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_BPJS)), // TAMBAHAN: Status BPJS
                                 cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_BUAT))
                         );
                         prospekList.add(prospek);
                     } catch (Exception e) {
                         Log.e("DatabaseHelper", "Error parsing data: " + e.getMessage());
+                        // Tambahkan logging lebih detail untuk debug
+                        Log.e("DatabaseHelper", "Error details: ", e);
                     }
                 } while (cursor.moveToNext());
             }
         } catch (Exception e) {
             Log.e("DatabaseHelper", "Error getAllProspek: " + e.getMessage());
+            e.printStackTrace();
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -489,19 +503,25 @@ public static final String TABLE_UNIT_HUNIAN = "unit_hunian";
 
         Prospek prospek = null;
         if (cursor != null && cursor.moveToFirst()) {
-            prospek = new Prospek(
-                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PROSPEK_ID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PENGINPUT)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NO_HP)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ALAMAT)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_NPWP)), // TAMBAHAN
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_BPJS)), // TAMBAHAN
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_BUAT))
-            );
-            cursor.close();
+            try {
+                prospek = new Prospek(
+                        cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PROSPEK_ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PENGINPUT)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAMA)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NO_HP)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ALAMAT)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REFERENSI)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_NPWP)), // TAMBAHAN
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS_BPJS)), // TAMBAHAN
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TANGGAL_BUAT))
+                );
+            } catch (Exception e) {
+                Log.e("DatabaseHelper", "Error parsing prospek data: " + e.getMessage());
+                e.printStackTrace();
+            } finally {
+                cursor.close();
+            }
         }
 
         db.close();

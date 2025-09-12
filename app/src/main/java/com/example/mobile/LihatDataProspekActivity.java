@@ -18,7 +18,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
-
+import android.util.Log;
 public class LihatDataProspekActivity extends AppCompatActivity {
 
     MaterialToolbar TopAppBar;
@@ -140,8 +140,22 @@ public class LihatDataProspekActivity extends AppCompatActivity {
 
     private void refreshData() {
         prospekListFull.clear();
-        prospekListFull.addAll(dbHelper.getAllProspek());
+        ArrayList<Prospek> newData = new ArrayList<>(dbHelper.getAllProspek());
+
+        // Debug: Log jumlah data yang diambil
+        Log.d("LihatDataProspek", "Jumlah data dari database: " + newData.size());
+
+        prospekListFull.addAll(newData);
+
+        // Debug: Log isi data
+        for (Prospek p : prospekListFull) {
+            Log.d("LihatDataProspek", "Prospek: " + p.getNama() + ", NPWP: " + p.getStatusNpwp() + ", BPJS: " + p.getStatusBpjs());
+        }
+
         filterData(searchEditText.getText().toString());
+
+        // Debug: Log jumlah data setelah filter
+        Log.d("LihatDataProspek", "Jumlah data setelah filter: " + prospekList.size());
     }
 
     @Override
