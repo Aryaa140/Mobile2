@@ -12,6 +12,13 @@
     <color name="light_blue_500">#03A9F4</color>
     <color name="light_blue_200">#81D4FA</color>
 
+    <color name="colorPrimary">#4361EE</color>
+    <color name="colorPrimaryDark">#3A56D4</color>
+    <color name="colorPrimaryLight">#A5B4FC</color>
+    <color name="colorAccent">#7209B7</color>
+    <color name="colorAccentLight">#C77DFF</color>
+    <color name="colorTextPrimary">#212121</color>
+    <color name="colorTextSecondary">#757575</color>
 
 </resources>
 
