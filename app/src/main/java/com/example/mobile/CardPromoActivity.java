@@ -15,7 +15,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.appbar.MaterialToolbar;
 import java.util.List;
-
+import android.util.Log;
 public class CardPromoActivity extends AppCompatActivity {
     private static final int PICK_IMAGE_REQUEST = 1;
 
@@ -142,6 +142,10 @@ public class CardPromoActivity extends AppCompatActivity {
         btnSimpan.setEnabled(false);
         btnSimpan.setText("Menyimpan...");
 
+        // Debug log
+        Log.d("FirebaseDebug", "Attempting to save: " + namaGambar);
+        Log.d("FirebaseDebug", "Image URI: " + imageUri.toString());
+
         // Simpan ke Firebase
         firebaseHelper.savePromoWithImage(
                 imageUri,
@@ -151,11 +155,11 @@ public class CardPromoActivity extends AppCompatActivity {
                 new OnSuccessListener<String>() {
                     @Override
                     public void onSuccess(String promoId) {
-                        // Berhasil disimpan
                         runOnUiThread(() -> {
                             btnSimpan.setEnabled(true);
                             btnSimpan.setText("Simpan");
                             Toast.makeText(CardPromoActivity.this, "Promo berhasil disimpan", Toast.LENGTH_SHORT).show();
+                            Log.d("FirebaseDebug", "Successfully saved with ID: " + promoId);
                             finish();
                         });
                     }
@@ -163,11 +167,19 @@ public class CardPromoActivity extends AppCompatActivity {
                 new OnFailureListener() {
                     @Override
                     public void onFailure(Exception e) {
-                        // Gagal menyimpan
                         runOnUiThread(() -> {
                             btnSimpan.setEnabled(true);
                             btnSimpan.setText("Simpan");
-                            Toast.makeText(CardPromoActivity.this, "Gagal menyimpan: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            String errorMsg = "Gagal menyimpan: " + e.getMessage();
+                            Toast.makeText(CardPromoActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                            Log.e("FirebaseError", "Save failed: " + e.getMessage(), e);
+
+                            // Tampilkan detail error lebih spesifik
+                            if (e.getMessage().contains("object does not exist")) {
+                                Toast.makeText(CardPromoActivity.this,
+                                        "Error: Firebase tidak terhubung. Periksa koneksi internet dan konfigurasi Firebase",
+                                        Toast.LENGTH_LONG).show();
+                            }
                         });
                     }
                 }
