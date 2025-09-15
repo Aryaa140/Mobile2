@@ -97,11 +97,10 @@ public class BerandaActivity extends AppCompatActivity {
             startActivity(intentUserp);
         });
         cardInputPromoM.setOnClickListener(v -> {
-            Intent intentUserp = new Intent(BerandaActivity.this, CardPromoActivity.class);
+            Intent intentUserp = new Intent(BerandaActivity.this, InputPromoActivity.class);
             startActivity(intentUserp);
         });
 
-        // Klik tombol menu di Toolbar buka Navigation Drawer
         topAppBar.setNavigationOnClickListener(v -> {
             if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
                 drawerLayout.openDrawer(GravityCompat.START);

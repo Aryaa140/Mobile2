@@ -18,7 +18,6 @@ import java.util.List;
 import android.util.Log;
 public class CardPromoActivity extends AppCompatActivity {
     private static final int PICK_IMAGE_REQUEST = 1;
-
     private MaterialToolbar topAppBar;
     private EditText editTextProspek, editTextNama;
     private Spinner spinnerRole;
@@ -63,7 +62,9 @@ public class CardPromoActivity extends AppCompatActivity {
         btnInputPromo = findViewById(R.id.btnInputPromo);
         btnSimpan = findViewById(R.id.btnSimpan);
         btnBatal = findViewById(R.id.btnBatal);
+
     }
+
 
     private void setupToolbar() {
         topAppBar.setNavigationOnClickListener(v -> onBackPressed());
