@@ -37,7 +37,7 @@ public class CardPromoActivity extends AppCompatActivity {
 
         // Inisialisasi helpers
         databaseHelper = new DatabaseHelper(this);
-        firebaseHelper = new FirebaseDatabaseHelper();
+        firebaseHelper = new FirebaseDatabaseHelper(this);
 
         // Dapatkan username dari SharedPreferences
         loggedInUsername = MainActivity.getLoggedInUser(this).getUsername();
