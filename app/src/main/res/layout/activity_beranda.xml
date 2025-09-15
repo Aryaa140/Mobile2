@@ -82,7 +82,6 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Scroll Konten -->
         <ScrollView
             android:layout_width="0dp"
             android:layout_height="0dp"

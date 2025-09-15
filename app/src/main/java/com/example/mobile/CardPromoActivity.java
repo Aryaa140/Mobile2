@@ -22,11 +22,9 @@ public class CardPromoActivity extends AppCompatActivity {
     private EditText editTextProspek, editTextNama;
     private Spinner spinnerRole;
     private Button btnInputPromo, btnSimpan, btnBatal;
-
     private DatabaseHelper databaseHelper;
     private FirebaseDatabaseHelper firebaseHelper;
     private Uri imageUri;
-
     private String loggedInUsername;
 
     @Override
