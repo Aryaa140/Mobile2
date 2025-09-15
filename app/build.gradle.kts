@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
+
 android {
     defaultConfig {
         vectorDrawables.useSupportLibrary = true

@@ -8,16 +8,23 @@ import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
+import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.navigation.NavigationView;
 
 public class BerandaActivity extends AppCompatActivity {
 
-    MaterialCardView cardWelcome, cardProspekM, cardLihatDataM, cardFasilitasM, cardProyekM, cardUserpM;
-    BottomNavigationView bottomNavigationView;
+    MaterialCardView cardWelcome, cardProspekM, cardLihatDataM, cardFasilitasM, cardProyekM, cardUserpM, cardInputPromoM;
+    private BottomNavigationView bottomNavigationView;
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
+    private MaterialToolbar topAppBar;
     TextView tvUserName; // TextView untuk menampilkan username
     private SharedPreferences sharedPreferences;
 
@@ -42,8 +49,12 @@ public class BerandaActivity extends AppCompatActivity {
         cardFasilitasM = findViewById(R.id.cardFasilitasM);
         cardProyekM = findViewById(R.id.cardProyekM);
         cardUserpM = findViewById(R.id.cardUserpM);
+        cardInputPromoM = findViewById(R.id.cardInputPromoM);
         tvUserName = findViewById(R.id.tvUserName);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+        drawerLayout = findViewById(R.id.drawerLayout);
+        navigationView = findViewById(R.id.navigationView);
+        topAppBar = findViewById(R.id.topAppBar);
 
         // TAMPILKAN USERNAME - Prioritaskan dari SharedPreferences
         String username = sharedPreferences.getString(KEY_USERNAME, "");
@@ -84,6 +95,44 @@ public class BerandaActivity extends AppCompatActivity {
         cardUserpM.setOnClickListener(v -> {
             Intent intentUserp = new Intent(BerandaActivity.this, TambahUserpActivity.class);
             startActivity(intentUserp);
+        });
+        cardInputPromoM.setOnClickListener(v -> {
+            Intent intentUserp = new Intent(BerandaActivity.this, CardPromoActivity.class);
+            startActivity(intentUserp);
+        });
+
+        // Klik tombol menu di Toolbar buka Navigation Drawer
+        topAppBar.setNavigationOnClickListener(v -> {
+            if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            } else {
+                drawerLayout.closeDrawer(GravityCompat.START);
+            }
+        });
+
+        navigationView.setNavigationItemSelectedListener(item -> {
+                int id = item.getItemId();
+                if (id == R.id.nav_home) {
+                    return true;
+                } else if (id == R.id.nav_folder) {
+                    startActivity(new Intent(this, LihatDataActivity.class));
+                    overridePendingTransition(0, 0);
+                    return true;
+                } else if (id == R.id.nav_news) {
+                    startActivity(new Intent(this, NewsActivity.class));
+                    overridePendingTransition(0, 0);
+                    return true;
+                } else if (id == R.id.nav_profile) {
+                    startActivity(new Intent(this, ProfileActivity.class));
+                    overridePendingTransition(0, 0);
+                    return true;
+                }else if (id == R.id.nav_exit) {
+                    startActivity(new Intent(this, MainActivity.class));
+                    overridePendingTransition(0, 0);
+                    return true;
+                }
+                drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
         });
 
         bottomNavigationView.setSelectedItemId(R.id.nav_home);
