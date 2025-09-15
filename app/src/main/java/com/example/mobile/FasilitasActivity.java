@@ -17,7 +17,6 @@ public class FasilitasActivity extends AppCompatActivity {
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
