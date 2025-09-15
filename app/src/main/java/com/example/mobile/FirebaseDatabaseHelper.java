@@ -9,16 +9,28 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import java.util.UUID;
-
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import android.content.Context;
+import android.util.Log;
 public class FirebaseDatabaseHelper {
     private DatabaseReference databaseReference;
     private StorageReference storageReference;
-
+    private Context context;
+    private static final String TAG = "FirebaseDatabaseHelper";
     public FirebaseDatabaseHelper() {
         try {
+            // Pastikan FirebaseApp sudah diinisialisasi
+            if (FirebaseApp.getApps(context).isEmpty()) {
+                FirebaseApp.initializeApp(context);
+            }
             databaseReference = FirebaseDatabase.getInstance().getReference("promo");
             storageReference = FirebaseStorage.getInstance().getReference("promo_images");
         } catch (Exception e) {
+            Log.e(TAG, "Error initializing Firebase: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -58,25 +70,35 @@ public class FirebaseDatabaseHelper {
     }
 
     public void savePromoWithImage(Uri imageUri, String namaGambar, String referensiProyek,
-                                   String namaPenginput, OnSuccessListener<String> onSuccess,
-                                   OnFailureListener onFailure) {
+                                   String namaPenginput, OnSuccessListener<String> onSuccessListener,
+                                   OnFailureListener onFailureListener) {
 
-        if (imageUri == null) {
-            onFailure.onFailure(new Exception("Image URI is null"));
+        // Validasi Firebase initialization
+        if (databaseReference == null || storageReference == null) {
+            onFailureListener.onFailure(new Exception("Firebase not initialized"));
             return;
         }
 
+        if (imageUri == null) {
+            onFailureListener.onFailure(new Exception("Image URI is null"));
+            return;
+        }
+
+        // Generate unique filename
         String imageFileName = "promo_" + System.currentTimeMillis() + ".jpg";
         StorageReference fileReference = storageReference.child(imageFileName);
 
+        // Upload image to Firebase Storage
         fileReference.putFile(imageUri)
-                .addOnSuccessListener(taskSnapshot ->
-                        fileReference.getDownloadUrl().addOnSuccessListener(uri -> {
-                            Promo promo = new Promo(namaGambar, referensiProyek, namaPenginput, uri.toString());
-                            savePromoData(promo, onSuccess, onFailure);
-                        }).addOnFailureListener(onFailure)
-                )
-                .addOnFailureListener(onFailure);
+                .addOnSuccessListener(taskSnapshot -> {
+                    // Get download URL
+                    fileReference.getDownloadUrl().addOnSuccessListener(uri -> {
+                        String imageUrl = uri.toString();
+                        Promo promo = new Promo(namaGambar, referensiProyek, namaPenginput, imageUrl);
+                        savePromoData(promo, onSuccessListener, onFailureListener);
+                    }).addOnFailureListener(onFailureListener);
+                })
+                .addOnFailureListener(onFailureListener);
     }
 
     private void savePromoData(Promo promo, OnSuccessListener<String> onSuccess,
