@@ -48,12 +48,15 @@
                 android:padding="16dp">
 
                 <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/avatar"
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
+                    android:id="@+id/iconCard"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
                     android:src="@drawable/ic_person"
-                    android:contentDescription="Foto Profil"
-                    app:shapeAppearanceOverlay="@style/CircleImageView"/>
+                    android:contentDescription="Icon"
+                    android:padding="8dp"
+                    android:tint="@android:color/holo_blue_dark"
+                    app:shapeAppearanceOverlay="@style/CircleImageView"
+                    android:backgroundTint="@color/light_blue_500"/>
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -78,6 +81,7 @@
                         android:text="Nama User"
                         android:textSize="14sp"
                         android:textColor="@android:color/darker_gray"/>
+
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -410,7 +414,8 @@
             app:itemTextColor="@color/bottom_nav_selector"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:itemActiveIndicatorStyle="@style/BottomNav" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
