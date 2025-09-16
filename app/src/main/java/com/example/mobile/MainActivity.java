@@ -4,21 +4,25 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class MainActivity extends AppCompatActivity {
+
     private EditText editTextUsername, editTextPassword;
     private TextView buatAkun, lupaPassword;
     private Button buttonLogin;
-    private DatabaseHelper databaseHelper;
     private SharedPreferences sharedPreferences;
 
-    // Keys untuk SharedPreferences
+    // Keys untuk SharedPreferences (Remember Me)
     private static final String PREFS_NAME = "LoginPrefs";
     private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
     private static final String KEY_USERNAME = "username";
@@ -33,92 +37,57 @@ public class MainActivity extends AppCompatActivity {
         // Inisialisasi SharedPreferences
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
-        // Cek apakah user sudah login
+        // 🔹 Kalau user sudah login → langsung ke beranda
         if (isUserLoggedIn()) {
-            // Jika sudah login, langsung arahkan ke BerandaActivity
             redirectToBeranda();
-            return; // Keluar dari onCreate agar tidak inisialisasi view yang tidak perlu
+            return;
         }
 
-        // Inisialisasi database helper
-        databaseHelper = new DatabaseHelper(this);
-
-        // Inisialisasi view
+        // Inisialisasi view sesuai XML
         buatAkun = findViewById(R.id.BuatAkun);
         lupaPassword = findViewById(R.id.lupaPassword);
         editTextUsername = findViewById(R.id.username);
         editTextPassword = findViewById(R.id.password);
         buttonLogin = findViewById(R.id.btnLogin);
 
-        // Tombol untuk pindah ke halaman sign up
-        buatAkun.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, SignUpActivity.class);
-                startActivity(intent);
-            }
+        // Tombol buat akun → ke SignUpActivity
+        buatAkun.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, SignUpActivity.class);
+            startActivity(intent);
         });
 
-        lupaPassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, LupaPasswordActivity.class);
-                startActivity(intent);
-            }
+        // Tombol lupa password → ke LupaPasswordActivity
+        lupaPassword.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, LupaPasswordActivity.class);
+            startActivity(intent);
         });
 
         // Tombol login
-        buttonLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Validasi input
-                if (validateInput()) {
-                    // Verifikasi kredensial
-                    String username = editTextUsername.getText().toString().trim();
-                    String password = editTextPassword.getText().toString().trim();
-
-                    if (databaseHelper.checkUser(username, password)) {
-                        // Login berhasil
-                        Toast.makeText(MainActivity.this, "Login berhasil!", Toast.LENGTH_SHORT).show();
-
-                        // Dapatkan data user untuk ditampilkan di beranda
-                        DatabaseHelper.User user = databaseHelper.getUserData(username);
-
-                        // Simpan status login ke SharedPreferences
-                        saveLoginStatus(user);
-
-                        // Pindah ke activity beranda dengan membawa data user
-                        Intent intent = new Intent(MainActivity.this, BerandaActivity.class);
-                        intent.putExtra("USERNAME", user.getUsername());
-                        intent.putExtra("DIVISION", user.getDivision());
-                        intent.putExtra("NIP", user.getNip());
-                        startActivity(intent);
-                        finish(); // Menutup activity login
-                    } else {
-                        // Login gagal
-                        Toast.makeText(MainActivity.this, "Username atau password salah!", Toast.LENGTH_SHORT).show();
-                    }
-                }
+        buttonLogin.setOnClickListener(v -> {
+            if (validateInput()) {
+                String username = editTextUsername.getText().toString().trim();
+                String password = editTextPassword.getText().toString().trim();
+                loginUser(username, password);
             }
         });
     }
 
-    // Method untuk mengecek apakah user sudah login
+    // 🔹 Cek apakah user sudah login
     private boolean isUserLoggedIn() {
         return sharedPreferences.getBoolean(KEY_IS_LOGGED_IN, false);
     }
 
-    // Method untuk menyimpan status login
-    private void saveLoginStatus(DatabaseHelper.User user) {
+    // 🔹 Simpan status login ke SharedPreferences
+    private void saveLoginStatus(String username, String division, String nip) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(KEY_IS_LOGGED_IN, true);
-        editor.putString(KEY_USERNAME, user.getUsername());
-        editor.putString(KEY_DIVISION, user.getDivision());
-        editor.putString(KEY_NIP, user.getNip());
+        editor.putString(KEY_USERNAME, username);
+        editor.putString(KEY_DIVISION, division);
+        editor.putString(KEY_NIP, nip);
         editor.apply();
     }
 
-    // Method untuk redirect ke BerandaActivity
+    // 🔹 Redirect ke BerandaActivity
     private void redirectToBeranda() {
         String username = sharedPreferences.getString(KEY_USERNAME, "");
         String division = sharedPreferences.getString(KEY_DIVISION, "");
@@ -129,38 +98,22 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("DIVISION", division);
         intent.putExtra("NIP", nip);
         startActivity(intent);
-        finish(); // Menutup MainActivity
+        finish();
     }
 
-    // Method untuk logout (bisa dipanggil dari activity lain)
+    // 🔹 Logout → bisa dipanggil dari activity lain
     public static void logout(AppCompatActivity activity) {
         SharedPreferences sharedPreferences = activity.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.clear(); // Hapus semua data login
+        editor.clear();
         editor.apply();
 
-        // Redirect ke MainActivity
         Intent intent = new Intent(activity, MainActivity.class);
         activity.startActivity(intent);
         activity.finish();
     }
 
-    // Method untuk mendapatkan data user yang login (bisa dipanggil dari activity lain)
-    public static DatabaseHelper.User getLoggedInUser(AppCompatActivity activity) {
-        SharedPreferences sharedPreferences = activity.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-
-        if (!sharedPreferences.getBoolean(KEY_IS_LOGGED_IN, false)) {
-            return null; // User belum login
-        }
-
-        DatabaseHelper.User user = new DatabaseHelper.User();
-        user.setUsername(sharedPreferences.getString(KEY_USERNAME, ""));
-        user.setDivision(sharedPreferences.getString(KEY_DIVISION, ""));
-        user.setNip(sharedPreferences.getString(KEY_NIP, ""));
-
-        return user;
-    }
-
+    // 🔹 Validasi input
     private boolean validateInput() {
         String username = editTextUsername.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
@@ -186,12 +139,42 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // Tutup koneksi database jika perlu
-        if (databaseHelper != null) {
-            databaseHelper.close();
-        }
+    // 🔹 Proses login dengan Retrofit (ke PHP MySQL API)
+    private void loginUser(String username, String password) {
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<LoginResponse> call = apiService.loginUser(username, password);
+
+        call.enqueue(new Callback<LoginResponse>() {
+            @Override
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    LoginResponse loginResponse = response.body();
+
+                    if (loginResponse.isSuccess()) {
+                        Toast.makeText(MainActivity.this, "Login berhasil!", Toast.LENGTH_SHORT).show();
+
+                        // Simpan status login (Remember Me)
+                        saveLoginStatus(
+                                loginResponse.getNIP(),     // kalau API mengembalikan NIP sebagai identitas utama
+                                loginResponse.getDivisi(),  // sesuai getter kamu
+                                loginResponse.getNIP()
+                        );
+
+                        // Pindah ke beranda
+                        redirectToBeranda();
+
+                    } else {
+                        Toast.makeText(MainActivity.this, "Login gagal: " + loginResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(MainActivity.this, "Response error!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
