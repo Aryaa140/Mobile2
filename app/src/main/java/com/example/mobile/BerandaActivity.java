@@ -99,10 +99,7 @@ public class BerandaActivity extends AppCompatActivity {
             Intent intentUserp = new Intent(BerandaActivity.this, TambahUserpActivity.class);
             startActivity(intentUserp);
         });
-        cardInputPromoM.setOnClickListener(v -> {
-            Intent intentUserp = new Intent(BerandaActivity.this, InputPromoActivity.class);
-            startActivity(intentUserp);
-        });
+
 
         topAppBar.setNavigationOnClickListener(v -> {
             if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
