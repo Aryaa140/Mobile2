@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_sidebar"
+    android:orientation="horizontal"
+    android:fitsSystemWindows="true"
+    android:gravity="center_vertical"
+    android:layout_marginTop="25dp"
+    android:paddingLeft="30dp"
+    android:padding="30dp">
+
+    <!-- Foto User -->
+    <ImageView
+        android:id="@+id/imgUser"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@drawable/ic_person"
+        android:background="@drawable/oval_bg"
+        android:padding="12dp"
+        android:contentDescription="User Icon"
+        android:layout_marginEnd="20dp" />
+
+    <!-- Bagian teks -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvUsername"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nama User"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:ellipsize="end"
+            android:singleLine="true"/>
+
+        <TextView
+            android:id="@+id/tvNip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="NIP: 123456789"
+            android:textColor="@android:color/white"
+            android:textSize="13sp"
+            android:layout_marginTop="4dp"/>
+
+        <TextView
+            android:id="@+id/tvDivisi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Divisi: IT Support"
+            android:textColor="@android:color/white"
+            android:textSize="13sp"
+            android:layout_marginTop="2dp"/>
+    </LinearLayout>
+
+</LinearLayout>

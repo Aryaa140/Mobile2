@@ -3,20 +3,29 @@ package com.example.mobile;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.graphics.Insets;
+import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
 
 public class ProfileActivity extends AppCompatActivity {
     BottomNavigationView bottomNavigationView;
     CardView cardEditProfil, cardGantiPW, cardHapusAkun, cardLogout;
+    private DrawerLayout drawerLayout;
+    private MaterialToolbar topAppBar;
+    NavigationView navigationView;
     private SharedPreferences sharedPreferences;
 
     // Keys untuk SharedPreferences
@@ -29,16 +38,32 @@ public class ProfileActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile);
 
-        // Inisialisasi SharedPreferences
-        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-
+        topAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+        drawerLayout = findViewById(R.id.drawerLayout);
+        navigationView = findViewById(R.id.navigationView);
         cardLogout = findViewById(R.id.card_logout);
         cardEditProfil = findViewById(R.id.cardEditProfil);
         cardGantiPW = findViewById(R.id.cardGantiPW);
         cardHapusAkun = findViewById(R.id.cardHapusAkun);
 
         bottomNavigationView.setSelectedItemId(R.id.nav_profile);
+        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+
+        View headerView = navigationView.getHeaderView(0);
+
+        TextView tvUsername = headerView.findViewById(R.id.tvUsername);
+        TextView tvNip = headerView.findViewById(R.id.tvNip);
+        TextView tvDivisi = headerView.findViewById(R.id.tvDivisi);
+
+        String username = sharedPreferences.getString("username", "User");
+        String division = sharedPreferences.getString("division", "Divisi");
+        String nip = sharedPreferences.getString("nip", "NIP");
+
+        tvUsername.setText(username);
+        tvNip.setText("NIP: " + nip);
+        tvDivisi.setText("Divisi: " + division);
+
 
         cardEditProfil.setOnClickListener(v -> {
             Intent intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
@@ -68,6 +93,27 @@ public class ProfileActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
+
+        topAppBar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_profile) {
+                if (!drawerLayout.isDrawerOpen(GravityCompat.END)) {
+                    drawerLayout.openDrawer(GravityCompat.END);
+                } else {
+                    drawerLayout.closeDrawer(GravityCompat.END);
+                }
+                return true;
+            }
+            return false;
+        });
+
+        topAppBar.setNavigationOnClickListener(v -> {
+            if (!drawerLayout.isDrawerOpen(GravityCompat.END)) {
+                drawerLayout.openDrawer(GravityCompat.END);
+            } else {
+                drawerLayout.closeDrawer(GravityCompat.END);
+            }
+        });
+
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
