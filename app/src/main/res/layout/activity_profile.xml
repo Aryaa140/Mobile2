@@ -47,6 +47,7 @@
                 android:padding="16dp">
 
                 <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardEditProfil"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:layout_marginBottom="16dp"
@@ -72,8 +73,8 @@
 
                             <ImageView
                                 android:layout_width="62dp"
-                                android:layout_height="52dp"
-                                android:src="@drawable/ic_person" />
+                                android:layout_height="56dp"
+                                android:src="@drawable/ic_person2" />
                         </FrameLayout>
 
                         <!-- Text -->
@@ -102,13 +103,15 @@
                     </RelativeLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Card Ganti Password -->
-                <androidx.cardview.widget.CardView
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardGantiPW"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:layout_marginBottom="16dp"
                     app:cardCornerRadius="24dp"
                     app:cardElevation="8dp"
+                    app:strokeColor="@color/teal_200"
+                    app:strokeWidth="1dp"
                     android:foreground="?attr/selectableItemBackground">
 
                     <RelativeLayout
@@ -120,18 +123,18 @@
                             android:id="@+id/icon_password"
                             android:layout_width="64dp"
                             android:layout_height="64dp"
-                            android:background="@drawable/circle_bg_purple"
+                            android:background="@drawable/circle_bg_blue"
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
                             android:gravity="center">
 
                             <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:src="@drawable/ic_lock"
-                                android:tint="@android:color/white"/>
+                                android:layout_width="64dp"
+                                android:layout_height="57dp"
+                                android:src="@drawable/ic_lock2" />
                         </FrameLayout>
 
+                        <!-- Text -->
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -141,26 +144,31 @@
                             android:orientation="vertical">
 
                             <TextView
+                                android:layout_height="wrap_content"
+                                android:layout_width="wrap_content"
                                 android:text="Ganti Password"
-                                android:textSize="16sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/black"/>
 
                             <TextView
-                                android:text="Atur ulang kata sandi Anda"
-                                android:textSize="13sp"
-                                android:textColor="@color/darker_gray"/>
+                                android:layout_height="wrap_content"
+                                android:layout_width="wrap_content"
+                                android:textStyle="italic"
+                                android:text="Lupa Password? Silahkan ubah Password Anda"
+                                android:textColor="@color/black"/>
                         </LinearLayout>
                     </RelativeLayout>
-                </androidx.cardview.widget.CardView>
+                </com.google.android.material.card.MaterialCardView>
 
-                <!-- Card Hapus Akun -->
-                <androidx.cardview.widget.CardView
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardHapusAkun"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:layout_marginBottom="16dp"
                     app:cardCornerRadius="24dp"
                     app:cardElevation="8dp"
+                    app:strokeColor="@color/teal_200"
+                    app:strokeWidth="1dp"
                     android:foreground="?attr/selectableItemBackground">
 
                     <RelativeLayout
@@ -172,18 +180,18 @@
                             android:id="@+id/icon_delete"
                             android:layout_width="64dp"
                             android:layout_height="64dp"
-                            android:background="@drawable/circle_bg_red"
+                            android:background="@drawable/circle_bg_blue"
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
                             android:gravity="center">
 
                             <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:src="@drawable/ic_delete"
-                                android:tint="@android:color/white"/>
+                                android:layout_width="64dp"
+                                android:layout_height="58dp"
+                                android:src="@drawable/ic_delete2" />
                         </FrameLayout>
 
+                        <!-- Text -->
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -193,25 +201,31 @@
                             android:orientation="vertical">
 
                             <TextView
+                                android:layout_height="wrap_content"
+                                android:layout_width="wrap_content"
                                 android:text="Hapus Akun"
-                                android:textSize="16sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/black"/>
 
                             <TextView
-                                android:text="Nonaktifkan akun secara permanen"
-                                android:textSize="13sp"
-                                android:textColor="@color/darker_gray"/>
+                                android:layout_height="wrap_content"
+                                android:layout_width="wrap_content"
+                                android:textStyle="italic"
+                                android:text="Akun Sudah tidak digunakan? Silahkan Hapus Akun"
+                                android:textColor="@color/black"/>
                         </LinearLayout>
                     </RelativeLayout>
-                </androidx.cardview.widget.CardView>
+                </com.google.android.material.card.MaterialCardView>
 
-                <!-- Card Logout -->
-                <androidx.cardview.widget.CardView
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_logout"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
+                    android:layout_marginBottom="16dp"
                     app:cardCornerRadius="24dp"
                     app:cardElevation="8dp"
+                    app:strokeColor="@color/teal_200"
+                    app:strokeWidth="1dp"
                     android:foreground="?attr/selectableItemBackground">
 
                     <RelativeLayout
@@ -221,20 +235,20 @@
 
                         <FrameLayout
                             android:id="@+id/icon_logout"
-                            android:layout_width="64dp"
-                            android:layout_height="64dp"
-                            android:background="@drawable/circle_bg_gray"
+                            android:layout_width="66dp"
+                            android:layout_height="66dp"
+                            android:background="@drawable/circle_bg_blue"
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
                             android:gravity="center">
 
                             <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:src="@drawable/ic_logout"
-                                android:tint="@android:color/white"/>
+                                android:layout_width="66dp"
+                                android:layout_height="60dp"
+                                android:src="@drawable/ic_exit2" />
                         </FrameLayout>
 
+                        <!-- Text -->
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -244,18 +258,21 @@
                             android:orientation="vertical">
 
                             <TextView
+                                android:layout_height="wrap_content"
+                                android:layout_width="wrap_content"
                                 android:text="Keluar"
-                                android:textSize="16sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/black"/>
 
                             <TextView
-                                android:text="Logout dari aplikasi"
-                                android:textSize="13sp"
-                                android:textColor="@color/darker_gray"/>
+                                android:layout_height="wrap_content"
+                                android:layout_width="wrap_content"
+                                android:textStyle="italic"
+                                android:text="Ingin keluar ke halaman Login? Silahkan logout"
+                                android:textColor="@color/black"/>
                         </LinearLayout>
                     </RelativeLayout>
-                </androidx.cardview.widget.CardView>
+                </com.google.android.material.card.MaterialCardView>
 
             </LinearLayout>
         </ScrollView>
