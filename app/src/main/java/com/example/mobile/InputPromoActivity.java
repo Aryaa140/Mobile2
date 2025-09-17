@@ -43,10 +43,10 @@ public class InputPromoActivity extends AppCompatActivity {
 
         // Inisialisasi helpers
         databaseHelper = new DatabaseHelper(this);
-        firebaseHelper = new FirebaseDatabaseHelper();
+        //firebaseHelper = new FirebaseDatabaseHelper();
 
         // Dapatkan username dari SharedPreferences
-        loggedInUsername = MainActivity.getLoggedInUser(this).getUsername();
+        //loggedInUsername = MainActivity.getLoggedInUser(this).getUsername();
 
         // Inisialisasi views
         initViews();
