@@ -21,9 +21,9 @@ public class FirebaseDatabaseHelper {
     private StorageReference storageReference;
     private Context context;
     private static final String TAG = "FirebaseDatabaseHelper";
-    public FirebaseDatabaseHelper() {
+    public FirebaseDatabaseHelper(Context context) {
+        this.context = context;
         try {
-            // Pastikan FirebaseApp sudah diinisialisasi
             if (FirebaseApp.getApps(context).isEmpty()) {
                 FirebaseApp.initializeApp(context);
             }
@@ -34,6 +34,7 @@ public class FirebaseDatabaseHelper {
             e.printStackTrace();
         }
     }
+
 
     public static class Promo {
         private String id;
