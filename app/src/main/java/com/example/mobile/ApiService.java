@@ -29,4 +29,16 @@ public interface ApiService {
             @Field("Divisi") String division,
             @Field("Password") String password
     );
+    @FormUrlEncoded
+    @POST("tambah_prospek.php")
+    Call<BasicResponse> tambahProspek(
+            @Field("nama_penginput") String namaPenginput,
+            @Field("nama_prospek") String namaProspek,
+            @Field("email") String email,
+            @Field("no_hp") String noHp,
+            @Field("alamat") String alamat,
+            @Field("referensi_proyek") String referensiProyek,
+            @Field("status_npwp") String statusNpwp,
+            @Field("status_bpjs") String statusBpjs
+    );
 }

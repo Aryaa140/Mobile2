@@ -7,23 +7,23 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class TambahProspekActivity extends AppCompatActivity {
 
@@ -33,7 +33,6 @@ public class TambahProspekActivity extends AppCompatActivity {
     private EditText editTextPenginput, editTextNama, editTextEmail, editTextNoHp, editTextAlamat;
     private Spinner spinnerReferensi, spinnerNPWP, spinnerBPJS;
     private Button btnSimpan, btnBatal;
-    private DatabaseHelper databaseHelper;
     private SharedPreferences sharedPreferences;
 
     // Keys untuk SharedPreferences
@@ -95,8 +94,6 @@ public class TambahProspekActivity extends AppCompatActivity {
             return insets;
         });
 
-        databaseHelper = new DatabaseHelper(this);
-
         // Inisialisasi view
         editTextPenginput = findViewById(R.id.editTextProspek);
         editTextNama = findViewById(R.id.editTextNama);
@@ -110,52 +107,40 @@ public class TambahProspekActivity extends AppCompatActivity {
         btnSimpan = findViewById(R.id.btnSimpan);
         btnBatal = findViewById(R.id.btnBatal);
 
-        // PERBAIKAN: TextWatcher untuk menghilangkan karakter khusus dan spasi secara otomatis
-        editTextNoHp.addTextChangedListener(new TextWatcher() {
-            private boolean isFormatting = false;
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // Tidak perlu diimplementasi
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Tidak perlu diimplementasi
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (isFormatting) return;
-
-                isFormatting = true;
-
-                // Hilangkan karakter khusus dan spasi secara otomatis
-                String originalString = s.toString();
-                String cleanedString = originalString.replaceAll("[^0-9+]", ""); // Hanya angka dan tanda +
-
-                if (!originalString.equals(cleanedString)) {
-                    s.replace(0, s.length(), cleanedString);
-                }
-
-                isFormatting = false;
-            }
-        });
+        // Setup spinner referensi dari database
+        setupReferensiSpinner();
 
         // OTOMATIS ISI NAMA PENGINPUT BERDASARKAN USER YANG LOGIN
         String username = sharedPreferences.getString(KEY_USERNAME, "");
         if (!TextUtils.isEmpty(username)) {
             editTextPenginput.setText(username);
-            editTextPenginput.setEnabled(false); // Nonaktifkan edit, karena sudah otomatis terisi
-        } else {
-            // Fallback: Ambil dari intent jika tidak ada di SharedPreferences
-            Intent intent = getIntent();
-            if (intent != null && intent.hasExtra("USERNAME")) {
-                username = intent.getStringExtra("USERNAME");
-                editTextPenginput.setText(username);
-                editTextPenginput.setEnabled(false);
-            }
+            editTextPenginput.setEnabled(false);
         }
+
+        // Filtering karakter khusus untuk nomor HP
+        editTextNoHp.addTextChangedListener(new TextWatcher() {
+            private boolean isFormatting = false;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (isFormatting) return;
+                isFormatting = true;
+
+                String originalString = s.toString();
+                String cleanedString = originalString.replaceAll("[^0-9+]", "");
+
+                if (!originalString.equals(cleanedString)) {
+                    s.replace(0, s.length(), cleanedString);
+                }
+                isFormatting = false;
+            }
+        });
 
         // Setup listeners
         btnSimpan.setOnClickListener(new View.OnClickListener() {
@@ -164,10 +149,28 @@ public class TambahProspekActivity extends AppCompatActivity {
                 simpanDataProspek();
             }
         });
+
+        btnBatal.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(TambahProspekActivity.this, BerandaActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+    }
+
+    private void setupReferensiSpinner() {
+        // Ambil data referensi dari database (contoh)
+        String[] referensiOptions = {"Website", "Media Sosial", "Rekomendasi", "Iklan", "Lainnya"};
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, referensiOptions);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerReferensi.setAdapter(adapter);
     }
 
     private void simpanDataProspek() {
-        // Ambil data dari form
         String penginput = editTextPenginput.getText().toString().trim();
         String nama = editTextNama.getText().toString().trim();
         String email = editTextEmail.getText().toString().trim();
@@ -178,75 +181,83 @@ public class TambahProspekActivity extends AppCompatActivity {
         String statusBpjs = spinnerBPJS.getSelectedItem().toString();
 
         // Validasi input
-        if (penginput.isEmpty()) {
+        if (TextUtils.isEmpty(penginput)) {
             editTextPenginput.setError("Nama penginput harus diisi");
             editTextPenginput.requestFocus();
             return;
         }
 
-        if (nama.isEmpty()) {
+        if (TextUtils.isEmpty(nama)) {
             editTextNama.setError("Nama lengkap harus diisi");
             editTextNama.requestFocus();
             return;
         }
 
-        if (noHp.isEmpty()) {
+        if (TextUtils.isEmpty(noHp)) {
             editTextNoHp.setError("No. Handphone harus diisi");
             editTextNoHp.requestFocus();
             return;
         }
 
-        // PERBAIKAN: Validasi karakter khusus pada nomor HP
         if (noHp.matches(".*[^0-9+].*")) {
             editTextNoHp.setError("Nomor HP hanya boleh mengandung angka dan tanda +");
             editTextNoHp.requestFocus();
             return;
         }
 
-        if (alamat.isEmpty()) {
+        if (TextUtils.isEmpty(alamat)) {
             editTextAlamat.setError("Alamat harus diisi");
             editTextAlamat.requestFocus();
             return;
         }
 
-        // Validasi format email (hanya jika email tidak kosong)
-        if (!email.isEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        if (!TextUtils.isEmpty(email) && !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             editTextEmail.setError("Format email tidak valid");
             editTextEmail.requestFocus();
             return;
         }
 
-        // Validasi duplikasi data - TIDAK DIUBAH (SUDAH BENAR)
-        if (databaseHelper.isProspekExists(nama, noHp)) {
-            // Cek apakah duplikat nama atau nomor HP
-            if (databaseHelper.isProspekExistsByName(nama)) {
-                editTextNama.setError("Nama prospek sudah terdaftar");
-                editTextNama.requestFocus();
-            } else {
-                editTextNoHp.setError("Nomor HP sudah terdaftar");
-                editTextNoHp.requestFocus();
+        // Simpan data ke MySQL melalui API
+        simpanProspekKeMySQL(penginput, nama, email, noHp, alamat, referensi, statusNpwp, statusBpjs);
+    }
+
+    private void simpanProspekKeMySQL(String penginput, String nama, String email, String noHp,
+                                      String alamat, String referensi, String statusNpwp, String statusBpjs) {
+
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<BasicResponse> call = apiService.tambahProspek(
+                penginput, nama, email, noHp, alamat, referensi, statusNpwp, statusBpjs
+        );
+
+        call.enqueue(new Callback<BasicResponse>() {
+            @Override
+            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    BasicResponse prospekResponse = response.body();
+
+                    if (prospekResponse.isSuccess()) {
+                        Toast.makeText(TambahProspekActivity.this, "Data prospek berhasil disimpan", Toast.LENGTH_SHORT).show();
+                        clearForm();
+
+                        Intent intent = new Intent(TambahProspekActivity.this, BerandaActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(TambahProspekActivity.this, "Gagal: " + prospekResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(TambahProspekActivity.this, "Error response dari server", Toast.LENGTH_SHORT).show();
+                }
             }
-            return;
-        }
 
-        // Simpan data ke database dengan parameter baru
-        long result = databaseHelper.addProspek(penginput, nama, email, noHp, alamat, referensi, statusNpwp, statusBpjs);
-
-        if (result != -1) {
-            Toast.makeText(this, "Data prospek berhasil disimpan", Toast.LENGTH_SHORT).show();
-            clearForm();
-
-            // Kembali ke BerandaActivity setelah berhasil menyimpan
-            Intent intent = new Intent(TambahProspekActivity.this, BerandaActivity.class);
-            startActivity(intent);
-            finish();
-        } else {
-            Toast.makeText(this, "Gagal menyimpan data prospek", Toast.LENGTH_SHORT).show();
-        }
+            @Override
+            public void onFailure(Call<BasicResponse> call, Throwable t) {
+                Toast.makeText(TambahProspekActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void clearForm() {
-        // Jangan reset editTextPenginput karena sudah terisi otomatis
         editTextNama.setText("");
         editTextEmail.setText("");
         editTextNoHp.setText("");
@@ -254,13 +265,5 @@ public class TambahProspekActivity extends AppCompatActivity {
         spinnerReferensi.setSelection(0);
         spinnerNPWP.setSelection(0);
         spinnerBPJS.setSelection(0);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (databaseHelper != null) {
-            databaseHelper.close();
-        }
     }
 }
