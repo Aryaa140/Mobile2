@@ -13,33 +13,25 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
 
-public class FasilitasActivity extends AppCompatActivity {
-    MaterialToolbar TopAppBar;
+public class FasilitasDevelopmentActivity extends AppCompatActivity {
     BottomNavigationView bottomNavigationView;
-    MaterialCardView cardDevelopment;
+    MaterialToolbar TopAppBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_fasilitas);
+        setContentView(R.layout.activity_fasilitas_development);
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setSelectedItemId(R.id.nav_folder);
         TopAppBar = findViewById(R.id.topAppBar);
-        cardDevelopment = findViewById(R.id.cardDevelopment);
 
         TopAppBar.setNavigationOnClickListener(v -> {
-            Intent intent = new Intent(FasilitasActivity.this, BerandaActivity.class);
+            Intent intent = new Intent(FasilitasDevelopmentActivity.this, FasilitasActivity.class);
             startActivity(intent);
             finish();
         });
-
-        cardDevelopment.setOnClickListener(v -> {
-            Intent intent = new Intent(FasilitasActivity.this, FasilitasDevelopmentActivity.class);
-            startActivity(intent);
-        });
-
-        bottomNavigationView.setSelectedItemId(R.id.nav_folder);
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
@@ -56,7 +48,6 @@ public class FasilitasActivity extends AppCompatActivity {
             }
             return false;
         });
-
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
