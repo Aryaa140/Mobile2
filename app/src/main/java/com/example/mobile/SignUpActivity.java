@@ -1,7 +1,6 @@
 package com.example.mobile;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -12,7 +11,19 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.widget.AdapterView;
+import android.view.View;
 public class SignUpActivity extends AppCompatActivity {
     private EditText editTextUsername, editTextNoNip, editTextPassword, editTextPassword2;
     private Spinner spinnerDivision;
@@ -51,27 +62,8 @@ public class SignUpActivity extends AppCompatActivity {
                     String nip = editTextNoNip.getText().toString().trim();
                     String password = editTextPassword.getText().toString().trim();
 
-                    if (databaseHelper.addUser(username, selectedDivision, nip, password)) {
-
-                        SharedPreferences sharedPreferences = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putBoolean("isLoggedIn", true);
-                        editor.putString("username", username);
-                        editor.putString("division", selectedDivision);
-                        editor.putString("nip", nip);
-                        editor.apply();
-
-                        // Pendaftaran berhasil
-                        Toast.makeText(SignUpActivity.this, "Akun berhasil dibuat!", Toast.LENGTH_SHORT).show();
-
-                        // Kembali ke activity login
-                        Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish(); // Menutup activity signup
-                    } else {
-                        // Pendaftaran gagal
-                        Toast.makeText(SignUpActivity.this, "Gagal membuat akun. Coba lagi.", Toast.LENGTH_SHORT).show();
-                    }
+                    // Registrasi menggunakan API PHP ke MySQL
+                    registerUserToMySQL(username, nip, selectedDivision, password);
                 }
             }
         });
@@ -83,22 +75,27 @@ public class SignUpActivity extends AppCompatActivity {
                 // Kembali ke activity login
                 Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
                 startActivity(intent);
-                finish(); // Menutup activity signup
+                finish();
             }
         });
     }
 
     // Method untuk setup spinner dengan divisi
+    // Method untuk setup spinner dengan divisi
+    // Method untuk setup spinner dengan divisi
     private void setupDivisionSpinner() {
-        // Ambil divisi dari database helper
-        String[] divisions = databaseHelper.getAllDivisions();
+        // Ambil divisi dari database helper (yang mengembalikan String[])
+        String[] divisionsArray = databaseHelper.getAllDivisions();
 
-        // Buat array dengan tambahan "Pilih Divisi" di awal
-        String[] spinnerItems = new String[divisions.length + 1];
-        spinnerItems[0] = "Pilih Divisi";
-        System.arraycopy(divisions, 0, spinnerItems, 1, divisions.length);
+        // Convert array ke List
+        List<String> divisionsList = Arrays.asList(divisionsArray);
 
-        // Create an ArrayAdapter
+        // Buat List dengan tambahan "Pilih Divisi" di awal
+        List<String> spinnerItems = new ArrayList<>();
+        spinnerItems.add("Pilih Divisi");
+        spinnerItems.addAll(divisionsList);
+
+        // Create an ArrayAdapter menggunakan List<String>
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, spinnerItems);
 
@@ -125,7 +122,6 @@ public class SignUpActivity extends AppCompatActivity {
             }
         });
     }
-
     // Method untuk validasi input
     private boolean validateInput() {
         String username = editTextUsername.getText().toString().trim();
@@ -168,20 +164,56 @@ public class SignUpActivity extends AppCompatActivity {
             return false;
         }
 
-        // Cek apakah username sudah digunakan
-        if (databaseHelper.checkUsername(username)) {
-            editTextUsername.setError("Username sudah digunakan");
-            editTextUsername.requestFocus();
-            return false;
-        }
-
-        // Cek apakah NIP sudah digunakan
-        if (databaseHelper.checkNip(nip)) {
-            editTextNoNip.setError("No. NIP sudah digunakan");
-            editTextNoNip.requestFocus();
-            return false;
-        }
-
         return true;
+    }
+
+    // METHOD UNTUK REGISTRASI KE MYSQL MELALUI API PHP
+    private void registerUserToMySQL(String username, String nip, String division, String password) {
+        // Tampilkan loading
+        showLoading(true);
+
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<RegisterResponse> call = apiService.registerUser(username, nip, division, password);
+
+        call.enqueue(new Callback<RegisterResponse>() {
+            @Override
+            public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> response) {
+                showLoading(false);
+
+                if (response.isSuccessful() && response.body() != null) {
+                    RegisterResponse registerResponse = response.body();
+
+                    if (registerResponse.isSuccess()) {
+                        // Pendaftaran berhasil
+                        Toast.makeText(SignUpActivity.this, "Akun berhasil dibuat!", Toast.LENGTH_SHORT).show();
+
+                        // Kembali ke activity login
+                        Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        // Pendaftaran gagal
+                        Toast.makeText(SignUpActivity.this, "Gagal membuat akun: " + registerResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(SignUpActivity.this, "Error response dari server", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RegisterResponse> call, Throwable t) {
+                showLoading(false);
+                Toast.makeText(SignUpActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // Method untuk menampilkan/menyembunyikan loading
+    private void showLoading(boolean isLoading) {
+        // Implementasi progress dialog atau progress bar
+        if (isLoading) {
+            // Tampilkan loading
+            Toast.makeText(this, "Mendaftarkan akun...", Toast.LENGTH_SHORT).show();
+        }
     }
 }

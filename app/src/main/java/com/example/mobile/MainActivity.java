@@ -14,7 +14,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
+import android.app.ProgressDialog;
+import android.util.Log;
+import java.io.IOException;
 public class MainActivity extends AppCompatActivity {
 
     private EditText editTextUsername, editTextPassword;
@@ -140,13 +142,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 🔹 Proses login dengan Retrofit (ke PHP MySQL API)
+    // 🔹 Proses login dengan Retrofit (ke PHP MySQL API)
     private void loginUser(String username, String password) {
+        // Tampilkan progress dialog atau loading indicator
+        Log.d("LoginDebug", "Attempting login with: " + username + "/" + password);
+        showLoading(true);
+
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
         Call<LoginResponse> call = apiService.loginUser(username, password);
 
         call.enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                showLoading(false);
+                Log.d("LoginDebug", "Response code: " + response.code());
+                Log.d("LoginDebug", "Response body: " + response.body());
                 if (response.isSuccessful() && response.body() != null) {
                     LoginResponse loginResponse = response.body();
 
@@ -154,11 +164,22 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "Login berhasil!", Toast.LENGTH_SHORT).show();
 
                         // Simpan status login (Remember Me)
-                        saveLoginStatus(
-                                loginResponse.getNIP(),     // kalau API mengembalikan NIP sebagai identitas utama
-                                loginResponse.getDivisi(),  // sesuai getter kamu
-                                loginResponse.getNIP()
-                        );
+                        // Perhatikan struktur response, jika ada objek data
+                        if (loginResponse.getData() != null) {
+                            // Jika response menggunakan struktur data
+                            saveLoginStatus(
+                                    loginResponse.getData().getUsername(),
+                                    loginResponse.getData().getDivisi(),
+                                    loginResponse.getData().getNIP()
+                            );
+                        } else {
+                            // Jika response langsung di root
+                            saveLoginStatus(
+                                    username,  // karena username tidak dikembalikan di response
+                                    loginResponse.getDivisi(),
+                                    loginResponse.getNIP()
+                            );
+                        }
 
                         // Pindah ke beranda
                         redirectToBeranda();
@@ -167,14 +188,31 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "Login gagal: " + loginResponse.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(MainActivity.this, "Response error!", Toast.LENGTH_SHORT).show();
+                    try {
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
+                        Toast.makeText(MainActivity.this, "Error: " + errorBody, Toast.LENGTH_SHORT).show();
+                    } catch (IOException e) {
+                        Toast.makeText(MainActivity.this, "Response error!", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
+                showLoading(false);
                 Toast.makeText(MainActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("LoginError", "Error: " + t.getMessage());
             }
         });
+    }
+
+    // Method untuk menampilkan/menyembunyikan loading
+    private void showLoading(boolean isLoading) {
+        // Implementasi progress dialog atau progress bar
+        if (isLoading) {
+            // Tampilkan loading
+        } else {
+            // Sembunyikan loading
+        }
     }
 }

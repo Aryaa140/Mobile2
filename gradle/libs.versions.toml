@@ -14,7 +14,7 @@ firebaseAuth = "23.0.0"
 googleServices = "4.4.0"
 retrofit = "2.9.0"
 okhttp = "4.9.3"
-
+gson = "2.10.1"
 
 [libraries]
 # Android libraries
@@ -28,6 +28,7 @@ constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayo
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 okhttp-logging = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 # Firebase libraries
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }

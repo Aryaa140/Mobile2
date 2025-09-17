@@ -21,4 +21,12 @@ public interface ApiService {
             @Field("Divisi") String Divisi,
             @Field("Password") String password
     );
+    @FormUrlEncoded
+    @POST("register.php")
+    Call<RegisterResponse> registerUser(
+            @Field("ussername") String username,
+            @Field("NIP") String nip,
+            @Field("Divisi") String division,
+            @Field("Password") String password
+    );
 }
