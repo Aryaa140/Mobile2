@@ -21,7 +21,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/transparent"
             android:theme="@style/ToolbarWhiteIcons"
-            app:title="Menu Profil"
+            app:title="Menu Profile"
             app:titleCentered="true"
             app:titleTextColor="@android:color/white"
             app:menu="@menu/top_app_bar_menupr"

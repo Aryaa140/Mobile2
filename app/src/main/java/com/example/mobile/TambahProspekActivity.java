@@ -108,7 +108,7 @@ public class TambahProspekActivity extends AppCompatActivity {
         btnBatal = findViewById(R.id.btnBatal);
 
         // Setup spinner referensi dari database
-        setupReferensiSpinner();
+        /*setupReferensiSpinner();*/
 
         // OTOMATIS ISI NAMA PENGINPUT BERDASARKAN USER YANG LOGIN
         String username = sharedPreferences.getString(KEY_USERNAME, "");
@@ -160,7 +160,7 @@ public class TambahProspekActivity extends AppCompatActivity {
         });
     }
 
-    private void setupReferensiSpinner() {
+    /*private void setupReferensiSpinner() {
         // Ambil data referensi dari database (contoh)
         String[] referensiOptions = {"Website", "Media Sosial", "Rekomendasi", "Iklan", "Lainnya"};
 
@@ -168,7 +168,7 @@ public class TambahProspekActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_item, referensiOptions);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerReferensi.setAdapter(adapter);
-    }
+    }*/
 
     private void simpanDataProspek() {
         String penginput = editTextPenginput.getText().toString().trim();
