@@ -11,6 +11,10 @@
 
     <color name="light_blue_500">#03A9F4</color>
     <color name="light_blue_200">#81D4FA</color>
+    <color name="blue_500">#007BFF</color>
+    <color name="blue_300">#339CFF</color>
+    <color name="gray_500">#808080</color>
+
 
     <color name="colorPrimary">#4361EE</color>
     <color name="colorPrimaryDark">#3A56D4</color>

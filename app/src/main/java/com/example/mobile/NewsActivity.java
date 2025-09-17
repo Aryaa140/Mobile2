@@ -8,12 +8,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
 
 
 public class NewsActivity extends AppCompatActivity {
-
+    MaterialToolbar topAppBar;
     BottomNavigationView bottomNavigationView;
 
     @Override
@@ -22,8 +25,15 @@ public class NewsActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_news);
 
+        topAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.nav_news);
+
+        topAppBar.setNavigationOnClickListener(v -> {
+            Intent intent = new Intent(NewsActivity.this, BerandaActivity.class);
+            startActivity(intent);
+            finish();
+        });
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();

@@ -4,20 +4,28 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
+import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.navigation.NavigationView;
 
 public class BerandaActivity extends AppCompatActivity {
 
-    MaterialCardView cardWelcome, cardProspekM, cardLihatDataM, cardFasilitasM, cardProyekM, cardUserpM;
-    BottomNavigationView bottomNavigationView;
+    MaterialCardView cardWelcome, cardProspekM, cardLihatDataM, cardFasilitasM, cardProyekM, cardUserpM, cardInputPromoM;
+    private BottomNavigationView bottomNavigationView;
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
+    private MaterialToolbar topAppBar;
     TextView tvUserName; // TextView untuk menampilkan username
     private SharedPreferences sharedPreferences;
 
@@ -25,6 +33,8 @@ public class BerandaActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "LoginPrefs";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_DIVISION = "division";
+
+    private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +52,12 @@ public class BerandaActivity extends AppCompatActivity {
         cardFasilitasM = findViewById(R.id.cardFasilitasM);
         cardProyekM = findViewById(R.id.cardProyekM);
         cardUserpM = findViewById(R.id.cardUserpM);
+        cardInputPromoM = findViewById(R.id.cardInputPromoM);
         tvUserName = findViewById(R.id.tvUserName);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+        drawerLayout = findViewById(R.id.drawerLayout);
+        navigationView = findViewById(R.id.navigationView);
+        topAppBar = findViewById(R.id.topAppBar);
 
         // TAMPILKAN USERNAME - Prioritaskan dari SharedPreferences
         String username = sharedPreferences.getString(KEY_USERNAME, "");
@@ -86,6 +100,51 @@ public class BerandaActivity extends AppCompatActivity {
             startActivity(intentUserp);
         });
 
+
+        topAppBar.setNavigationOnClickListener(v -> {
+            if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            } else {
+                drawerLayout.closeDrawer(GravityCompat.START);
+            }
+        });
+
+        navigationView.setNavigationItemSelectedListener(item -> {
+                int id = item.getItemId();
+                if (id == R.id.nav_home) {
+                    return true;
+                } else if (id == R.id.nav_folder) {
+                    startActivity(new Intent(this, LihatDataActivity.class));
+                    overridePendingTransition(0, 0);
+                    return true;
+                } else if (id == R.id.nav_news) {
+                    startActivity(new Intent(this, NewsActivity.class));
+                    overridePendingTransition(0, 0);
+                    return true;
+                } else if (id == R.id.nav_profile) {
+                    startActivity(new Intent(this, ProfileActivity.class));
+                    overridePendingTransition(0, 0);
+                    return true;
+                }else if (id == R.id.nav_exit) {
+                    logout();
+
+                    // Tampilkan pesan logout berhasil
+                    Toast.makeText(BerandaActivity.this, "Logout berhasil", Toast.LENGTH_SHORT).show();
+
+                    // Redirect ke MainActivity
+                    Intent intent = new Intent(BerandaActivity.this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+
+                    overridePendingTransition(0, 0);
+                    return true;
+                }
+                drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+        });
+
+
         bottomNavigationView.setSelectedItemId(R.id.nav_home);
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -114,6 +173,15 @@ public class BerandaActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    private void logout() {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.remove(KEY_IS_LOGGED_IN);
+            editor.remove("username");
+            editor.remove("division");
+            editor.remove("nip");
+            editor.apply();
     }
 
     // Method untuk mendapatkan data user yang login

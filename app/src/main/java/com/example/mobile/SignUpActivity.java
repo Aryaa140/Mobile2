@@ -1,6 +1,7 @@
 package com.example.mobile;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -51,6 +52,15 @@ public class SignUpActivity extends AppCompatActivity {
                     String password = editTextPassword.getText().toString().trim();
 
                     if (databaseHelper.addUser(username, selectedDivision, nip, password)) {
+
+                        SharedPreferences sharedPreferences = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putBoolean("isLoggedIn", true);
+                        editor.putString("username", username);
+                        editor.putString("division", selectedDivision);
+                        editor.putString("nip", nip);
+                        editor.apply();
+
                         // Pendaftaran berhasil
                         Toast.makeText(SignUpActivity.this, "Akun berhasil dibuat!", Toast.LENGTH_SHORT).show();
 

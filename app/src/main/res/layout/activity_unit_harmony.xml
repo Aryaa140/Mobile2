@@ -6,7 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/biru_ungu"
+    android:background="@drawable/gradient_bg"
     tools:context=".MainActivity"
     tools:ignore="ExtraText">
 
@@ -30,7 +30,7 @@
         android:id="@+id/container"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/biru_ungu"
+        android:background="@drawable/gradient_bg"
         app:layout_constraintTop_toBottomOf="@id/topAppBar"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
@@ -494,7 +494,7 @@
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
         app:menu="@menu/bottom_nav_menu"
@@ -502,5 +502,7 @@
         app:itemTextColor="@color/bottom_nav_selector"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:itemActiveIndicatorStyle="@style/BottomNav" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
