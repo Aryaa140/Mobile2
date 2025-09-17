@@ -20,7 +20,6 @@
         app:title="Fasilitas Umum"
         app:titleCentered="true"
         app:titleTextColor="@android:color/white"
-        app:menu="@menu/top_app_bar_menu"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
@@ -349,6 +348,7 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardDevelopment"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"

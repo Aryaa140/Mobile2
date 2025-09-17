@@ -18,6 +18,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".FasilitasDevelopmentActivity"
+            android:exported="false" />
+        <activity
             android:name=".InputPromoActivity"
             android:exported="false" />
         <activity
