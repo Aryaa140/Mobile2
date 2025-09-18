@@ -21,7 +21,7 @@ public class EditProfileActivity extends AppCompatActivity {
     BottomNavigationView bottomNavigationView;
     EditText editTextNoNip, editTextUsername;
     Spinner spinnerDivisi;
-    Button btnSimpan, btnBatal;
+    Button btnEdit, btnBatal;
     DatabaseHelper databaseHelper;
 
     @Override
@@ -39,7 +39,7 @@ public class EditProfileActivity extends AppCompatActivity {
         editTextNoNip = findViewById(R.id.noNip);
         editTextUsername = findViewById(R.id.username);
         spinnerDivisi = findViewById(R.id.spinnerOpsi);
-        btnSimpan = findViewById(R.id.btnSimpan);
+        btnEdit = findViewById(R.id.btnEdit);
         btnBatal = findViewById(R.id.btnBatal);
 
         // Setup spinner divisi
@@ -80,7 +80,7 @@ public class EditProfileActivity extends AppCompatActivity {
         });
 
         // Setup button listeners
-        btnSimpan.setOnClickListener(new View.OnClickListener() {
+        btnEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 editProfil();

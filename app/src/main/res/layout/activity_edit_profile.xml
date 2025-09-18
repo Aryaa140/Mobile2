@@ -40,7 +40,7 @@
         android:id="@+id/cardForm"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="45dp"
+        android:layout_marginTop="85dp"
         android:layout_marginRight="18dp"
         android:layout_marginLeft="18dp"
         app:cardCornerRadius="16dp"
@@ -60,84 +60,62 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:layout_marginBottom="0dp"
-                android:layout_marginRight="45dp"
-                android:layout_marginLeft="65dp"
-                android:text="Silahkan Masukkan No. NIP"
+                android:layout_marginBottom="25dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginLeft="15dp"
+                android:text="Silahkan Masukkan Data yang ingin diubah"
                 android:textColor="@android:color/black"
                 android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/textView1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="20dp"
-                android:layout_marginRight="45dp"
-                android:layout_marginLeft="77dp"
-                android:text="Akun yang ingin diubah!"
-                android:textColor="@android:color/black"
-                android:textSize="16sp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
-                android:layout_marginBottom="10dp"
-                android:text="No. NIP"
-                android:textColor="@android:color/black"
-                android:textSize="15dp"
-                tools:ignore="TextSizeCheck" />
 
             <EditText
                 android:id="@+id/noNip"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
                 android:textColor="@android:color/black"
-                android:layout_marginBottom="12dp"
-                android:hint="Masukkan No. NIP"
-                android:inputType="phone"
-                android:minHeight="48dp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
-                android:layout_marginBottom="10dp"
-                android:text="Username"
-                android:textColor="@android:color/black"
-                android:textSize="15dp"
-                tools:ignore="TextSizeCheck" />
+                android:background="@android:drawable/edit_text"
+                android:drawableStart="@drawable/ic_nip"
+                android:drawablePadding="8dp"
+                android:hint="Masukkan No. NIP Baru"
+                android:inputType="number"
+                android:padding="12dp" />
 
             <EditText
                 android:id="@+id/username"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
                 android:textColor="@android:color/black"
-                android:layout_marginBottom="20dp"
-                android:inputType="textPersonName"
-                android:minHeight="48dp"
-                android:hint="Masukkan Username" />
+                android:background="@android:drawable/edit_text"
+                android:drawableStart="@drawable/ic_username"
+                android:drawablePadding="8dp"
+                android:hint="Masukkan Username"
+                android:padding="12dp" />
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
+                android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:text="Nama Divisi"
+                android:layout_marginLeft="16dp"
+                android:text="Divisi"
                 android:textColor="@android:color/black"
-                android:textSize="15dp"
-                tools:ignore="TextSizeCheck" />
+                android:textSize="15sp" />
 
             <Spinner
                 android:id="@+id/spinnerOpsi"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
                 android:textColor="@android:color/black"
+                android:padding="12dp"
                 android:background="@android:drawable/edit_text"
-                android:entries="@array/opsi_spinner"
-                android:minHeight="48dp"/>
+                android:entries="@array/opsi_spinner" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -147,7 +125,7 @@
                 android:layout_marginTop="16dp">
 
                 <Button
-                    android:id="@+id/btnSimpan"
+                    android:id="@+id/btnEdit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="24dp"

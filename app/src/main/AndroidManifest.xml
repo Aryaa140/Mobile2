@@ -124,9 +124,6 @@
             android:name=".DetailProyekRiversideActivity"
             android:exported="false" />
         <activity
-            android:name=".HapusAkunActivity"
-            android:exported="false" />
-        <activity
             android:name=".LupaPasswordActivity"
             android:exported="false" />
         <activity
