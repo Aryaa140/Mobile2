@@ -17,7 +17,9 @@
         android:theme="@style/Theme.Mobile"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-
+        <activity
+            android:name=".TampilPromoActivity"
+            android:exported="false" />
         <activity
             android:name=".FasilitasDevelopmentActivity"
             android:exported="false" />

@@ -17,7 +17,7 @@
         android:theme="@style/ToolbarWhiteIcons"
         app:navigationIcon="@drawable/ic_back"
         app:navigationIconTint="@android:color/white"
-        app:title="Menu Input Card Promo"
+        app:title="Menu Tampil Card Promo"
         app:titleCentered="true"
         app:titleTextColor="@android:color/white"
         app:layout_constraintTop_toTopOf="parent"
@@ -40,7 +40,7 @@
         android:id="@+id/cardForm"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="95dp"
+        android:layout_marginTop="35dp"
         android:layout_marginRight="18dp"
         android:layout_marginLeft="18dp"
         app:cardCornerRadius="16dp"
@@ -55,41 +55,28 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <EditText
-                android:id="@+id/editTextNama"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardImagePreview"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:textColor="@android:color/black"
-                android:background="@android:drawable/edit_text"
-                android:drawableStart="@drawable/ic_promo"
-                android:drawablePadding="8dp"
-                android:hint="Masukkan Nama Promo"
-                android:padding="12dp"
-                android:inputType="textPersonName"/>
+                android:layout_height="300dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
 
-            <EditText
-                android:id="@+id/editTextProspek"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:textColor="@android:color/black"
-                android:background="@android:drawable/edit_text"
-                android:drawableStart="@drawable/ic_pin_person"
-                android:drawablePadding="8dp"
-                android:hint="Masukkan Nama Penginput"
-                android:padding="12dp" />
+                <ImageView
+                    android:id="@+id/imgPreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="Preview Gambar" />
+            </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:layout_marginLeft="16dp"
-                android:text="Pilih Refrensi Prospek"
+                android:text="Pilih Card"
                 android:textColor="@android:color/black"
                 android:textSize="15sp" />
 
@@ -97,27 +84,12 @@
                 android:id="@+id/spinnerRole"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:textColor="@android:color/black"
-                android:background="@android:drawable/edit_text"
-                android:drawablePadding="8dp"
-                android:entries="@array/opsi_spinnerRefrensiProyek"/>
-
-            <Button
-                android:id="@+id/btnInputPromo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:layout_marginBottom="15dp"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
                 android:textColor="@android:color/black"
-                android:backgroundTint="@android:color/white"
-                android:drawablePadding="8dp"
-                android:hint="Input Gambar"
-                android:padding="12dp" />
+                android:background="@android:drawable/edit_text"
+                android:drawablePadding="8dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"

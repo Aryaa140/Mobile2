@@ -113,16 +113,16 @@
                                 android:layout_marginStart="16dp"
                                 android:layout_marginTop="16dp"/>
 
-                            <androidx.recyclerview.widget.RecyclerView
-                                android:id="@+id/recyclerPromo"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:padding="8dp"
-                                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                                tools:listitem="@layout/item_promo_card" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerPromo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="8dp"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/item_promo_card" />
 
-                            <TextView
+                <TextView
                                 android:id="@+id/tvMenu"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -149,7 +149,6 @@
                                     android:layout_height="wrap_content"
                                     android:orientation="horizontal"
                                     android:padding="8dp">
-
 
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardLihatDataM"
@@ -255,6 +254,41 @@
                                                 android:textColor="@android:color/black"
                                                 android:textStyle="bold" />
 
+                                        </LinearLayout>
+                                    </com.google.android.material.card.MaterialCardView>
+
+                                    <com.google.android.material.card.MaterialCardView
+                                        android:id="@+id/cardTampilkanPromoM"
+                                        android:layout_width="90dp"
+                                        android:layout_height="85dp"
+                                        android:layout_margin="8dp"
+                                        app:cardCornerRadius="16dp"
+                                        app:cardElevation="6dp"
+                                        app:strokeWidth="1dp"
+                                        app:strokeColor="@color/black">
+
+                                        <LinearLayout
+                                            android:layout_width="match_parent"
+                                            android:layout_height="match_parent"
+                                            android:orientation="vertical"
+                                            android:gravity="center"
+                                            android:padding="8dp">
+
+                                            <ImageView
+                                                android:layout_width="40dp"
+                                                android:layout_height="40dp"
+                                                android:src="@drawable/ic_tampil"
+                                                android:contentDescription="Tampil Promo"
+                                                app:tint="@color/light_blue_500" />
+
+                                            <TextView
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content"
+                                                android:layout_marginTop="8dp"
+                                                android:text="Tampil Promo"
+                                                android:textSize="10sp"
+                                                android:textColor="@android:color/black"
+                                                android:textStyle="bold" />
                                         </LinearLayout>
                                     </com.google.android.material.card.MaterialCardView>
 

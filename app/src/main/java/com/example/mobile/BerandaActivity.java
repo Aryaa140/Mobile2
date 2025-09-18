@@ -21,7 +21,7 @@ import com.google.android.material.navigation.NavigationView;
 
 public class BerandaActivity extends AppCompatActivity {
 
-    MaterialCardView cardWelcome, cardProspekM, cardLihatDataM, cardFasilitasM, cardProyekM, cardUserpM, cardInputPromoM;
+    MaterialCardView cardWelcome, cardProspekM, cardLihatDataM, cardFasilitasM, cardProyekM, cardUserpM, cardInputPromoM, cardTampilkanPromoM;
     private BottomNavigationView bottomNavigationView;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
@@ -53,6 +53,7 @@ public class BerandaActivity extends AppCompatActivity {
         cardProyekM = findViewById(R.id.cardProyekM);
         cardUserpM = findViewById(R.id.cardUserpM);
         cardInputPromoM = findViewById(R.id.cardInputPromoM);
+        cardTampilkanPromoM = findViewById(R.id.cardTampilkanPromoM);
         tvUserName = findViewById(R.id.tvUserName);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         drawerLayout = findViewById(R.id.drawerLayout);
@@ -101,6 +102,10 @@ public class BerandaActivity extends AppCompatActivity {
         });
         cardInputPromoM.setOnClickListener(v -> {
             Intent intent = new Intent(BerandaActivity.this, InputPromoActivity.class);
+            startActivity(intent);
+        });
+        cardTampilkanPromoM.setOnClickListener(v -> {
+            Intent intent = new Intent(BerandaActivity.this, TampilPromoActivity.class);
             startActivity(intent);
         });
 

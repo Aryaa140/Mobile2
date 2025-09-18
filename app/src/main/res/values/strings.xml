@@ -47,5 +47,13 @@
         <item> </item>
     </string-array>
 
+    <string-array name="opsi_spinnerRefrensiProyek">
+        <item>The Quality Riverside</item>
+        <item>The Quality Harmony</item>
+        <item>The Quality View</item>
+        <item>The Quality Garden Residence</item>
+        <item>The Quality Residence</item>
+    </string-array>
+
 </resources>
 
