@@ -13,11 +13,20 @@ import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.navigation.NavigationView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class BerandaActivity extends AppCompatActivity {
 
@@ -26,14 +35,15 @@ public class BerandaActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private MaterialToolbar topAppBar;
-    TextView tvUserName; // TextView untuk menampilkan username
+    TextView tvUserName;
+    private RecyclerView recyclerPromo;
+    private PromoAdapter promoAdapter;
+    private List<Promo> promoList = new ArrayList<>();
     private SharedPreferences sharedPreferences;
 
-    // Keys untuk SharedPreferences
     private static final String PREFS_NAME = "LoginPrefs";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_DIVISION = "division";
-
     private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
 
     @Override
@@ -42,10 +52,23 @@ public class BerandaActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_beranda);
 
-        // Inisialisasi SharedPreferences
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
-        // Inisialisasi view
+        initViews();
+        setupRecyclerView();
+        loadPromoData();
+        setupUserInfo();
+        setupClickListeners();
+        setupNavigation();
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+    }
+
+    private void initViews() {
         cardWelcome = findViewById(R.id.cardWelcome);
         cardProspekM = findViewById(R.id.cardProspekM);
         cardLihatDataM = findViewById(R.id.cardLihatDataM);
@@ -59,23 +82,53 @@ public class BerandaActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawerLayout);
         navigationView = findViewById(R.id.navigationView);
         topAppBar = findViewById(R.id.topAppBar);
+        recyclerPromo = findViewById(R.id.recyclerPromo);
+    }
 
-        // TAMPILKAN USERNAME - Prioritaskan dari SharedPreferences
+    private void setupRecyclerView() {
+        recyclerPromo.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        promoAdapter = new PromoAdapter(this, promoList);
+        recyclerPromo.setAdapter(promoAdapter);
+    }
+
+    private void loadPromoData() {
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<PromoResponse> call = apiService.getSemuaPromo();
+
+        call.enqueue(new Callback<PromoResponse>() {
+            @Override
+            public void onResponse(Call<PromoResponse> call, Response<PromoResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    PromoResponse promoResponse = response.body();
+                    if (promoResponse.isSuccess()) {
+                        promoList.clear();
+                        promoList.addAll(promoResponse.getData());
+                        promoAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PromoResponse> call, Throwable t) {
+                Toast.makeText(BerandaActivity.this, "Gagal memuat promo", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void setupUserInfo() {
         String username = sharedPreferences.getString(KEY_USERNAME, "");
-        String division = sharedPreferences.getString(KEY_DIVISION, "");
-
         if (!username.isEmpty()) {
-            tvUserName.setText(username); // Set text username dari SharedPreferences
+            tvUserName.setText(username);
         } else {
-            // Fallback: Ambil data username dari Intent (jika ada)
             Intent intent = getIntent();
             if (intent != null && intent.hasExtra("USERNAME")) {
                 username = intent.getStringExtra("USERNAME");
-                tvUserName.setText(username); // Set text username
+                tvUserName.setText(username);
             }
         }
+    }
 
-        // JANGAN UBAH INTENT YANG SUDAH ADA - biarkan seperti semula
+    private void setupClickListeners() {
         cardWelcome.setOnClickListener(v -> {
             Intent profileIntent = new Intent(BerandaActivity.this, ProfileActivity.class);
             startActivity(profileIntent);
@@ -108,8 +161,9 @@ public class BerandaActivity extends AppCompatActivity {
             Intent intent = new Intent(BerandaActivity.this, TampilPromoActivity.class);
             startActivity(intent);
         });
+    }
 
-
+    private void setupNavigation() {
         topAppBar.setNavigationOnClickListener(v -> {
             if (!drawerLayout.isDrawerOpen(GravityCompat.START)) {
                 drawerLayout.openDrawer(GravityCompat.START);
@@ -119,46 +173,38 @@ public class BerandaActivity extends AppCompatActivity {
         });
 
         navigationView.setNavigationItemSelectedListener(item -> {
-                int id = item.getItemId();
-                if (id == R.id.nav_home) {
-                    return true;
-                } else if (id == R.id.nav_folder) {
-                    startActivity(new Intent(this, LihatDataActivity.class));
-                    overridePendingTransition(0, 0);
-                    return true;
-                } else if (id == R.id.nav_news) {
-                    startActivity(new Intent(this, NewsActivity.class));
-                    overridePendingTransition(0, 0);
-                    return true;
-                } else if (id == R.id.nav_profile) {
-                    startActivity(new Intent(this, ProfileActivity.class));
-                    overridePendingTransition(0, 0);
-                    return true;
-                }else if (id == R.id.nav_exit) {
-                    logout();
-
-                    // Tampilkan pesan logout berhasil
-                    Toast.makeText(BerandaActivity.this, "Logout berhasil", Toast.LENGTH_SHORT).show();
-
-                    // Redirect ke MainActivity
-                    Intent intent = new Intent(BerandaActivity.this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
-
-                    overridePendingTransition(0, 0);
-                    return true;
-                }
-                drawerLayout.closeDrawer(GravityCompat.START);
+            int id = item.getItemId();
+            if (id == R.id.nav_home) {
                 return true;
+            } else if (id == R.id.nav_folder) {
+                startActivity(new Intent(this, LihatDataActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_news) {
+                startActivity(new Intent(this, NewsActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_exit) {
+                logout();
+                Toast.makeText(BerandaActivity.this, "Logout berhasil", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(BerandaActivity.this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+                overridePendingTransition(0, 0);
+                return true;
+            }
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return true;
         });
 
-
         bottomNavigationView.setSelectedItemId(R.id.nav_home);
-
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-
             if (id == R.id.nav_home) {
                 return true;
             } else if (id == R.id.nav_folder) {
@@ -176,40 +222,21 @@ public class BerandaActivity extends AppCompatActivity {
             }
             return false;
         });
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
     }
 
     private void logout() {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.remove(KEY_IS_LOGGED_IN);
-            editor.remove("username");
-            editor.remove("division");
-            editor.remove("nip");
-            editor.apply();
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(KEY_IS_LOGGED_IN);
+        editor.remove("username");
+        editor.remove("division");
+        editor.remove("nip");
+        editor.apply();
     }
 
-    // Method untuk mendapatkan data user yang login
-    public DatabaseHelper.User getLoggedInUser() {
-        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-
-        String username = sharedPreferences.getString(KEY_USERNAME, "");
-        String division = sharedPreferences.getString(KEY_DIVISION, "");
-        String nip = sharedPreferences.getString("nip", ""); // Ganti "nip" dengan key yang sesuai
-
-        if (username.isEmpty()) {
-            return null; // User belum login
-        }
-
-        DatabaseHelper.User user = new DatabaseHelper.User();
-        user.setUsername(username);
-        user.setDivision(division);
-        user.setNip(nip);
-
-        return user;
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh data promo ketika activity resume
+        loadPromoData();
     }
 }

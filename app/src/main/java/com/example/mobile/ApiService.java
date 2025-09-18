@@ -79,4 +79,6 @@ public interface ApiService {
             @Field("referensi_proyek") String referensiProyek,
             @Field("gambar") String gambarBase64
     );
+    @GET("get_promo.php")
+    Call<PromoResponse> getSemuaPromo();
 }
