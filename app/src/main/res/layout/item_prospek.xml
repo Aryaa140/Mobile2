@@ -37,7 +37,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Tanggal: -"
-                android:textColor="@android:color/darker_gray"
+                android:textColor="@android:color/black"
                 android:textSize="12sp"
                 android:ellipsize="end"
                 android:singleLine="true" />
@@ -82,7 +82,7 @@
                     android:id="@+id/tvNoHp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="No. HP (+62): -"
+                    android:text="No. Handphone (+62): -"
                     android:textColor="@android:color/darker_gray"
                     android:textSize="14sp"
                     android:ellipsize="end"

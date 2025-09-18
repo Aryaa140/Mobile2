@@ -98,7 +98,7 @@
                 android:background="@android:drawable/edit_text"
                 android:drawableStart="@drawable/ic_request"
                 android:drawablePadding="8dp"
-                android:hint="Masukkan Alamat Email"
+                android:hint="Masukkan Alamat Email (Opsional)"
                 android:padding="12dp"
                 android:inputType="textEmailAddress"/>
 
@@ -135,7 +135,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@android:color/transparent"
-                    android:hint="Nomor Handphone"
+                    android:hint="Masukkan Nomor Handphone"
                     android:inputType="phone"
                     android:minHeight="48dp"
                     android:textColor="@android:color/black" />

@@ -181,7 +181,7 @@
                         android:id="@+id/txtDeskripsi"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Hunian berkonsep modern minimalis dengan luas tanah 72, luas bangunan 30, Menggunakan atap bahan galvalum serta kusen aluminium, akses jalan lebar, One gate system, Scurity dan cctv 24 jam"
+                        android:text="useHunian berkonsep modern minimalis dengan luas tanah 72, luas bangunan 30, Menggunakan atap bahan galvalum serta kn aluminium, akses jalan lebar, One gate system, Scurity dan cctv 24 jam"
                         android:textColor="@android:color/black"
                         android:paddingTop="12dp"/>
 

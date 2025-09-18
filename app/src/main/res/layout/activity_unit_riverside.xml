@@ -21,7 +21,6 @@
         app:title="Unit Hunian Riverside"
         app:titleCentered="true"
         app:titleTextColor="@android:color/white"
-        app:menu="@menu/top_app_bar_menu"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
