@@ -21,7 +21,6 @@
         app:title="Menu Proyek"
         app:titleCentered="true"
         app:titleTextColor="@android:color/white"
-        app:menu="@menu/top_app_bar_menu"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
@@ -182,7 +181,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Gamping Wetan, Gamping, Kec. Krian"
+                        android:text="Gamping, Kec. Krian"
                         android:textColor="@android:color/white"/>
                 </LinearLayout>
 
@@ -214,7 +213,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Sawah, Jatikalang, Kec. Krian, Kabupaten Sidoarjo, Jawa Timur "
+                        android:text="Sawah, Jatikalang, Kec. Krian"
                         android:textColor="@android:color/white"/>
                 </LinearLayout>
 

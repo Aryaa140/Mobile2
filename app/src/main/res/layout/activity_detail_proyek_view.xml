@@ -197,12 +197,12 @@
                             <ImageView
                                 android:layout_width="match_parent"
                                 android:layout_height="120dp"
-                                android:src="@drawable/masjid_barokah" />
+                                android:src="@drawable/cctv" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Masjid"
+                                android:text="CCTV"
                                 android:textSize="14sp"
                                 android:textColor="@android:color/black"
                                 android:gravity="center"
@@ -272,29 +272,6 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Taman"
-                                android:textSize="14sp"
-                                android:textColor="@android:color/black"
-                                android:gravity="center"
-                                android:layout_marginTop="6dp"/>
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_columnWeight="1"
-                            android:orientation="vertical"
-                            android:padding="8dp"
-                            android:gravity="center">
-
-                            <ImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="100dp"
-                                android:src="@drawable/water_park_swimming_pool" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Waterpark"
                                 android:textSize="14sp"
                                 android:textColor="@android:color/black"
                                 android:gravity="center"
