@@ -71,5 +71,12 @@ public interface ApiService {
             @Field("nama_penginput") String namaPenginput,
             @Field("nama_prospek") String namaProspek
     );
-
+    @FormUrlEncoded
+    @POST("tambah_promo.php")
+    Call<BasicResponse> tambahPromo(
+            @Field("nama_promo") String namaPromo,
+            @Field("nama_penginput") String namaPenginput,
+            @Field("referensi_proyek") String referensiProyek,
+            @Field("gambar") String gambarBase64
+    );
 }
