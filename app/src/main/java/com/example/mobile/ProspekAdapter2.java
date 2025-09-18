@@ -46,7 +46,7 @@ public class ProspekAdapter2 extends RecyclerView.Adapter<ProspekAdapter2.ViewHo
         holder.tvNamaPenginput.setText("Penginput: " + safeString(prospek.getNamaPenginput()));
         holder.tvTanggalInput.setText("Tanggal: " + safeString(prospek.getTanggalInput()));
         holder.tvEmail.setText("Email: " + safeString(prospek.getEmail()));
-        holder.tvNoHp.setText("No. HP: " + safeString(prospek.getNoHp()));
+        holder.tvNoHp.setText("No. HP (+62): " + safeString(prospek.getNoHp()));
         holder.tvAlamat.setText("Alamat: " + safeString(prospek.getAlamat()));
         holder.tvStatusNPWP.setText("NPWP: " + safeString(prospek.getStatusNpwp()));
         holder.tvStatusBPJS.setText("BPJS: " + safeString(prospek.getStatusBpjs()));
