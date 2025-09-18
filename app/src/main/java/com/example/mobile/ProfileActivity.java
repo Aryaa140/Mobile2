@@ -22,7 +22,7 @@ import com.google.android.material.navigation.NavigationView;
 
 public class ProfileActivity extends AppCompatActivity {
     BottomNavigationView bottomNavigationView;
-    CardView cardEditProfil, cardGantiPW, cardHapusAkun, cardLogout;
+    CardView cardEditProfil, cardGantiPW, cardLogout;
     private DrawerLayout drawerLayout;
     private MaterialToolbar topAppBar;
     NavigationView navigationView;
@@ -45,7 +45,6 @@ public class ProfileActivity extends AppCompatActivity {
         cardLogout = findViewById(R.id.card_logout);
         cardEditProfil = findViewById(R.id.cardEditProfil);
         cardGantiPW = findViewById(R.id.cardGantiPW);
-        cardHapusAkun = findViewById(R.id.cardHapusAkun);
 
         bottomNavigationView.setSelectedItemId(R.id.nav_profile);
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -72,11 +71,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         cardGantiPW.setOnClickListener(v -> {
             Intent intent = new Intent(ProfileActivity.this, GantiPasswordActivity.class);
-            startActivity(intent);
-        });
-
-        cardHapusAkun.setOnClickListener(v -> {
-            Intent intent = new Intent(ProfileActivity.this, HapusAkunActivity.class);
             startActivity(intent);
         });
 

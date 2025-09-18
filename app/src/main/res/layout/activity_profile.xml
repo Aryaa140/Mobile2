@@ -161,63 +161,6 @@
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cardHapusAkun"
-                    android:layout_width="match_parent"
-                    android:layout_height="100dp"
-                    android:layout_marginBottom="16dp"
-                    app:cardCornerRadius="24dp"
-                    app:cardElevation="8dp"
-                    app:strokeColor="@color/teal_200"
-                    app:strokeWidth="1dp"
-                    android:foreground="?attr/selectableItemBackground">
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:padding="16dp">
-
-                        <FrameLayout
-                            android:id="@+id/icon_delete"
-                            android:layout_width="64dp"
-                            android:layout_height="64dp"
-                            android:background="@drawable/circle_bg_blue"
-                            android:layout_alignParentStart="true"
-                            android:layout_centerVertical="true"
-                            android:gravity="center">
-
-                            <ImageView
-                                android:layout_width="64dp"
-                                android:layout_height="58dp"
-                                android:src="@drawable/ic_delete2" />
-                        </FrameLayout>
-
-                        <!-- Text -->
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_toEndOf="@id/icon_delete"
-                            android:layout_marginStart="20dp"
-                            android:layout_centerVertical="true"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_height="wrap_content"
-                                android:layout_width="wrap_content"
-                                android:text="Hapus Akun"
-                                android:textStyle="bold"
-                                android:textColor="@color/black"/>
-
-                            <TextView
-                                android:layout_height="wrap_content"
-                                android:layout_width="wrap_content"
-                                android:textStyle="italic"
-                                android:text="Akun Sudah tidak digunakan? Silahkan Hapus Akun"
-                                android:textColor="@color/black"/>
-                        </LinearLayout>
-                    </RelativeLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_logout"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
