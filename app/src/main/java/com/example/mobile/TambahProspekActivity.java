@@ -24,6 +24,9 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class TambahProspekActivity extends AppCompatActivity {
 
@@ -108,7 +111,7 @@ public class TambahProspekActivity extends AppCompatActivity {
         btnBatal = findViewById(R.id.btnBatal);
 
         // Setup spinner referensi dari database
-        setupReferensiSpinner();
+       // setupReferensiSpinner();
 
         // OTOMATIS ISI NAMA PENGINPUT BERDASARKAN USER YANG LOGIN
         String username = sharedPreferences.getString(KEY_USERNAME, "");
@@ -160,7 +163,7 @@ public class TambahProspekActivity extends AppCompatActivity {
         });
     }
 
-    private void setupReferensiSpinner() {
+   /* private void setupReferensiSpinner() {
         // Ambil data referensi dari database (contoh)
         String[] referensiOptions = {"Website", "Media Sosial", "Rekomendasi", "Iklan", "Lainnya"};
 
@@ -168,7 +171,7 @@ public class TambahProspekActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_item, referensiOptions);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerReferensi.setAdapter(adapter);
-    }
+    }*/
 
     private void simpanDataProspek() {
         String penginput = editTextPenginput.getText().toString().trim();
@@ -179,6 +182,7 @@ public class TambahProspekActivity extends AppCompatActivity {
         String referensi = spinnerReferensi.getSelectedItem().toString();
         String statusNpwp = spinnerNPWP.getSelectedItem().toString();
         String statusBpjs = spinnerBPJS.getSelectedItem().toString();
+        String tanggalInput = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
 
         // Validasi input
         if (TextUtils.isEmpty(penginput)) {
@@ -218,15 +222,15 @@ public class TambahProspekActivity extends AppCompatActivity {
         }
 
         // Simpan data ke MySQL melalui API
-        simpanProspekKeMySQL(penginput, nama, email, noHp, alamat, referensi, statusNpwp, statusBpjs);
+        simpanProspekKeMySQL(penginput, nama, email, noHp, alamat, referensi, statusNpwp, statusBpjs,tanggalInput);
     }
 
     private void simpanProspekKeMySQL(String penginput, String nama, String email, String noHp,
-                                      String alamat, String referensi, String statusNpwp, String statusBpjs) {
+                                      String alamat, String referensi, String statusNpwp, String statusBpjs, String tanggalInput) {
 
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
         Call<BasicResponse> call = apiService.tambahProspek(
-                penginput, nama, email, noHp, alamat, referensi, statusNpwp, statusBpjs
+                penginput, nama, email, noHp, alamat, referensi, statusNpwp, statusBpjs, tanggalInput
         );
 
         call.enqueue(new Callback<BasicResponse>() {

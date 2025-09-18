@@ -5,7 +5,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 public class RetrofitClient {
-    private static final String BASE_URL = "http://10.0.2.2/quality_mobile_api/";
+    private static final String BASE_URL = "http://192.168.2.102/quality_mobile_api/";
     private static Retrofit retrofit;
     public static Retrofit getClient() {
         if (retrofit == null) {
