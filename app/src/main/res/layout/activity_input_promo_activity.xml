@@ -56,20 +56,6 @@
             android:padding="16dp">
 
             <EditText
-                android:id="@+id/editTextProspek"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:textColor="@android:color/black"
-                android:background="@android:drawable/edit_text"
-                android:drawableStart="@drawable/ic_pin_person"
-                android:drawablePadding="8dp"
-                android:hint="Masukkan Nama Penginput"
-                android:padding="12dp" />
-
-            <EditText
                 android:id="@+id/editTextNama"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -83,6 +69,20 @@
                 android:hint="Masukkan Nama Promo"
                 android:padding="12dp"
                 android:inputType="textPersonName"/>
+
+            <EditText
+                android:id="@+id/editTextProspek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:textColor="@android:color/black"
+                android:background="@android:drawable/edit_text"
+                android:drawableStart="@drawable/ic_pin_person"
+                android:drawablePadding="8dp"
+                android:hint="Masukkan Nama Penginput"
+                android:padding="12dp" />
 
             <TextView
                 android:layout_width="match_parent"
