@@ -78,7 +78,7 @@
                 android:background="@android:drawable/edit_text"
                 android:drawableStart="@drawable/ic_nip"
                 android:drawablePadding="8dp"
-                android:hint="Masukkan No. NIP Baru"
+                android:hint="Masukkan No. NIP"
                 android:inputType="number"
                 android:padding="12dp" />
 
