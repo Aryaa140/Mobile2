@@ -215,7 +215,7 @@
                                                 android:layout_height="wrap_content"
                                                 android:layout_marginTop="8dp"
                                                 android:text="Fasilitas Umum"
-                                                android:textSize="10sp"
+                                                android:textSize="8sp"
                                                 android:textColor="@android:color/black"
                                                 android:textStyle="bold" />
                                         </LinearLayout>

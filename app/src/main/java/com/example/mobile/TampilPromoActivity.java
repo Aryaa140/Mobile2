@@ -33,6 +33,7 @@ import retrofit2.Response;
 public class TampilPromoActivity extends AppCompatActivity {
 
     private MaterialToolbar topAppBar;
+    private BottomNavigationView bottomNavigationView;
     private ImageView imgPreview;
     private Spinner spinnerPromo;
     private Button btnSimpan, btnBatal;
@@ -44,6 +45,36 @@ public class TampilPromoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_tampil_promo);
+
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        topAppBar = findViewById(R.id.topAppBar);
+
+        topAppBar.setNavigationOnClickListener(v -> {
+            Intent intent = new Intent(TampilPromoActivity.this, BerandaActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
+        bottomNavigationView.setSelectedItemId(R.id.nav_home);
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_home) {
+                return true;
+            } else if (id == R.id.nav_folder) {
+                startActivity(new Intent(this, LihatDataActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_news) {
+                startActivity(new Intent(this, NewsActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            }
+            return false;
+        });
 
         initViews();
         setupToolbar();
