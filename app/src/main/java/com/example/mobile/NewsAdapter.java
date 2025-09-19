@@ -21,11 +21,15 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
     private Context context;
     private List<NewsItem> newsItems;
     private SimpleDateFormat dateFormat;
+    public interface OnItemRemoveListener {
+        void onItemRemoved(int position, NewsItem removedItem);
+    }
 
     public NewsAdapter(Context context, List<NewsItem> newsItems) {
         this.context = context;
         this.newsItems = newsItems;
         this.dateFormat = new SimpleDateFormat("dd MMM yyyy, HH:mm", new Locale("id", "ID"));
+
     }
 
     @NonNull
@@ -34,6 +38,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
         View view = LayoutInflater.from(context).inflate(R.layout.item_news_card, parent, false);
         return new NewsViewHolder(view);
     }
+
 
     @Override
     public void onBindViewHolder(@NonNull NewsViewHolder holder, int position) {
@@ -48,13 +53,17 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
         if (item.getImageUrl() != null && !item.getImageUrl().isEmpty()) {
             Picasso.get()
                     .load(item.getImageUrl())
-                    .placeholder(R.color.placeholder_color) // Gunakan placeholder_color
-                    .error(R.color.error_color) // Gunakan error_color
+                    .fit() // Otomatis menyesuaikan ukuran
+                    .centerCrop() // Crop agar pas dengan ImageView
                     .into(holder.imgNews);
         } else {
-            // Set background color jika tidak ada gambar
-            holder.imgNews.setBackgroundColor(ContextCompat.getColor(context, R.color.placeholder_color));
-            holder.imgNews.setImageDrawable(null); // Hapus image sebelumnya
+            // Gunakan background color saja tanpa drawable
+            holder.imgNews.setBackgroundColor(ContextCompat.getColor(context, android.R.color.darker_gray));
+            holder.imgNews.setImageDrawable(null);
+            holder.imgNews.setScaleType(ImageView.ScaleType.CENTER);
+
+            // Tambahkan text placeholder jika perlu
+            holder.imgNews.setContentDescription("Gambar tidak tersedia");
         }
     }
 
@@ -64,8 +73,11 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
     }
 
     public void removeItem(int position) {
+        NewsItem removedItem = newsItems.get(position);
         newsItems.remove(position);
         notifyItemRemoved(position);
+
+
     }
 
     public static class NewsViewHolder extends RecyclerView.ViewHolder {

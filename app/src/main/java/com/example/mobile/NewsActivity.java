@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -193,10 +195,7 @@ public class NewsActivity extends AppCompatActivity {
     }
 
     private void processPromoData(List<Promo> promoList) {
-        // This is where you would compare with previous data to detect changes
-        // For simplicity, we'll just add all as "new" items
         for (Promo promo : promoList) {
-            // Check if this promo already exists in our news
             boolean exists = false;
             for (NewsItem newsItem : newsItems) {
                 if (newsItem.getPromoId() == promo.getIdPromo()) {
@@ -206,29 +205,31 @@ public class NewsActivity extends AppCompatActivity {
             }
 
             if (!exists) {
-                // Add as new item
+                // Pastikan URL gambar valid
+                String imageUrl = promo.getGambarBase64(); // Ganti dengan method yang sesuai
+
+                // Jika URL tidak valid, set ke null
+                if (imageUrl == null || imageUrl.isEmpty() || !imageUrl.startsWith("http")) {
+                    imageUrl = null;
+                }
+
                 NewsItem newItem = new NewsItem(
                         newsItems.size() + 1,
                         promo.getNamaPromo(),
                         promo.getNamaPenginput(),
                         "Ditambahkan",
-                        new Date(), // Use current time for demo
-                        "https://example.com/images/" + promo.getIdPromo(), // Construct image URL
+                        new Date(),
+                        imageUrl, // Bisa null jika tidak ada gambar
                         promo.getIdPromo()
                 );
 
-                newsItems.add(0, newItem); // Add to top
+                newsItems.add(0, newItem);
                 showNotification(newItem);
             }
         }
 
-        // Save to SharedPreferences
         saveNewsData();
-
-        // Update UI
         newsAdapter.notifyDataSetChanged();
-
-        // Remove items older than 7 days
         removeOldNews();
     }
 
@@ -276,7 +277,7 @@ public class NewsActivity extends AppCompatActivity {
 
     private void scheduleDailyCleanup() {
         Intent intent = new Intent(this, NewsCleanupReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
@@ -291,15 +292,52 @@ public class NewsActivity extends AppCompatActivity {
             calendar.add(Calendar.DAY_OF_YEAR, 1);
         }
 
-        alarmManager.setInexactRepeating(
-                AlarmManager.RTC_WAKEUP,
-                calendar.getTimeInMillis(),
-                AlarmManager.INTERVAL_DAY,
-                pendingIntent
-        );
+        // Check for permissions on Android 12+ (API 31+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (alarmManager.canScheduleExactAlarms()) {
+                alarmManager.setInexactRepeating(
+                        AlarmManager.RTC_WAKEUP,
+                        calendar.getTimeInMillis(),
+                        AlarmManager.INTERVAL_DAY,
+                        pendingIntent
+                );
+            } else {
+                // Handle case where permission is not granted
+                Log.w("NewsActivity", "Cannot schedule exact alarms - permission not granted");
+                // You might want to request the permission here
+                requestAlarmPermission();
+            }
+        } else {
+            // For older versions, just set the alarm
+            alarmManager.setInexactRepeating(
+                    AlarmManager.RTC_WAKEUP,
+                    calendar.getTimeInMillis(),
+                    AlarmManager.INTERVAL_DAY,
+                    pendingIntent
+            );
+        }
+    }
+    private void requestAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            Intent intent = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+            try {
+                startActivity(intent);
+            } catch (Exception e) {
+                Log.e("NewsActivity", "Failed to open alarm permission settings", e);
+            }
+        }
     }
 
     private void showNotification(NewsItem newsItem) {
+        // Check notification permission for Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // Permission not granted, don't show notification
+                return;
+            }
+        }
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle("Promo Baru: " + newsItem.getTitle())
@@ -308,7 +346,12 @@ public class NewsActivity extends AppCompatActivity {
                 .setAutoCancel(true);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(new Random().nextInt(), builder.build());
+
+        try {
+            notificationManager.notify(new Random().nextInt(), builder.build());
+        } catch (SecurityException e) {
+            Log.e("NewsActivity", "Notification permission denied", e);
+        }
     }
 
     @Override

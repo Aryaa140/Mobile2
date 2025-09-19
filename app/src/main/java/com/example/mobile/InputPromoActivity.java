@@ -104,7 +104,7 @@ public class InputPromoActivity extends AppCompatActivity {
         // Contoh sederhana menggunakan array resources
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 this,
-                R.array.opsi_spinnerProspek,
+                R.array.opsi_spinnerRefrensiProyek,
                 android.R.layout.simple_spinner_item
         );
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
