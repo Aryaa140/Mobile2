@@ -2,6 +2,8 @@ package com.example.mobile;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -25,7 +27,9 @@ import com.google.android.material.appbar.MaterialToolbar;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -34,6 +38,7 @@ import retrofit2.Response;
 public class InputPromoActivity extends AppCompatActivity {
 
     private static final int PICK_IMAGE_REQUEST = 1;
+    private static final String TAG = "InputPromoActivity";
     private MaterialToolbar topAppBar;
     private EditText editTextNamaPromo, editTextPenginput;
     private Spinner spinnerReferensi;
@@ -108,9 +113,7 @@ public class InputPromoActivity extends AppCompatActivity {
 
     private void setupButtons() {
         btnPilihGambar.setOnClickListener(v -> pilihGambar());
-
         btnSimpan.setOnClickListener(v -> simpanPromo());
-
         btnBatal.setOnClickListener(v -> finish());
     }
 
@@ -132,8 +135,10 @@ public class InputPromoActivity extends AppCompatActivity {
             try {
                 imageBase64 = convertImageToBase64(imageUri);
                 Toast.makeText(this, "Gambar berhasil dipilih", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "Gambar Base64 length: " + imageBase64.length());
             } catch (IOException e) {
                 Toast.makeText(this, "Gagal memproses gambar", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Error processing image: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -141,13 +146,13 @@ public class InputPromoActivity extends AppCompatActivity {
 
     private String convertImageToBase64(Uri uri) throws IOException {
         InputStream inputStream = getContentResolver().openInputStream(uri);
+
+        // Compress image untuk mengurangi ukuran
+        Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        byte[] buffer = new byte[1024];
-        int length;
-        while ((length = inputStream.read(buffer)) != -1) {
-            outputStream.write(buffer, 0, length);
-        }
+        // Compress dengan kualitas 80% untuk mengurangi ukuran file
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream);
 
         byte[] imageBytes = outputStream.toByteArray();
         return Base64.encodeToString(imageBytes, Base64.DEFAULT);
@@ -174,6 +179,13 @@ public class InputPromoActivity extends AppCompatActivity {
         btnSimpan.setEnabled(false);
         btnSimpan.setText("Menyimpan...");
 
+        // Log data yang akan dikirim (untuk debugging)
+        Log.d(TAG, "Data yang dikirim:");
+        Log.d(TAG, "Nama Promo: " + namaPromo);
+        Log.d(TAG, "Nama Penginput: " + namaPenginput);
+        Log.d(TAG, "Referensi Proyek: " + referensiProyek);
+        Log.d(TAG, "Gambar Base64 length: " + imageBase64.length());
+
         // Panggil API untuk menyimpan data
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
         Call<BasicResponse> call = apiService.tambahPromo(
@@ -196,9 +208,18 @@ public class InputPromoActivity extends AppCompatActivity {
                         finish();
                     } else {
                         Toast.makeText(InputPromoActivity.this, "Gagal: " + basicResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "Server error: " + basicResponse.getMessage());
                     }
                 } else {
-                    Toast.makeText(InputPromoActivity.this, "Error response dari server", Toast.LENGTH_SHORT).show();
+                    // Log error response secara detail
+                    try {
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
+                        Log.e(TAG, "Error response code: " + response.code());
+                        Log.e(TAG, "Error response body: " + errorBody);
+                    } catch (IOException e) {
+                        Log.e(TAG, "Error reading error body: " + e.getMessage());
+                    }
+                    Toast.makeText(InputPromoActivity.this, "Error response dari server: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -207,7 +228,7 @@ public class InputPromoActivity extends AppCompatActivity {
                 btnSimpan.setEnabled(true);
                 btnSimpan.setText("Simpan");
                 Toast.makeText(InputPromoActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e("InputPromo", "Error: " + t.getMessage());
+                Log.e(TAG, "Network error: " + t.getMessage());
             }
         });
     }

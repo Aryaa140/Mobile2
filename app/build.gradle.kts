@@ -52,4 +52,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("com.squareup.picasso:picasso:2.71828")
+    implementation("androidx.work:work-runtime:2.7.1")
 }

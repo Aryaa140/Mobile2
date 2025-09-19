@@ -23,6 +23,7 @@
     <color name="colorAccentLight">#C77DFF</color>
     <color name="colorTextPrimary">#212121</color>
     <color name="colorTextSecondary">#757575</color>
-
+    <color name="placeholder_color">#9E9E9E</color>
+    <color name="error_color">#F44336</color>
 </resources>
 

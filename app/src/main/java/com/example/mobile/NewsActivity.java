@@ -1,23 +1,59 @@
 package com.example.mobile;
 
+import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationView;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class NewsActivity extends AppCompatActivity {
+    private static final String CHANNEL_ID = "news_channel";
+    private static final String PREF_NAME = "news_prefs";
+    private static final String NEWS_KEY = "news_items";
+
     MaterialToolbar topAppBar;
     BottomNavigationView bottomNavigationView;
+    private RecyclerView recyclerNews;
+    private NewsAdapter newsAdapter;
+    private List<NewsItem> newsItems = new ArrayList<>();
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private SharedPreferences sharedPreferences;
+    private Gson gson = new Gson();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +63,15 @@ public class NewsActivity extends AppCompatActivity {
 
         topAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+        recyclerNews = findViewById(R.id.recyclerNews);
+        swipeRefreshLayout = new SwipeRefreshLayout(this);
+
+        // Setup SharedPreferences
+        sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+
+        // Create notification channel
+        createNotificationChannel();
+
         bottomNavigationView.setSelectedItemId(R.id.nav_news);
 
         topAppBar.setNavigationOnClickListener(v -> {
@@ -47,8 +92,7 @@ public class NewsActivity extends AppCompatActivity {
                 overridePendingTransition(0, 0);
                 return true;
             } else if (id == R.id.nav_news) {
-                startActivity(new Intent(this, NewsActivity.class));
-                overridePendingTransition(0, 0);
+                // Already in NewsActivity
                 return true;
             } else if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
@@ -58,11 +102,219 @@ public class NewsActivity extends AppCompatActivity {
             return false;
         });
 
+        // Setup RecyclerView
+        recyclerNews.setLayoutManager(new LinearLayoutManager(this));
+        newsAdapter = new NewsAdapter(this, newsItems);
+        recyclerNews.setAdapter(newsAdapter);
+
+        // Load data from SharedPreferences or API
+        loadNewsData();
+
+        // Setup swipe to refresh
+        swipeRefreshLayout.setOnRefreshListener(this::refreshNewsData);
+
+        // Setup swipe to dismiss
+        setupSwipeToDismiss();
+
+        // Schedule daily cleanup of old news
+        scheduleDailyCleanup();
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "News Channel";
+            String description = "Channel for news notifications";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    private void loadNewsData() {
+        // First try to load from SharedPreferences
+        String json = sharedPreferences.getString(NEWS_KEY, null);
+        if (json != null) {
+            Type type = new TypeToken<List<NewsItem>>(){}.getType();
+            List<NewsItem> savedNews = gson.fromJson(json, type);
+            if (savedNews != null) {
+                newsItems.clear();
+                newsItems.addAll(savedNews);
+                newsAdapter.notifyDataSetChanged();
+
+                // Remove items older than 7 days
+                removeOldNews();
+                return;
+            }
+        }
+
+        // If no saved data, load from API
+        refreshNewsData();
+    }
+
+    private void refreshNewsData() {
+        swipeRefreshLayout.setRefreshing(true);
+
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<PromoResponse> call = apiService.getSemuaPromo();
+
+        call.enqueue(new Callback<PromoResponse>() {
+            @Override
+            public void onResponse(Call<PromoResponse> call, Response<PromoResponse> response) {
+                swipeRefreshLayout.setRefreshing(false);
+
+                if (response.isSuccessful() && response.body() != null) {
+                    PromoResponse promoResponse = response.body();
+                    if (promoResponse.isSuccess()) {
+                        processPromoData(promoResponse.getData());
+                    } else {
+                        Toast.makeText(NewsActivity.this, "Gagal memuat data: " + promoResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(NewsActivity.this, "Error response dari server", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PromoResponse> call, Throwable t) {
+                swipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(NewsActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("NewsActivity", "Error: " + t.getMessage());
+            }
+        });
+    }
+
+    private void processPromoData(List<Promo> promoList) {
+        // This is where you would compare with previous data to detect changes
+        // For simplicity, we'll just add all as "new" items
+        for (Promo promo : promoList) {
+            // Check if this promo already exists in our news
+            boolean exists = false;
+            for (NewsItem newsItem : newsItems) {
+                if (newsItem.getPromoId() == promo.getIdPromo()) {
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (!exists) {
+                // Add as new item
+                NewsItem newItem = new NewsItem(
+                        newsItems.size() + 1,
+                        promo.getNamaPromo(),
+                        promo.getNamaPenginput(),
+                        "Ditambahkan",
+                        new Date(), // Use current time for demo
+                        "https://example.com/images/" + promo.getIdPromo(), // Construct image URL
+                        promo.getIdPromo()
+                );
+
+                newsItems.add(0, newItem); // Add to top
+                showNotification(newItem);
+            }
+        }
+
+        // Save to SharedPreferences
+        saveNewsData();
+
+        // Update UI
+        newsAdapter.notifyDataSetChanged();
+
+        // Remove items older than 7 days
+        removeOldNews();
+    }
+
+    private void saveNewsData() {
+        String json = gson.toJson(newsItems);
+        sharedPreferences.edit().putString(NEWS_KEY, json).apply();
+    }
+
+    private void setupSwipeToDismiss() {
+        ItemTouchHelper.SimpleCallback swipeCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                newsAdapter.removeItem(position);
+                saveNewsData();
+            }
+        };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerNews);
+    }
+
+    private void removeOldNews() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, -7);
+        Date oneWeekAgo = calendar.getTime();
+
+        List<NewsItem> itemsToRemove = new ArrayList<>();
+
+        for (NewsItem item : newsItems) {
+            if (item.getTimestamp().before(oneWeekAgo)) {
+                itemsToRemove.add(item);
+            }
+        }
+
+        newsItems.removeAll(itemsToRemove);
+        newsAdapter.notifyDataSetChanged();
+        saveNewsData();
+    }
+
+    private void scheduleDailyCleanup() {
+        Intent intent = new Intent(this, NewsCleanupReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        // Set alarm to trigger at 2:00 AM daily
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 2);
+        calendar.set(Calendar.MINUTE, 0);
+
+        // If it's already past 2:00 AM, schedule for next day
+        if (calendar.getTimeInMillis() < System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+        }
+
+        alarmManager.setInexactRepeating(
+                AlarmManager.RTC_WAKEUP,
+                calendar.getTimeInMillis(),
+                AlarmManager.INTERVAL_DAY,
+                pendingIntent
+        );
+    }
+
+    private void showNotification(NewsItem newsItem) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle("Promo Baru: " + newsItem.getTitle())
+                .setContentText("Status: " + newsItem.getStatus() + " oleh " + newsItem.getPenginput())
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(new Random().nextInt(), builder.build());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh data when activity resumes
+        refreshNewsData();
     }
 }

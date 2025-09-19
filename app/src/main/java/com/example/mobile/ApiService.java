@@ -74,9 +74,9 @@ public interface ApiService {
     @FormUrlEncoded
     @POST("tambah_promo.php")
     Call<BasicResponse> tambahPromo(
-            @Field("nama_promo") String namaPromo,
-            @Field("nama_penginput") String namaPenginput,
-            @Field("referensi_proyek") String referensiProyek,
+            @Field("nama_promo") String namaPromo, // Diubah ke huruf kecil
+            @Field("nama_penginput") String namaPenginput, // Diubah ke huruf kecil
+            @Field("referensi_proyek") String referensiProyek, // Diubah ke huruf kecil
             @Field("gambar") String gambarBase64
     );
     @GET("get_promo.php")
