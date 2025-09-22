@@ -7,6 +7,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
@@ -28,7 +30,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class BerandaActivity extends AppCompatActivity {
+public class BerandaActivity extends AppCompatActivity  {
 
     MaterialCardView cardWelcome, cardProspekM, cardLihatDataM, cardFasilitasM, cardProyekM, cardUserpM, cardInputPromoM, cardTampilkanPromoM;
     private BottomNavigationView bottomNavigationView;
@@ -239,4 +241,5 @@ public class BerandaActivity extends AppCompatActivity {
         // Refresh data promo ketika activity resume
         loadPromoData();
     }
+
 }

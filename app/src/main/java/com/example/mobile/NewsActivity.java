@@ -195,6 +195,8 @@ public class NewsActivity extends AppCompatActivity {
     }
 
     private void processPromoData(List<Promo> promoList) {
+        List<NewsItem> newItems = new ArrayList<>();
+
         for (Promo promo : promoList) {
             boolean exists = false;
             for (NewsItem newsItem : newsItems) {
@@ -205,12 +207,14 @@ public class NewsActivity extends AppCompatActivity {
             }
 
             if (!exists) {
-                // Pastikan URL gambar valid
-                String imageUrl = promo.getGambarBase64(); // Ganti dengan method yang sesuai
+                String imageData = promo.getGambarBase64();
 
-                // Jika URL tidak valid, set ke null
-                if (imageUrl == null || imageUrl.isEmpty() || !imageUrl.startsWith("http")) {
-                    imageUrl = null;
+                // Handle base64 image data
+                String imageUrl = null;
+                if (imageData != null && !imageData.isEmpty()) {
+                    // Jika data adalah base64, kita simpan sebagai string base64
+                    // NewsAdapter akan menangani decoding-nya
+                    imageUrl = imageData;
                 }
 
                 NewsItem newItem = new NewsItem(
@@ -219,18 +223,22 @@ public class NewsActivity extends AppCompatActivity {
                         promo.getNamaPenginput(),
                         "Ditambahkan",
                         new Date(),
-                        imageUrl, // Bisa null jika tidak ada gambar
+                        imageUrl, // Ini sekarang berisi string base64
                         promo.getIdPromo()
                 );
 
-                newsItems.add(0, newItem);
+                newItems.add(newItem);
                 showNotification(newItem);
             }
         }
 
-        saveNewsData();
-        newsAdapter.notifyDataSetChanged();
-        removeOldNews();
+        // Tambahkan semua item baru sekaligus
+        if (!newItems.isEmpty()) {
+            newsItems.addAll(0, newItems);
+            saveNewsData();
+            newsAdapter.notifyDataSetChanged();
+            removeOldNews();
+        }
     }
 
     private void saveNewsData() {

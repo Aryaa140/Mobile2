@@ -1,10 +1,12 @@
 package com.example.mobile;
 
 import retrofit2.Call;
+import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 public interface ApiService {
     @FormUrlEncoded
@@ -81,4 +83,19 @@ public interface ApiService {
     );
     @GET("get_promo.php")
     Call<PromoResponse> getSemuaPromo();
+    @FormUrlEncoded
+    @POST("delete_promo.php")
+    Call<BasicResponse> deletePromo(
+            @Field("id_promo") int idPromo
+    );
+    @FormUrlEncoded
+    @POST("update_promo.php")
+    Call<BasicResponse> updatePromo(
+            @Field("id_promo") int idPromo,
+            @Field("nama_promo") String namaPromo,
+            @Field("nama_penginput") String namaPenginput,
+            @Field("referensi_proyek") String referensiProyek,
+            @Field("gambar") String gambarBase64
+    );
+
 }

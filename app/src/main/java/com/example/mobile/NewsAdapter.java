@@ -1,6 +1,7 @@
 package com.example.mobile;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +17,12 @@ import com.squareup.picasso.Picasso;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
-
+import com.squareup.picasso.Callback;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
+import android.util.Log;
+import android.widget.ImageView;
+import androidx.core.content.ContextCompat;
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder> {
     private Context context;
     private List<NewsItem> newsItems;
@@ -40,6 +46,8 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
     }
 
 
+
+
     @Override
     public void onBindViewHolder(@NonNull NewsViewHolder holder, int position) {
         NewsItem item = newsItems.get(position);
@@ -49,22 +57,62 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
         holder.tvStatus.setText("Status: " + item.getStatus());
         holder.tvNewsDate.setText(dateFormat.format(item.getTimestamp()));
 
-        // Load image using Picasso
+        // Handle image - bisa berupa URL atau base64 string
         if (item.getImageUrl() != null && !item.getImageUrl().isEmpty()) {
-            Picasso.get()
-                    .load(item.getImageUrl())
-                    .fit() // Otomatis menyesuaikan ukuran
-                    .centerCrop() // Crop agar pas dengan ImageView
-                    .into(holder.imgNews);
-        } else {
-            // Gunakan background color saja tanpa drawable
-            holder.imgNews.setBackgroundColor(ContextCompat.getColor(context, android.R.color.darker_gray));
-            holder.imgNews.setImageDrawable(null);
-            holder.imgNews.setScaleType(ImageView.ScaleType.CENTER);
+            String imageData = item.getImageUrl();
 
-            // Tambahkan text placeholder jika perlu
-            holder.imgNews.setContentDescription("Gambar tidak tersedia");
+            if (imageData.startsWith("http")) {
+                // Jika berupa URL, gunakan Picasso
+                Picasso.get()
+                        .load(imageData)
+                        .fit()
+                        .centerCrop()
+                        .placeholder(android.R.drawable.ic_menu_gallery)
+                        .error(android.R.drawable.ic_menu_report_image)
+                        .into(holder.imgNews);
+            } else if (imageData.startsWith("data:image") || imageData.length() > 100) {
+                // Jika berupa base64, decode dan set bitmap
+                decodeBase64AndSetImage(imageData, holder.imgNews);
+            } else {
+                // Data tidak valid
+                setDefaultImage(holder.imgNews);
+            }
+        } else {
+            setDefaultImage(holder.imgNews);
         }
+    }
+
+    private void decodeBase64AndSetImage(String base64String, ImageView imageView) {
+        try {
+            // Bersihkan base64 string jika mengandung prefix "data:image"
+            String base64Image;
+            if (base64String.contains(",")) {
+                base64Image = base64String.split(",")[1];
+            } else {
+                base64Image = base64String;
+            }
+
+            // Decode base64 to bitmap
+            byte[] decodedBytes = android.util.Base64.decode(base64Image, android.util.Base64.DEFAULT);
+            android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+
+            if (bitmap != null) {
+                imageView.setImageBitmap(bitmap);
+                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            } else {
+                setDefaultImage(imageView);
+                Log.e("NewsAdapter", "Failed to decode base64 image");
+            }
+        } catch (Exception e) {
+            setDefaultImage(imageView);
+            Log.e("NewsAdapter", "Error decoding base64: " + e.getMessage());
+        }
+    }
+
+    private void setDefaultImage(ImageView imageView) {
+        imageView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.darker_gray));
+        imageView.setImageDrawable(null);
+        imageView.setScaleType(ImageView.ScaleType.CENTER);
     }
 
     @Override
