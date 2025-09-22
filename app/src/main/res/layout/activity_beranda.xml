@@ -106,7 +106,7 @@
                                 android:id="@+id/tvMore"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Selengkapnya"
+                                android:text="Promo Terbaru"
                                 android:textStyle="bold"
                                 android:textSize="16sp"
                                 android:textColor="@android:color/white"
