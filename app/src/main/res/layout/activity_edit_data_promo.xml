@@ -67,7 +67,7 @@
                 android:drawableStart="@drawable/ic_pin_person"
                 android:drawablePadding="8dp"
                 android:hint="'"
-                android:padding="12dp" />
+                android:padding="12dp"/>
 
             <EditText
                 android:id="@+id/editTextNama"
