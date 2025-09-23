@@ -7,7 +7,6 @@
         <item name="materialCardViewStyle">@style/CustomCardView</item>
     </style>
 
-    <!-- Aplikasi pakai ini -->
     <style name="Theme.Mobile" parent="Base.Theme.Mobile" />
 
 </resources>

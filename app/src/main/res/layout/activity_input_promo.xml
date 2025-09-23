@@ -89,7 +89,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:layout_marginLeft="16dp"
-                android:text="Pilih Refrensi Prospek"
+                android:text="Pilih Refrensi Promo"
                 android:textColor="@android:color/black"
                 android:textSize="15sp" />
 
@@ -103,7 +103,7 @@
                 android:textColor="@android:color/black"
                 android:background="@android:drawable/edit_text"
                 android:drawablePadding="8dp"
-                android:entries="@array/opsi_spinnerRefrensiProyek"/>
+                android:entries="@array/opsi_spinnerRefrensiPromo"/>
 
             <Button
                 android:id="@+id/btnInputPromo"
