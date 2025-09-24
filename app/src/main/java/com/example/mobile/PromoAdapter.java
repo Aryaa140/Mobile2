@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -31,19 +30,19 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
     private List<Promo> promoList;
     private OnPromoActionListener actionListener;
 
-    // Constants untuk request code
     public static final int EDIT_PROMO_REQUEST = 1001;
 
     public interface OnPromoActionListener {
         void onEditPromo(Promo promo);
         void onDeletePromo(Promo promo);
-        void onPromoUpdated(int promoId, String updatedImage); // New method untuk handle update
+        void onPromoUpdated(int promoId, String updatedImage);
     }
 
     public PromoAdapter(Context context, List<Promo> promoList) {
         this.context = context;
         this.promoList = promoList;
 
+        // PERBAIKAN: Auto-set listener jika context adalah Activity
         if (context instanceof OnPromoActionListener) {
             this.actionListener = (OnPromoActionListener) context;
         }
@@ -95,32 +94,31 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
 
         Intent intent = new Intent(context, EditDataPromoActivity.class);
 
-        // Kirim semua data promo yang diperlukan
         intent.putExtra("PROMO_ID", promo.getIdPromo());
         intent.putExtra("PROMO_TITLE", promo.getNamaPromo());
         intent.putExtra("PROMO_INPUTTER", promo.getNamaPenginput());
         intent.putExtra("PROMO_REFERENCE", promo.getReferensiProyek());
         intent.putExtra("PROMO_IMAGE", promo.getGambarBase64());
 
-        // Jika context adalah Activity, start dengan request code
         if (context instanceof android.app.Activity) {
             ((android.app.Activity) context).startActivityForResult(intent, EDIT_PROMO_REQUEST);
         } else {
-            // Fallback untuk non-Activity context
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         }
     }
 
-    // Method untuk handle update dari activity yang memanggil
+    // PERBAIKAN: Method update yang lebih robust
     public void updatePromoItem(int promoId, String updatedImage) {
+        Log.d("PromoAdapter", "=== UPDATE PROMO ITEM ===");
+        Log.d("PromoAdapter", "Target ID: " + promoId);
+
         for (int i = 0; i < promoList.size(); i++) {
             Promo promo = promoList.get(i);
             if (promo.getIdPromo() == promoId) {
-                // Update gambar promo
+                Log.d("PromoAdapter", "Found promo at position: " + i);
                 promo.setGambarBase64(updatedImage);
                 notifyItemChanged(i);
-                Log.d("PromoAdapter", "Promo ID " + promoId + " image updated");
                 break;
             }
         }
@@ -132,23 +130,18 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
         builder.setMessage("Apakah Anda yakin ingin menghapus promo '" + promo.getNamaPromo() + "'?");
 
         builder.setPositiveButton("Ya, Hapus", (dialog, which) -> {
-            if (actionListener != null) {
-                actionListener.onDeletePromo(promo);
-            } else {
-                deletePromo(promo, position);
-            }
+            // PERBAIKAN: Selalu gunakan method delete di adapter, bukan melalui listener
+            deletePromoDirectly(promo, position);
         });
 
-        builder.setNegativeButton("Batal", (dialog, which) -> {
-            dialog.dismiss();
-        });
+        builder.setNegativeButton("Batal", (dialog, which) -> dialog.dismiss());
 
-        builder.setIcon(android.R.drawable.ic_dialog_alert);
         AlertDialog dialog = builder.create();
         dialog.show();
     }
 
-    private void deletePromo(Promo promo, int position) {
+    // PERBAIKAN: Method delete langsung di adapter (tidak melalui listener)
+    private void deletePromoDirectly(Promo promo, int position) {
         Log.d("PromoAdapter", "Deleting promo with ID: " + promo.getIdPromo());
 
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
@@ -160,12 +153,15 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
                 if (response.isSuccessful() && response.body() != null) {
                     BasicResponse basicResponse = response.body();
                     if (basicResponse.isSuccess()) {
+                        // Hapus dari list dan update UI
                         promoList.remove(position);
                         notifyItemRemoved(position);
-                        notifyItemRangeChanged(position, promoList.size());
                         Toast.makeText(context, "Promo berhasil dihapus", Toast.LENGTH_SHORT).show();
+
+                        // PERBAIKAN: Also notify range changed untuk update positions
+                        notifyItemRangeChanged(position, promoList.size());
                     } else {
-                        Toast.makeText(context, "Gagal: " + basicResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Gagal menghapus: " + basicResponse.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     Toast.makeText(context, "Error response dari server", Toast.LENGTH_SHORT).show();
@@ -174,7 +170,7 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
 
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
-                Toast.makeText(context, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Error koneksi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -195,26 +191,46 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
         }
 
         public void bind(Promo promo) {
+            loadImage(promo.getGambarBase64());
+        }
+
+        private void loadImage(String base64Image) {
+            // Reset ke placeholder dulu
+            imgPromo.setImageResource(R.drawable.ic_placeholder);
+
+            if (base64Image == null || base64Image.trim().isEmpty()) {
+                Log.d("PromoViewHolder", "Base64 image is null or empty");
+                return;
+            }
+
             try {
-                String base64Image = promo.getGambarBase64();
+                String cleanBase64 = base64Image.trim();
 
-                if (base64Image != null && !base64Image.trim().isEmpty()) {
-                    byte[] decodedBytes = Base64.decode(base64Image, Base64.DEFAULT);
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
-
-                    if (bitmap != null) {
-                        imgPromo.setImageBitmap(bitmap);
-                    } else {
-                        // Jika decoding gagal, gunakan placeholder default
-                        imgPromo.setImageResource(R.drawable.ic_placeholder);
-                    }
-                } else {
-                    // Jika string kosong/null → gunakan placeholder
-                    imgPromo.setImageResource(R.drawable.ic_placeholder);
+                // Validasi base64
+                if (cleanBase64.length() < 100) {
+                    Log.w("PromoViewHolder", "Base64 too short: " + cleanBase64.length());
+                    return;
                 }
+
+                byte[] decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
+
+                if (decodedBytes == null || decodedBytes.length == 0) {
+                    Log.w("PromoViewHolder", "Decoded bytes are empty");
+                    return;
+                }
+
+                // Decode bitmap
+                Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+
+                if (bitmap != null) {
+                    imgPromo.setImageBitmap(bitmap);
+                    Log.d("PromoViewHolder", "✅ Image loaded successfully");
+                } else {
+                    Log.w("PromoViewHolder", "Failed to decode bitmap");
+                }
+
             } catch (Exception e) {
-                e.printStackTrace();
-                imgPromo.setImageResource(R.drawable.ic_placeholder);
+                Log.e("PromoViewHolder", "Error loading image: " + e.getMessage());
             }
         }
     }

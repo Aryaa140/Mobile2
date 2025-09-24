@@ -95,7 +95,7 @@ public interface ApiService {
             @Field("nama_promo") String namaPromo,
             @Field("nama_penginput") String namaPenginput,
             @Field("referensi_proyek") String referensiProyek,
-            @Field("gambar") String gambarBase64
+            @Field("gambar_base64") String gambarBase64
     );
 
 }
