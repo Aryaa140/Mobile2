@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_bg"
+    android:background="@drawable/bg_scroll_gradient"
     tools:context=".MainActivity"
     tools:ignore="ExtraText">
 
@@ -17,7 +17,7 @@
         android:theme="@style/ToolbarWhiteIcons"
         app:navigationIcon="@drawable/ic_back"
         app:navigationIconTint="@android:color/white"
-        app:title="Edit Data Prospek"
+        app:title="Menu Edit Data Prospek"
         app:titleCentered="true"
         app:titleTextColor="@android:color/white"
         app:layout_constraintTop_toTopOf="parent"
@@ -28,12 +28,11 @@
         android:id="@+id/container"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/gradient_bg"
+        android:background="@drawable/bg_scroll_gradient"
         app:layout_constraintTop_toBottomOf="@id/topAppBar"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.cardview.widget.CardView
@@ -57,168 +56,197 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="16dp"
+                android:divider="@android:color/darker_gray"
+                android:showDividers="middle">
 
-                <EditText
-                    android:id="@+id/editTextProspek"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:textColor="@android:color/black"
-                    android:background="@android:drawable/edit_text"
-                    android:drawableStart="@drawable/ic_pin_person"
-                    android:drawablePadding="8dp"
-                    android:hint="`"
-                    android:padding="12dp" />
-
-                <EditText
-                    android:id="@+id/editTextNama"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:textColor="@android:color/black"
-                    android:background="@android:drawable/edit_text"
-                    android:drawableStart="@drawable/ic_username"
-                    android:drawablePadding="8dp"
-                    android:hint="`"
-                    android:padding="12dp"
-                    android:inputType="textPersonName"/>
-
-                <EditText
-                    android:id="@+id/editTextEmail"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:textColor="@android:color/black"
-                    android:background="@android:drawable/edit_text"
-                    android:drawableStart="@drawable/ic_request"
-                    android:drawablePadding="8dp"
-                    android:hint="`"
-                    android:padding="12dp"
-                    android:inputType="textEmailAddress"/>
-
+                <!-- 🔹 Section 1: Data Pribadi -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:background="@android:drawable/edit_text"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="8dp">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_phonec"
-                        android:contentDescription="@string/app_name"
-                        android:layout_marginEnd="6dp"/>
+                    android:orientation="vertical"
+                    android:paddingBottom="12dp">
 
                     <TextView
-                        android:id="@+id/tvPrefixNoHp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="+62"
-                        android:textColor="@android:color/black"
+                        android:text="Data Pribadi"
+                        android:textStyle="bold"
                         android:textSize="16sp"
-                        android:layout_marginEnd="6dp"/>
+                        android:textColor="@android:color/black"
+                        android:layout_marginBottom="8dp"/>
 
                     <EditText
-                        android:id="@+id/editTextNoHp"
-                        android:layout_width="0dp"
+                        android:id="@+id/editTextProspek"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:background="@android:color/transparent"
+                        android:layout_marginBottom="12dp"
                         android:hint="'"
-                        android:inputType="phone"
-                        android:minHeight="48dp"
-                        android:textColor="@android:color/black" />
+                        android:textColor="@android:color/black"
+                        android:background="@android:drawable/edit_text"
+                        android:drawableStart="@drawable/ic_pin_person"
+                        android:drawablePadding="8dp"
+                        android:padding="12dp"/>
+
+                    <EditText
+                        android:id="@+id/editTextNama"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:hint="'"
+                        android:textColor="@android:color/black"
+                        android:background="@android:drawable/edit_text"
+                        android:drawableStart="@drawable/ic_username"
+                        android:drawablePadding="8dp"
+                        android:padding="12dp"
+                        android:inputType="textPersonName"/>
+
+                    <EditText
+                        android:id="@+id/editTextAlamat"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:hint="'"
+                        android:textColor="@android:color/black"
+                        android:background="@android:drawable/edit_text"
+                        android:drawableStart="@drawable/ic_home"
+                        android:drawablePadding="8dp"
+                        android:padding="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Status NPWP"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginBottom="4dp"/>
+
+                    <Spinner
+                        android:id="@+id/spinnerNPWP"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:drawable/edit_text"
+                        android:entries="@array/opsi_spinnerNPWP"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Status BPJS"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginBottom="4dp"/>
+
+                    <Spinner
+                        android:id="@+id/spinnerBPJS"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:drawable/edit_text"
+                        android:entries="@array/opsi_spinnerBPJS"/>
                 </LinearLayout>
 
-                <EditText
-                    android:id="@+id/editTextAlamat"
+                <!-- 🔹 Section 2: Kontak -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:textColor="@android:color/black"
-                    android:background="@android:drawable/edit_text"
-                    android:drawableStart="@drawable/ic_home"
-                    android:drawablePadding="8dp"
-                    android:hint="`"
-                    android:padding="12dp"/>
+                    android:orientation="vertical"
+                    android:paddingVertical="12dp">
 
-                <TextView
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Kontak"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginBottom="8dp"/>
+
+                    <!-- Input No HP -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="8dp"
+                        android:background="@android:drawable/edit_text"
+                        android:layout_marginBottom="12dp">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_phonec"
+                            android:contentDescription="@string/app_name"
+                            android:layout_marginEnd="6dp"/>
+
+                        <TextView
+                            android:id="@+id/tvPrefixNoHp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="+62"
+                            android:textSize="16sp"
+                            android:textColor="@android:color/black"
+                            android:layout_marginEnd="6dp"/>
+
+                        <EditText
+                            android:id="@+id/editTextNoHp"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@android:color/transparent"
+                            android:hint="'"
+                            android:inputType="phone"
+                            android:minHeight="48dp"
+                            android:textColor="@android:color/black"/>
+                    </LinearLayout>
+
+                    <EditText
+                        android:id="@+id/editTextEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:hint="'"
+                        android:textColor="@android:color/black"
+                        android:background="@android:drawable/edit_text"
+                        android:drawableStart="@drawable/ic_request"
+                        android:drawablePadding="8dp"
+                        android:padding="12dp"
+                        android:inputType="textEmailAddress"/>
+                </LinearLayout>
+
+                <!-- 🔹 Section 3: Status -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginLeft="16dp"
-                    android:text="Refrensi Proyek"
-                    android:textColor="@android:color/black"
-                    android:textSize="15sp" />
+                    android:orientation="vertical"
+                    android:paddingTop="12dp">
 
-                <Spinner
-                    android:id="@+id/spinnerRole"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:textColor="@android:color/black"
-                    android:background="@android:drawable/edit_text"
-                    android:drawablePadding="8dp"
-                    android:entries="@array/opsi_spinnerProspek"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Refrensi"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginBottom="8dp"/>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginLeft="16dp"
-                    android:text="Status Nomor Pokok Wajib Pajak (NPWP)"
-                    android:textColor="@android:color/black"
-                    android:textSize="15sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pilih Referensi Prospek"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginBottom="4dp"/>
 
-                <Spinner
-                    android:id="@+id/spinnerRole2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:textColor="@android:color/black"
-                    android:background="@android:drawable/edit_text"
-                    android:drawablePadding="8dp"
-                    android:entries="@array/opsi_spinnerNPWP"/>
+                    <Spinner
+                        android:id="@+id/spinnerRole"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:drawable/edit_text"
+                        android:entries="@array/opsi_spinnerProspek"
+                        android:layout_marginBottom="12dp"/>
+                </LinearLayout>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginLeft="16dp"
-                    android:text="Status Badan Penyelenggara Jaminan Sosial (BPJS)"
-                    android:textColor="@android:color/black"
-                    android:textSize="15sp" />
-
-                <Spinner
-                    android:id="@+id/spinnerRole3"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:textColor="@android:color/black"
-                    android:background="@android:drawable/edit_text"
-                    android:drawablePadding="8dp"
-                    android:entries="@array/opsi_spinnerBPJS"/>
-
+                <!-- 🔹 Tombol -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -227,34 +255,35 @@
                     android:layout_marginTop="16dp">
 
                     <Button
-                        android:id="@+id/btnEdit"
+                        android:id="@+id/btnSimpan"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:text="Simpan"
+                        android:textColor="@android:color/black"
+                        android:backgroundTint="@android:color/white"
                         android:paddingLeft="24dp"
                         android:paddingRight="24dp"
                         android:paddingTop="10dp"
                         android:paddingBottom="10dp"
-                        android:text="Edit"
-                        android:textColor="@android:color/black"
-                        android:backgroundTint="@android:color/white"
                         android:layout_marginEnd="12dp"/>
 
                     <Button
                         android:id="@+id/btnBatal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:text="Batal"
+                        android:textColor="@android:color/black"
+                        android:backgroundTint="@android:color/white"
                         android:paddingLeft="24dp"
                         android:paddingRight="24dp"
                         android:paddingTop="10dp"
-                        android:paddingBottom="10dp"
-                        android:text="Batal"
-                        android:textColor="@android:color/black"
-                        android:backgroundTint="@android:color/white"/>
+                        android:paddingBottom="10dp"/>
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>
 
     </androidx.cardview.widget.CardView>
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"

@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_bg"
+    android:background="@drawable/bg_scroll_gradient"
     tools:context=".MainActivity">
 
     <com.google.android.material.appbar.MaterialToolbar
@@ -42,7 +42,6 @@
                 android:alignmentMode="alignMargins"
                 android:rowOrderPreserved="false">
 
-                <!-- Menu Prospek -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardProspek"
                     android:layout_width="0dp"

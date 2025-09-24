@@ -32,7 +32,7 @@ import retrofit2.Response;
 
 public class BerandaActivity extends AppCompatActivity  {
 
-    MaterialCardView cardWelcome, cardProspekM, cardLihatDataM, cardFasilitasM, cardProyekM, cardUserpM, cardInputPromoM, cardTampilkanPromoM;
+    MaterialCardView cardWelcome, cardProspekM, cardLihatDataM, cardFasilitasM, cardProyekM, cardUserpM, cardInputPromoM, cardTampilkanPromoM, cardNewBeranda;
     private BottomNavigationView bottomNavigationView;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
@@ -69,7 +69,7 @@ public class BerandaActivity extends AppCompatActivity  {
             return insets;
         });
     }
-
+    
     private void initViews() {
         cardWelcome = findViewById(R.id.cardWelcome);
         cardProspekM = findViewById(R.id.cardProspekM);
@@ -79,6 +79,7 @@ public class BerandaActivity extends AppCompatActivity  {
         cardUserpM = findViewById(R.id.cardUserpM);
         cardInputPromoM = findViewById(R.id.cardInputPromoM);
         cardTampilkanPromoM = findViewById(R.id.cardTampilkanPromoM);
+        cardNewBeranda = findViewById(R.id.cardNewBeranda);
         tvUserName = findViewById(R.id.tvUserName);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         drawerLayout = findViewById(R.id.drawerLayout);
@@ -161,6 +162,10 @@ public class BerandaActivity extends AppCompatActivity  {
         });
         cardTampilkanPromoM.setOnClickListener(v -> {
             Intent intent = new Intent(BerandaActivity.this, TampilPromoActivity.class);
+            startActivity(intent);
+        });
+        cardNewBeranda.setOnClickListener(v -> {
+            Intent intent = new Intent(BerandaActivity.this, NewBeranda.class);
             startActivity(intent);
         });
     }
