@@ -2,7 +2,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="Base.Theme.Mobile" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Override card supaya tetap putih -->
         <item name="cardViewStyle">@style/CustomCardView</item>
         <item name="materialCardViewStyle">@style/CustomCardView</item>
     </style>
