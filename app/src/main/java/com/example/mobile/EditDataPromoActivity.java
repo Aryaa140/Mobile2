@@ -35,26 +35,18 @@ public class EditDataPromoActivity extends AppCompatActivity {
 
     private int promoId;
     private String currentImageBase64;
+    private String originalImageBase64; // PERBAIKAN: Simpan gambar original
     private static final int PICK_IMAGE_REQUEST = 100;
-    private Bitmap selectedBitmap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_data_promo);
 
-        // Inisialisasi SharedPreferences
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-
-        // Inisialisasi view
         initViews();
-
-        // Terima data dari intent
         receiveIntentData();
-
-        // Setup data otomatis
         setupAutoData();
-
-        // Setup listeners
         setupListeners();
     }
 
@@ -76,53 +68,36 @@ public class EditDataPromoActivity extends AppCompatActivity {
             String promoReference = intent.getStringExtra("PROMO_REFERENCE");
             currentImageBase64 = intent.getStringExtra("PROMO_IMAGE");
 
-            // Set data ke form
+            // PERBAIKAN: Simpan gambar original untuk comparison
+            originalImageBase64 = currentImageBase64;
+
             editTextNamaPromo.setText(promoTitle);
             editTextPenginput.setText(promoInputter);
-
-            // Set spinner selection berdasarkan data yang diterima
             setSpinnerSelection(promoReference);
 
             Log.d("EditPromo", "Editing Promo ID: " + promoId);
+            Log.d("EditPromo", "Original image length: " +
+                    (originalImageBase64 != null ? originalImageBase64.length() : "null"));
         }
     }
 
     private void setupAutoData() {
-        // Auto-fill username dari SharedPreferences (Remember Me)
         String username = sharedPreferences.getString(KEY_USERNAME, "");
         if (!username.isEmpty()) {
             editTextPenginput.setText(username);
         }
-
-        // Spinner sudah memiliki item dari XML, jadi tidak perlu setup lagi
-        // Hanya set selection berdasarkan data yang ada
     }
 
     private void setSpinnerSelection(String reference) {
         if (reference != null && !reference.isEmpty()) {
-            // Cari item yang sesuai dalam spinner
             for (int i = 0; i < spinnerReferensi.getCount(); i++) {
                 String item = spinnerReferensi.getItemAtPosition(i).toString();
                 if (item.equalsIgnoreCase(reference)) {
                     spinnerReferensi.setSelection(i);
-                    Log.d("Spinner", "Set selection to: " + item + " at position: " + i);
-                    return;
+                    break;
                 }
             }
-
-            // Jika referensi tidak ditemukan, set ke default atau tambahkan ke spinner
-            Log.w("Spinner", "Referensi '" + reference + "' tidak ditemukan dalam spinner");
-            // Optional: bisa tambahkan item baru ke spinner jika diperlukan
-            // addItemToSpinner(reference);
         }
-    }
-
-    // Optional: Method untuk menambah item ke spinner jika diperlukan
-    private void addItemToSpinner(String newItem) {
-        ArrayAdapter<CharSequence> adapter = (ArrayAdapter<CharSequence>) spinnerReferensi.getAdapter();
-        adapter.add(newItem);
-        adapter.notifyDataSetChanged();
-        spinnerReferensi.setSelection(adapter.getPosition(newItem));
     }
 
     private void setupListeners() {
@@ -140,41 +115,48 @@ public class EditDataPromoActivity extends AppCompatActivity {
             startActivityForResult(Intent.createChooser(intent, "Pilih Gambar"), PICK_IMAGE_REQUEST);
         });
     }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Uri imageUri = data.getData();
-            try {
-                InputStream inputStream = getContentResolver().openInputStream(imageUri);
+            processSelectedImage(imageUri);
+        }
+    }
 
-                // PERBAIKAN: Decode bitmap dengan options untuk avoid memory issues
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inSampleSize = 2; // Reduce image size to avoid OOM
-                selectedBitmap = BitmapFactory.decodeStream(inputStream, null, options);
+    private void processSelectedImage(Uri imageUri) {
+        try {
+            InputStream inputStream = getContentResolver().openInputStream(imageUri);
 
-                if (selectedBitmap != null) {
-                    // PERBAIKAN: Compress dengan quality yang sesuai
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    selectedBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos); // Reduced quality
-                    byte[] imageBytes = baos.toByteArray();
-                    currentImageBase64 = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+            // Decode bitmap dengan optimization
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 2;
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
 
-                    Toast.makeText(this, "Gambar berhasil dipilih", Toast.LENGTH_SHORT).show();
+            if (bitmap != null) {
+                // Compress ke JPEG
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
+                byte[] imageBytes = baos.toByteArray();
+                currentImageBase64 = Base64.encodeToString(imageBytes, Base64.DEFAULT);
 
-                    // PERBAIKAN: Clear memory
-                    baos.close();
-                    if (inputStream != null) {
-                        inputStream.close();
-                    }
-                } else {
-                    Toast.makeText(this, "Gagal memuat gambar", Toast.LENGTH_SHORT).show();
+                // Clean up
+                baos.close();
+                if (inputStream != null) {
+                    inputStream.close();
                 }
 
-            } catch (Exception e) {
-                e.printStackTrace();
-                Toast.makeText(this, "Gagal memuat gambar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Gambar berhasil dipilih", Toast.LENGTH_SHORT).show();
+                Log.d("EditPromo", "New image length: " + currentImageBase64.length());
+            } else {
+                Toast.makeText(this, "Gagal memuat gambar", Toast.LENGTH_SHORT).show();
             }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Gagal memuat gambar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -183,29 +165,65 @@ public class EditDataPromoActivity extends AppCompatActivity {
         String penginput = editTextPenginput.getText().toString().trim();
         String referensi = spinnerReferensi.getSelectedItem().toString();
 
+        // Validasi dasar
         if (namaPromo.isEmpty() || penginput.isEmpty()) {
             Toast.makeText(this, "Harap isi semua field", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // PERBAIKAN: Validasi spinner yang benar
-        // Jangan validasi berdasarkan position, tapi berdasarkan value
         if (referensi.equals("Pilih Referensi Proyek") || referensi.isEmpty()) {
             Toast.makeText(this, "Harap pilih referensi proyek", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Tampilkan loading
+        // PERBAIKAN: Deteksi perubahan yang lebih akurat
+        String originalTitle = getIntent().getStringExtra("PROMO_TITLE");
+        String originalInputter = getIntent().getStringExtra("PROMO_INPUTTER");
+        String originalReference = getIntent().getStringExtra("PROMO_REFERENCE");
+
+        boolean dataChanged = !namaPromo.equals(originalTitle) ||
+                !penginput.equals(originalInputter) ||
+                !referensi.equals(originalReference) ||
+                isImageChanged();
+
+        Log.d("EditPromo", "=== PERUBAHAN DATA ===");
+        Log.d("EditPromo", "Nama berubah: " + !namaPromo.equals(originalTitle));
+        Log.d("EditPromo", "Penginput berubah: " + !penginput.equals(originalInputter));
+        Log.d("EditPromo", "Referensi berubah: " + !referensi.equals(originalReference));
+        Log.d("EditPromo", "Gambar berubah: " + isImageChanged());
+        Log.d("EditPromo", "Ada perubahan: " + dataChanged);
+
+        if (!dataChanged) {
+            Toast.makeText(this, "Tidak ada perubahan data", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // PERBAIKAN: Tentukan apa yang akan dikirim ke server
+        String imageToSend = currentImageBase64;
+
+        // Jika gambar tidak berubah, kirim null ke server (biarkan server handle)
+        if (!isImageChanged()) {
+            imageToSend = null;
+            Log.d("EditPromo", "Gambar tidak berubah, kirim null ke server");
+        }
+
         showLoading(true);
 
-        // Panggil API untuk update promo
+        // Debug final data
+        Log.d("EditPromo", "=== DATA AKHIR UNTUK SERVER ===");
+        Log.d("EditPromo", "ID: " + promoId);
+        Log.d("EditPromo", "Nama: " + namaPromo);
+        Log.d("EditPromo", "Penginput: " + penginput);
+        Log.d("EditPromo", "Referensi: " + referensi);
+        Log.d("EditPromo", "Gambar dikirim: " + (imageToSend != null ? imageToSend.length() + " chars" : "null"));
+
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
         Call<BasicResponse> call = apiService.updatePromo(
                 promoId,
                 namaPromo,
                 penginput,
                 referensi,
-                currentImageBase64 // Gunakan gambar yang sama jika tidak diubah
+                imageToSend
         );
 
         call.enqueue(new Callback<BasicResponse>() {
@@ -219,18 +237,22 @@ public class EditDataPromoActivity extends AppCompatActivity {
                     if (basicResponse.isSuccess()) {
                         Toast.makeText(EditDataPromoActivity.this, "Promo berhasil diupdate", Toast.LENGTH_SHORT).show();
 
-                        // PERBAIKAN: Kirim kembali data yang diupdate ke activity sebelumnya
+                        // PERBAIKAN: Selalu kirim gambar terbaru ke BerandaActivity
                         Intent resultIntent = new Intent();
                         resultIntent.putExtra("UPDATED_PROMO_ID", promoId);
-                        resultIntent.putExtra("UPDATED_IMAGE", currentImageBase64);
-                        setResult(RESULT_OK, resultIntent);
 
+                        // Jika gambar diubah, kirim yang baru; jika tidak, kirim yang original
+                        String imageToReturn = isImageChanged() ? currentImageBase64 : originalImageBase64;
+                        resultIntent.putExtra("UPDATED_IMAGE", imageToReturn);
+
+                        setResult(RESULT_OK, resultIntent);
                         finish();
                     } else {
                         Toast.makeText(EditDataPromoActivity.this, "Gagal: " + basicResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.e("EditPromo", "Server error: " + basicResponse.getMessage());
                     }
                 } else {
-                    Toast.makeText(EditDataPromoActivity.this, "Error response dari server", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditDataPromoActivity.this, "Error response dari server: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -238,18 +260,29 @@ public class EditDataPromoActivity extends AppCompatActivity {
             public void onFailure(Call<BasicResponse> call, Throwable t) {
                 showLoading(false);
                 Toast.makeText(EditDataPromoActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("EditPromo", "Network error: " + t.getMessage());
             }
         });
     }
 
-    private void showLoading(boolean isLoading) {
-        if (isLoading) {
-            btnSimpan.setEnabled(false);
-            btnSimpan.setText("Loading...");
-        } else {
-            btnSimpan.setEnabled(true);
-            btnSimpan.setText("Ubah");
+    // PERBAIKAN: Method untuk cek perubahan gambar
+    private boolean isImageChanged() {
+        if (originalImageBase64 == null && currentImageBase64 == null) {
+            return false; // Keduanya null, tidak ada perubahan
         }
+        if (originalImageBase64 == null && currentImageBase64 != null) {
+            return true; // Dari null ke ada gambar
+        }
+        if (originalImageBase64 != null && currentImageBase64 == null) {
+            return true; // Dari ada gambar ke null
+        }
+        // Bandingkan string base64 (gunakan substring untuk efisiensi)
+        return !originalImageBase64.equals(currentImageBase64);
+    }
+
+    private void showLoading(boolean isLoading) {
+        btnSimpan.setEnabled(!isLoading);
+        btnSimpan.setText(isLoading ? "Loading..." : "Ubah");
     }
 
     @Override
