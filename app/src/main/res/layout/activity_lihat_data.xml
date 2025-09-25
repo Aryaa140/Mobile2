@@ -70,7 +70,7 @@
                             android:layout_marginBottom="8dp">
 
                             <ImageView
-                                android:layout_width="65dp"
+                                android:layout_width="match_parent"
                                 android:layout_height="53dp"
                                 android:src="@drawable/ic_pemohon2" />
                         </FrameLayout>
@@ -122,8 +122,8 @@
                             android:layout_marginBottom="8dp">
 
                             <ImageView
-                                android:layout_width="65dp"
-                                android:layout_height="53dp"
+                                android:layout_width="match_parent"
+                                android:layout_height="52dp"
                                 android:src="@drawable/ic_prospek2" />
                         </FrameLayout>
 
@@ -149,7 +149,14 @@
             </GridLayout>
         </ScrollView>
 
-
+    <View
+        android:id="@+id/shadow_view"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:background="@drawable/shadow_top"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
@@ -157,6 +164,7 @@
         android:layout_height="wrap_content"
         android:background="@android:color/white"
         app:menu="@menu/bottom_nav_menu"
+        app:labelVisibilityMode="labeled"
         app:itemIconTint="@color/bottom_nav_selector"
         app:itemTextColor="@color/bottom_nav_selector"
         app:layout_constraintBottom_toBottomOf="parent"

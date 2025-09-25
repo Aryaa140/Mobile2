@@ -29,7 +29,7 @@ public class FasilitasActivity extends AppCompatActivity {
         cardDevelopment = findViewById(R.id.cardDevelopment);
 
         TopAppBar.setNavigationOnClickListener(v -> {
-            Intent intent = new Intent(FasilitasActivity.this, BerandaActivity.class);
+            Intent intent = new Intent(FasilitasActivity.this, NewBeranda.class);
             startActivity(intent);
             finish();
         });
@@ -44,12 +44,20 @@ public class FasilitasActivity extends AppCompatActivity {
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == R.id.nav_home) {
-                startActivity(new Intent(this, BerandaActivity.class));
+                startActivity(new Intent(this, NewBeranda.class));
                 overridePendingTransition(0, 0);
                 return true;
             } else if (id == R.id.nav_folder) {
                 return true;
-            } else if (id == R.id.nav_profile) {
+            } else if (id == R.id.nav_news) {
+                startActivity(new Intent(this, NewsActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_news) {
+                startActivity(new Intent(this, NewsActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            }else if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
                 overridePendingTransition(0, 0);
                 return true;

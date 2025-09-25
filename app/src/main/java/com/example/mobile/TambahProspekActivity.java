@@ -57,13 +57,13 @@ public class TambahProspekActivity extends AppCompatActivity {
         Batal = findViewById(R.id.btnBatal);
 
         TopAppBar.setNavigationOnClickListener(v -> {
-            Intent intent = new Intent(TambahProspekActivity.this, BerandaActivity.class);
+            Intent intent = new Intent(TambahProspekActivity.this, NewBeranda.class);
             startActivity(intent);
             finish();
         });
 
         Batal.setOnClickListener(v -> {
-            Intent intent = new Intent(TambahProspekActivity.this, BerandaActivity.class);
+            Intent intent = new Intent(TambahProspekActivity.this, NewBeranda.class);
             startActivity(intent);
             finish();
         });
@@ -74,6 +74,8 @@ public class TambahProspekActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
+                startActivity(new Intent(this, NewBeranda.class));
+                overridePendingTransition(0, 0);
                 return true;
             } else if (id == R.id.nav_folder) {
                 startActivity(new Intent(this, LihatDataActivity.class));
@@ -156,7 +158,7 @@ public class TambahProspekActivity extends AppCompatActivity {
         btnBatal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(TambahProspekActivity.this, BerandaActivity.class);
+                Intent intent = new Intent(TambahProspekActivity.this, NewBeranda.class);
                 startActivity(intent);
                 finish();
             }

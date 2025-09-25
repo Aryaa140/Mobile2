@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
@@ -31,8 +32,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class EditDataPromoActivity extends AppCompatActivity {
-
+public class EditDataPromooActivity extends AppCompatActivity {
     private EditText editTextNamaPromo, editTextPenginput;
     private Spinner spinnerReferensi;
     private Button btnSimpan, btnBatal, btnPilihGambar;
@@ -50,7 +50,15 @@ public class EditDataPromoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_data_promo);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_edit_data_promoo);
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
 
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         initViews();
@@ -58,12 +66,6 @@ public class EditDataPromoActivity extends AppCompatActivity {
         setupAutoData();
         setupListeners();
         setupNavigation();
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
     }
 
     private void initViews() {
@@ -80,7 +82,7 @@ public class EditDataPromoActivity extends AppCompatActivity {
     }
     private void setupNavigation() {
         topAppBar.setNavigationOnClickListener(v -> {
-            Intent intent = new Intent(EditDataPromoActivity.this, NewBeranda.class);
+            Intent intent = new Intent(EditDataPromooActivity.this, NewBeranda.class);
             startActivity(intent);
             finish();
         });
@@ -285,7 +287,7 @@ public class EditDataPromoActivity extends AppCompatActivity {
                     BasicResponse basicResponse = response.body();
 
                     if (basicResponse.isSuccess()) {
-                        Toast.makeText(EditDataPromoActivity.this, "Promo berhasil diupdate", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EditDataPromooActivity.this, "Promo berhasil diupdate", Toast.LENGTH_SHORT).show();
 
                         // PERBAIKAN: Selalu kirim gambar terbaru ke BerandaActivity
                         Intent resultIntent = new Intent();
@@ -298,18 +300,18 @@ public class EditDataPromoActivity extends AppCompatActivity {
                         setResult(RESULT_OK, resultIntent);
                         finish();
                     } else {
-                        Toast.makeText(EditDataPromoActivity.this, "Gagal: " + basicResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EditDataPromooActivity.this, "Gagal: " + basicResponse.getMessage(), Toast.LENGTH_SHORT).show();
                         Log.e("EditPromo", "Server error: " + basicResponse.getMessage());
                     }
                 } else {
-                    Toast.makeText(EditDataPromoActivity.this, "Error response dari server: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditDataPromooActivity.this, "Error response dari server: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
                 showLoading(false);
-                Toast.makeText(EditDataPromoActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditDataPromooActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("EditPromo", "Network error: " + t.getMessage());
             }
         });
@@ -341,3 +343,4 @@ public class EditDataPromoActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 }
+

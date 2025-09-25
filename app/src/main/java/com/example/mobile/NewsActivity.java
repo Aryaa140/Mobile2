@@ -77,7 +77,7 @@ public class NewsActivity extends AppCompatActivity {
         bottomNavigationView.setSelectedItemId(R.id.nav_news);
 
         topAppBar.setNavigationOnClickListener(v -> {
-            Intent intent = new Intent(NewsActivity.this, BerandaActivity.class);
+            Intent intent = new Intent(NewsActivity.this, NewBeranda.class);
             startActivity(intent);
             finish();
         });
@@ -86,7 +86,7 @@ public class NewsActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
-                startActivity(new Intent(this, BerandaActivity.class));
+                startActivity(new Intent(this, NewBeranda.class));
                 overridePendingTransition(0, 0);
                 return true;
             } else if (id == R.id.nav_folder) {

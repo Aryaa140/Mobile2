@@ -7,6 +7,8 @@ public class NewsItem {
     private String title;
     private String penginput;
     private String status;
+    private String action;
+
     private Date timestamp;
     private String imageUrl;
     private int promoId;
@@ -16,6 +18,7 @@ public class NewsItem {
         this.title = title;
         this.penginput = penginput;
         this.status = status;
+        this.action = action;
         this.timestamp = timestamp;
         this.imageUrl = imageUrl;
         this.promoId = promoId;
@@ -27,6 +30,8 @@ public class NewsItem {
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
+
+    public String getAction() { return action; }
 
     public String getPenginput() { return penginput; }
     public void setPenginput(String penginput) { this.penginput = penginput; }

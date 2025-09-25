@@ -71,13 +71,10 @@ public class BerandaActivity extends AppCompatActivity implements PromoAdapter.O
     private void initViews() {
         cardWelcome = findViewById(R.id.cardWelcome);
         cardProspekM = findViewById(R.id.cardProspekM);
-        cardLihatDataM = findViewById(R.id.cardLihatDataM);
         cardFasilitasM = findViewById(R.id.cardFasilitasM);
         cardProyekM = findViewById(R.id.cardProyekM);
         cardUserpM = findViewById(R.id.cardUserpM);
         cardInputPromoM = findViewById(R.id.cardInputPromoM);
-        cardTampilkanPromoM = findViewById(R.id.cardTampilkanPromoM);
-        cardNewBeranda = findViewById(R.id.cardNewBeranda);
         tvUserName = findViewById(R.id.tvUserName);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         drawerLayout = findViewById(R.id.drawerLayout);

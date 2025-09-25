@@ -5,13 +5,17 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#f4f4f4"
+    android:background="@drawable/bg_scroll_gradient"
     android:padding="24dp"
     tools:context=".SignUpActivity">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <androidx.cardview.widget.CardView
         android:id="@+id/cardLogin"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:padding="24dp"
@@ -149,10 +153,8 @@
                 android:minHeight="48dp"
                 android:text="Kembali"
                 android:textColor="@android:color/white" />
-
-
-
         </LinearLayout>
     </androidx.cardview.widget.CardView>
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

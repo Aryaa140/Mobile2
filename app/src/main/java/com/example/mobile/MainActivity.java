@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
         String division = sharedPreferences.getString(KEY_DIVISION, "");
         String nip = sharedPreferences.getString(KEY_NIP, "");
 
-        Intent intent = new Intent(MainActivity.this, BerandaActivity.class);
+        Intent intent = new Intent(MainActivity.this, NewBeranda.class);
         intent.putExtra("USERNAME", username);
         intent.putExtra("DIVISION", division);
         intent.putExtra("NIP", nip);
