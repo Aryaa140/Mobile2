@@ -82,7 +82,7 @@ public class EditProfileActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
-                startActivity(new Intent(this, BerandaActivity.class));
+                startActivity(new Intent(this, NewBeranda.class));
                 overridePendingTransition(0, 0);
                 return true;
             } else if (id == R.id.nav_folder) {
@@ -95,7 +95,6 @@ public class EditProfileActivity extends AppCompatActivity {
                 return true;
             } else if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
-                overridePendingTransition(0, 0);
                 return true;
             }
             return false;

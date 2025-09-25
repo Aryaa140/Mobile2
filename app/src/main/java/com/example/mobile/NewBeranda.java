@@ -29,9 +29,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class BerandaActivity extends AppCompatActivity implements PromoAdapter.OnPromoActionListener {
-
-    MaterialCardView cardWelcome, cardProspekM, cardLihatDataM, cardFasilitasM, cardProyekM, cardUserpM, cardInputPromoM, cardTampilkanPromoM, cardNewBeranda;
+public class NewBeranda extends AppCompatActivity  implements PromoAdapter.OnPromoActionListener{
+    MaterialCardView cardWelcome, cardProspekM, cardFasilitasM, cardProyekM, cardUserpM, cardInputPromoM;
     private BottomNavigationView bottomNavigationView;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
@@ -41,7 +40,6 @@ public class BerandaActivity extends AppCompatActivity implements PromoAdapter.O
     private PromoAdapter promoAdapter;
     private List<Promo> promoList = new ArrayList<>();
     private SharedPreferences sharedPreferences;
-
     private static final String PREFS_NAME = "LoginPrefs";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
@@ -50,7 +48,7 @@ public class BerandaActivity extends AppCompatActivity implements PromoAdapter.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_beranda);
+        setContentView(R.layout.activity_new_beranda);
 
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
@@ -67,7 +65,7 @@ public class BerandaActivity extends AppCompatActivity implements PromoAdapter.O
             return insets;
         });
     }
-    
+
     private void initViews() {
         cardWelcome = findViewById(R.id.cardWelcome);
         cardProspekM = findViewById(R.id.cardProspekM);
@@ -107,16 +105,16 @@ public class BerandaActivity extends AppCompatActivity implements PromoAdapter.O
                         promoAdapter.notifyDataSetChanged();
                         Log.d("BerandaActivity", "Promo data loaded: " + promoList.size() + " items");
                     } else {
-                        Toast.makeText(BerandaActivity.this, "Gagal memuat promo: " + promoResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(NewBeranda.this, "Gagal memuat promo: " + promoResponse.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(BerandaActivity.this, "Error response server", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(NewBeranda.this, "Error response server", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<PromoResponse> call, Throwable t) {
-                Toast.makeText(BerandaActivity.this, "Gagal memuat promo: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(NewBeranda.this, "Gagal memuat promo: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("BerandaActivity", "Load promo error: " + t.getMessage());
             }
         });
@@ -192,39 +190,27 @@ public class BerandaActivity extends AppCompatActivity implements PromoAdapter.O
 
     private void setupClickListeners() {
         cardWelcome.setOnClickListener(v -> {
-            Intent profileIntent = new Intent(BerandaActivity.this, ProfileActivity.class);
+            Intent profileIntent = new Intent(NewBeranda.this, ProfileActivity.class);
             startActivity(profileIntent);
         });
         cardProspekM.setOnClickListener(v -> {
-            Intent intentProspek = new Intent(BerandaActivity.this, TambahProspekActivity.class);
+            Intent intentProspek = new Intent(NewBeranda.this, TambahProspekActivity.class);
             startActivity(intentProspek);
         });
-        cardLihatDataM.setOnClickListener(v -> {
-            Intent intentLihatData = new Intent(BerandaActivity.this, LihatDataActivity.class);
-            startActivity(intentLihatData);
-        });
         cardFasilitasM.setOnClickListener(v -> {
-            Intent intentFasilitas = new Intent(BerandaActivity.this, FasilitasActivity.class);
+            Intent intentFasilitas = new Intent(NewBeranda.this, FasilitasActivity.class);
             startActivity(intentFasilitas);
         });
         cardProyekM.setOnClickListener(v -> {
-            Intent intentProyek = new Intent(BerandaActivity.this, ProyekActivity.class);
+            Intent intentProyek = new Intent(NewBeranda.this, ProyekActivity.class);
             startActivity(intentProyek);
         });
         cardUserpM.setOnClickListener(v -> {
-            Intent intentUserp = new Intent(BerandaActivity.this, TambahUserpActivity.class);
+            Intent intentUserp = new Intent(NewBeranda.this, TambahUserpActivity.class);
             startActivity(intentUserp);
         });
         cardInputPromoM.setOnClickListener(v -> {
-            Intent intent = new Intent(BerandaActivity.this, InputPromoActivity.class);
-            startActivity(intent);
-        });
-        cardTampilkanPromoM.setOnClickListener(v -> {
-            Intent intent = new Intent(BerandaActivity.this, TampilPromoActivity.class);
-            startActivity(intent);
-        });
-        cardNewBeranda.setOnClickListener(v -> {
-            Intent intent = new Intent(BerandaActivity.this, NewBeranda.class);
+            Intent intent = new Intent(NewBeranda.this, InputPromoActivity.class);
             startActivity(intent);
         });
     }
@@ -287,8 +273,8 @@ public class BerandaActivity extends AppCompatActivity implements PromoAdapter.O
         editor.remove("nip");
         editor.apply();
 
-        Toast.makeText(BerandaActivity.this, "Logout berhasil", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(BerandaActivity.this, MainActivity.class);
+        Toast.makeText(NewBeranda.this, "Logout berhasil", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(NewBeranda.this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
@@ -301,3 +287,4 @@ public class BerandaActivity extends AppCompatActivity implements PromoAdapter.O
         loadPromoData();
     }
 }
+

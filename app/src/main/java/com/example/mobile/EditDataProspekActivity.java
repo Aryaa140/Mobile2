@@ -112,9 +112,10 @@ public class EditDataProspekActivity extends AppCompatActivity {
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == R.id.nav_home) {
-                startActivity(new Intent(this, BerandaActivity.class));
+                startActivity(new Intent(this, NewBeranda.class));
                 return true;
             } else if (id == R.id.nav_folder) {
+                startActivity(new Intent(this, LihatDataActivity.class));
                 return true;
             } else if (id == R.id.nav_news) {
                 startActivity(new Intent(this, NewsActivity.class));

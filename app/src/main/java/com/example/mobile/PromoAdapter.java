@@ -92,7 +92,7 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
     private void openEditActivity(Promo promo) {
         Log.d("PromoAdapter", "Opening EditActivity for promo ID: " + promo.getIdPromo());
 
-        Intent intent = new Intent(context, EditDataPromoActivity.class);
+        Intent intent = new Intent(context, EditDataPromooActivity.class);
 
         intent.putExtra("PROMO_ID", promo.getIdPromo());
         intent.putExtra("PROMO_TITLE", promo.getNamaPromo());

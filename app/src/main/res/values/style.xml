@@ -30,6 +30,14 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <style name="CircleImageViewWithShadow" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+        <item name="strokeColor">@color/light_blue_200</item>
+        <item name="strokeWidth">2dp</item>
+        <item name="elevation">8dp</item>
+    </style>
+
     <style name="BottomNav">
         <item name="android:color">@android:color/transparent</item>
     </style>

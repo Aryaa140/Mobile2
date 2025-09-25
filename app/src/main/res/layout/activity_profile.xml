@@ -12,7 +12,7 @@
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/gradient_bg">
+        android:background="@drawable/bg_scroll_gradient">
 
         <!-- Toolbar -->
         <com.google.android.material.appbar.MaterialToolbar
@@ -186,8 +186,8 @@
                             android:gravity="center">
 
                             <ImageView
-                                android:layout_width="66dp"
-                                android:layout_height="60dp"
+                                android:layout_width="62dp"
+                                android:layout_height="61dp"
                                 android:src="@drawable/ic_exit2" />
                         </FrameLayout>
 
@@ -220,6 +220,15 @@
             </LinearLayout>
         </ScrollView>
 
+        <View
+            android:id="@+id/shadow_view"
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:background="@drawable/shadow_top"
+            app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
         <!-- Bottom Navigation -->
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottom_navigation"
@@ -227,6 +236,7 @@
             android:layout_height="wrap_content"
             android:background="@android:color/white"
             app:menu="@menu/bottom_nav_menu"
+            app:labelVisibilityMode="labeled"
             app:itemIconTint="@color/bottom_nav_selector"
             app:itemTextColor="@color/bottom_nav_selector"
             app:layout_constraintBottom_toBottomOf="parent"
