@@ -1,7 +1,11 @@
 package com.example.mobile;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,15 +17,28 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import java.io.IOException;
+
 public class GantiPasswordActivity extends AppCompatActivity {
 
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
     EditText editTextUsername, editTextPassword, editTextConfirmPassword;
     Button btnSimpan, btnBatal;
-    DatabaseHelper databaseHelper;
+
+    private ApiService apiService;
+    private SharedPreferences sharedPreferences;
+    private boolean isUsernameValid = false;
+    private static final String TAG = "GantiPasswordActivity";
+
+    // Keys untuk SharedPreferences
+    private static final String PREFS_NAME = "LoginPrefs";
+    private static final String KEY_USERNAME = "username";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,8 +46,11 @@ public class GantiPasswordActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_ganti_password);
 
-        // Inisialisasi DatabaseHelper
-        databaseHelper = new DatabaseHelper(this);
+        // Inisialisasi SharedPreferences
+        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+
+        // PERBAIKAN: Gunakan RetrofitClient yang sudah ada
+        apiService = RetrofitClient.getClient().create(ApiService.class);
 
         // Inisialisasi view
         TopAppBar = findViewById(R.id.topAppBar);
@@ -75,22 +95,52 @@ public class GantiPasswordActivity extends AppCompatActivity {
             return false;
         });
 
-        // Setup button listeners
-        btnSimpan.setOnClickListener(new View.OnClickListener() {
+        // Auto-set username dari SharedPreferences
+        String currentUsername = sharedPreferences.getString(KEY_USERNAME, "");
+        if (!TextUtils.isEmpty(currentUsername)) {
+            editTextUsername.setText(currentUsername);
+            validateUsername(currentUsername);
+        }
+
+        // Setup TextWatcher untuk real-time username validation
+        editTextUsername.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onClick(View v) {
-                gantiPassword();
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String username = s.toString().trim();
+                if (!TextUtils.isEmpty(username)) {
+                    // Hapus callback sebelumnya dan buat yang baru
+                    editTextUsername.removeCallbacks(validateRunnable);
+                    editTextUsername.postDelayed(validateRunnable, 1000);
+                } else {
+                    isUsernameValid = false;
+                    updateUIForUsernameValidation(false);
+                }
             }
+
+            private final Runnable validateRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    String username = editTextUsername.getText().toString().trim();
+                    if (!TextUtils.isEmpty(username)) {
+                        validateUsername(username);
+                    }
+                }
+            };
         });
 
-        btnBatal.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Kembali ke ProfileActivity
-                Intent intent = new Intent(GantiPasswordActivity.this, ProfileActivity.class);
-                startActivity(intent);
-                finish();
-            }
+        // Setup button listeners
+        btnSimpan.setOnClickListener(v -> gantiPassword());
+
+        btnBatal.setOnClickListener(v -> {
+            Intent intent = new Intent(GantiPasswordActivity.this, ProfileActivity.class);
+            startActivity(intent);
+            finish();
         });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -100,86 +150,168 @@ public class GantiPasswordActivity extends AppCompatActivity {
         });
     }
 
+    private void validateUsername(String username) {
+        Log.d(TAG, "Validating username: " + username);
+
+        Call<BasicResponse> call = apiService.checkUsername(username, "");
+        call.enqueue(new Callback<BasicResponse>() {
+            @Override
+            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                Log.d(TAG, "Response code: " + response.code());
+
+                if (response.isSuccessful() && response.body() != null) {
+                    BasicResponse checkResponse = response.body();
+                    Log.d(TAG, "Response success: " + checkResponse.isSuccess() + ", available: " + checkResponse.isAvailable());
+
+                    if (checkResponse.isSuccess() && checkResponse.isAvailable()) {
+                        isUsernameValid = true;
+                        runOnUiThread(() -> {
+                            updateUIForUsernameValidation(true);
+                            editTextUsername.setError(null);
+                            Toast.makeText(GantiPasswordActivity.this, "Username valid", Toast.LENGTH_SHORT).show();
+                        });
+                    } else {
+                        isUsernameValid = false;
+                        runOnUiThread(() -> {
+                            updateUIForUsernameValidation(false);
+                            editTextUsername.setError("Username tidak ditemukan");
+                        });
+                    }
+                } else {
+                    // Handle error response
+                    try {
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
+                        Log.e(TAG, "Error response: " + errorBody);
+                        handleError("Error: " + response.code() + " - " + errorBody);
+                    } catch (IOException e) {
+                        handleError("Error reading response: " + e.getMessage());
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BasicResponse> call, Throwable t) {
+                Log.e(TAG, "Network error: ", t);
+                handleError("Network error: " + t.getMessage());
+            }
+        });
+    }
+
+    private void handleError(String errorMessage) {
+        Log.e(TAG, errorMessage);
+        runOnUiThread(() -> {
+            isUsernameValid = false;
+            updateUIForUsernameValidation(false);
+            editTextUsername.setError("Gagal terhubung ke server");
+            Toast.makeText(GantiPasswordActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+        });
+    }
+
+    private void updateUIForUsernameValidation(boolean isValid) {
+        editTextPassword.setEnabled(isValid);
+        editTextConfirmPassword.setEnabled(isValid);
+        btnSimpan.setEnabled(isValid);
+
+        if (!isValid) {
+            editTextPassword.setText("");
+            editTextConfirmPassword.setText("");
+        }
+    }
+
     private void gantiPassword() {
         String username = editTextUsername.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
         String confirmPassword = editTextConfirmPassword.getText().toString().trim();
 
-        // Validasi input
+        if (validateInput(username, password, confirmPassword)) {
+            updatePasswordViaAPI(username, password);
+        }
+    }
+
+    private boolean validateInput(String username, String password, String confirmPassword) {
         if (username.isEmpty()) {
             editTextUsername.setError("Username harus diisi");
             editTextUsername.requestFocus();
-            return;
+            return false;
+        }
+
+        if (!isUsernameValid) {
+            editTextUsername.setError("Username tidak valid");
+            editTextUsername.requestFocus();
+            return false;
         }
 
         if (password.isEmpty()) {
             editTextPassword.setError("Password harus diisi");
             editTextPassword.requestFocus();
-            return;
+            return false;
         }
 
         if (confirmPassword.isEmpty()) {
             editTextConfirmPassword.setError("Konfirmasi password harus diisi");
             editTextConfirmPassword.requestFocus();
-            return;
+            return false;
         }
 
         if (!password.equals(confirmPassword)) {
             editTextConfirmPassword.setError("Password tidak cocok");
             editTextConfirmPassword.requestFocus();
-            return;
+            return false;
         }
 
-        // Cek apakah username ada di database
-        if (!databaseHelper.checkUsername(username)) {
-            editTextUsername.setError("Username tidak ditemukan");
-            editTextUsername.requestFocus();
-            return;
+        if (password.length() < 6) {
+            editTextPassword.setError("Password minimal 6 karakter");
+            editTextPassword.requestFocus();
+            return false;
         }
 
-        // Update password di database
-        boolean success = updatePasswordInDatabase(username, password);
-
-        if (success) {
-            Toast.makeText(this, "Password berhasil diubah", Toast.LENGTH_SHORT).show();
-            clearForm();
-            // Kembali ke ProfileActivity
-            Intent intent = new Intent(this, ProfileActivity.class);
-            startActivity(intent);
-            finish();
-        } else {
-            Toast.makeText(this, "Gagal mengubah password", Toast.LENGTH_SHORT).show();
-        }
+        return true;
     }
 
-    private boolean updatePasswordInDatabase(String username, String newPassword) {
-        // Method untuk update password di database
-        // Karena DatabaseHelper tidak memiliki method updatePassword, kita buat manual
+    private void updatePasswordViaAPI(String username, String newPassword) {
+        Toast.makeText(this, "Mengubah password...", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "Updating password for: " + username);
 
-        SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(DatabaseHelper.COLUMN_PASSWORD, newPassword);
+        Call<BasicResponse> call = apiService.updatePassword(username, newPassword);
+        call.enqueue(new Callback<BasicResponse>() {
+            @Override
+            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                Log.d(TAG, "Update password response code: " + response.code());
 
-        String selection = DatabaseHelper.COLUMN_USERNAME + " = ?";
-        String[] selectionArgs = {username};
+                if (response.isSuccessful() && response.body() != null) {
+                    BasicResponse basicResponse = response.body();
+                    if (basicResponse.isSuccess()) {
+                        Toast.makeText(GantiPasswordActivity.this, "Password berhasil diubah", Toast.LENGTH_SHORT).show();
+                        clearForm();
+                        Intent intent = new Intent(GantiPasswordActivity.this, ProfileActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(GantiPasswordActivity.this, "Gagal: " + basicResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    try {
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
+                        Toast.makeText(GantiPasswordActivity.this, "Error: " + errorBody, Toast.LENGTH_SHORT).show();
+                    } catch (IOException e) {
+                        Toast.makeText(GantiPasswordActivity.this, "Error reading response", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
 
-        int rowsAffected = db.update(DatabaseHelper.TABLE_USERS, values, selection, selectionArgs);
-        db.close();
-
-        return rowsAffected > 0;
+            @Override
+            public void onFailure(Call<BasicResponse> call, Throwable t) {
+                Log.e(TAG, "Update password error: ", t);
+                Toast.makeText(GantiPasswordActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void clearForm() {
         editTextUsername.setText("");
         editTextPassword.setText("");
         editTextConfirmPassword.setText("");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (databaseHelper != null) {
-            databaseHelper.close();
-        }
+        isUsernameValid = false;
+        updateUIForUsernameValidation(false);
     }
 }

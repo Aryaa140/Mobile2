@@ -16,15 +16,7 @@ public interface ApiService {
             @Field("Password") String password
     );
 
-    @FormUrlEncoded
-    @POST("register.php")
-    Call<LoginResponse> registerUser(
-            @Field("Id_prospek") int idProspek,
-            @Field("ussername") String ussername,
-            @Field("NIP") int NIP,
-            @Field("Divisi") String Divisi,
-            @Field("Password") String password
-    );
+
     @FormUrlEncoded
     @POST("register.php")
     Call<RegisterResponse> registerUser(
@@ -33,6 +25,37 @@ public interface ApiService {
             @Field("Divisi") String division,
             @Field("Password") String password
     );
+    @FormUrlEncoded
+    @POST("update_password.php")
+    Call<BasicResponse> updatePassword(
+            @Field("username") String username,
+            @Field("new_password") String newPassword
+    );
+
+    @FormUrlEncoded
+    @POST("update_profile.php")
+    Call<BasicResponse> updateProfile(
+            @Field("nip") int nip,
+            @Field("old_username") String oldUsername,
+            @Field("new_username") String newUsername,
+            @Field("new_division") String newDivision,
+            @Field("username_changed") int usernameChanged
+    );
+    @FormUrlEncoded
+    @POST("check_username.php")
+    Call<BasicResponse> checkUsername(
+            @Field("username") String username,
+            @Field("current_username") String currentUsername
+    );
+    @FormUrlEncoded
+    @POST("update_username_relations.php")
+    Call<BasicResponse> updateUsernameInRelatedTables(
+            @Field("old_username") String oldUsername,
+            @Field("new_username") String newUsername
+    );
+
+
+
     @FormUrlEncoded
     @POST("tambah_prospek.php")
     Call<BasicResponse> tambahProspek(
