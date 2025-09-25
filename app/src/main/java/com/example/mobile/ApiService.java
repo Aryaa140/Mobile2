@@ -54,7 +54,11 @@ public interface ApiService {
             @Field("new_username") String newUsername
     );
 
-
+    @FormUrlEncoded
+    @POST("check_username_password.php")
+    Call<PasswordCheckResponse> checkUsernameForPassword(
+            @Field("username") String username
+    );
 
     @FormUrlEncoded
     @POST("tambah_prospek.php")

@@ -49,7 +49,7 @@ public class GantiPasswordActivity extends AppCompatActivity {
         // Inisialisasi SharedPreferences
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
-        // PERBAIKAN: Gunakan RetrofitClient yang sudah ada
+        // Gunakan RetrofitClient yang sudah ada
         apiService = RetrofitClient.getClient().create(ApiService.class);
 
         // Inisialisasi view
@@ -76,7 +76,7 @@ public class GantiPasswordActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
-                startActivity(new Intent(this, NewBeranda.class));
+                startActivity(new Intent(this, BerandaActivity.class));
                 overridePendingTransition(0, 0);
                 return true;
             } else if (id == R.id.nav_folder) {
@@ -114,7 +114,6 @@ public class GantiPasswordActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 String username = s.toString().trim();
                 if (!TextUtils.isEmpty(username)) {
-                    // Hapus callback sebelumnya dan buat yang baru
                     editTextUsername.removeCallbacks(validateRunnable);
                     editTextUsername.postDelayed(validateRunnable, 1000);
                 } else {
@@ -151,19 +150,21 @@ public class GantiPasswordActivity extends AppCompatActivity {
     }
 
     private void validateUsername(String username) {
-        Log.d(TAG, "Validating username: " + username);
+        Log.d(TAG, "Validating username for password change: " + username);
 
-        Call<BasicResponse> call = apiService.checkUsername(username, "");
-        call.enqueue(new Callback<BasicResponse>() {
+        // GUNAKAN METHOD BARU UNTUK GANTI PASSWORD
+        Call<PasswordCheckResponse> call = apiService.checkUsernameForPassword(username);
+        call.enqueue(new Callback<PasswordCheckResponse>() {
             @Override
-            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+            public void onResponse(Call<PasswordCheckResponse> call, Response<PasswordCheckResponse> response) {
                 Log.d(TAG, "Response code: " + response.code());
 
                 if (response.isSuccessful() && response.body() != null) {
-                    BasicResponse checkResponse = response.body();
-                    Log.d(TAG, "Response success: " + checkResponse.isSuccess() + ", available: " + checkResponse.isAvailable());
+                    PasswordCheckResponse checkResponse = response.body();
+                    Log.d(TAG, "Response - Success: " + checkResponse.isSuccess() + ", Exists: " + checkResponse.isExists());
 
-                    if (checkResponse.isSuccess() && checkResponse.isAvailable()) {
+                    if (checkResponse.isSuccess() && checkResponse.isExists()) {
+                        // Username DITEMUKAN di database - VALID untuk ganti password
                         isUsernameValid = true;
                         runOnUiThread(() -> {
                             updateUIForUsernameValidation(true);
@@ -171,10 +172,14 @@ public class GantiPasswordActivity extends AppCompatActivity {
                             Toast.makeText(GantiPasswordActivity.this, "Username valid", Toast.LENGTH_SHORT).show();
                         });
                     } else {
+                        // Username TIDAK DITEMUKAN di database
                         isUsernameValid = false;
                         runOnUiThread(() -> {
                             updateUIForUsernameValidation(false);
                             editTextUsername.setError("Username tidak ditemukan");
+                            Toast.makeText(GantiPasswordActivity.this,
+                                    "Username tidak valid: " + checkResponse.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
                         });
                     }
                 } else {
@@ -190,7 +195,7 @@ public class GantiPasswordActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<BasicResponse> call, Throwable t) {
+            public void onFailure(Call<PasswordCheckResponse> call, Throwable t) {
                 Log.e(TAG, "Network error: ", t);
                 handleError("Network error: " + t.getMessage());
             }
