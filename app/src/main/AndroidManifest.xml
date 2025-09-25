@@ -22,7 +22,7 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".EditDataPromoActivity"
+            android:name=".EditDataPromooActivity"
             android:exported="false" />
         <activity
             android:name=".TampilPromoActivity"

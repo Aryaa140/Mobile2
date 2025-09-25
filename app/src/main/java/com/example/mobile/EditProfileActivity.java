@@ -123,13 +123,8 @@ public class EditProfileActivity extends AppCompatActivity {
     private void setupSpinnerDivisi() {
         // Data divisi - sesuaikan dengan data yang ada di database
         String[] divisions = {
-                "IT",
-                "Marketing",
-                "Sales",
-                "HRD",
-                "Finance",
-                "Operations",
-                "Production"
+                "EDP (Electronic Data Processing)",
+                "Marketing"
         };
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(

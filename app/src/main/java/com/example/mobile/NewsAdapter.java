@@ -1,6 +1,9 @@
 package com.example.mobile;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,30 +15,19 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.squareup.picasso.Picasso;
-
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
-import com.squareup.picasso.Callback;
-import android.graphics.BitmapFactory;
-import android.util.Base64;
-import android.util.Log;
-import android.widget.ImageView;
-import androidx.core.content.ContextCompat;
+
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder> {
     private Context context;
     private List<NewsItem> newsItems;
     private SimpleDateFormat dateFormat;
-    public interface OnItemRemoveListener {
-        void onItemRemoved(int position, NewsItem removedItem);
-    }
 
     public NewsAdapter(Context context, List<NewsItem> newsItems) {
         this.context = context;
         this.newsItems = newsItems;
         this.dateFormat = new SimpleDateFormat("dd MMM yyyy, HH:mm", new Locale("id", "ID"));
-
     }
 
     @NonNull
@@ -44,9 +36,6 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
         View view = LayoutInflater.from(context).inflate(R.layout.item_news_card, parent, false);
         return new NewsViewHolder(view);
     }
-
-
-
 
     @Override
     public void onBindViewHolder(@NonNull NewsViewHolder holder, int position) {
@@ -57,61 +46,67 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
         holder.tvStatus.setText("Status: " + item.getStatus());
         holder.tvNewsDate.setText(dateFormat.format(item.getTimestamp()));
 
-        // Handle image - bisa berupa URL atau base64 string
-        if (item.getImageUrl() != null && !item.getImageUrl().isEmpty()) {
-            String imageData = item.getImageUrl();
-
-            if (imageData.startsWith("http")) {
-                // Jika berupa URL, gunakan Picasso
-                Picasso.get()
-                        .load(imageData)
-                        .fit()
-                        .centerCrop()
-                        .placeholder(android.R.drawable.ic_menu_gallery)
-                        .error(android.R.drawable.ic_menu_report_image)
-                        .into(holder.imgNews);
-            } else if (imageData.startsWith("data:image") || imageData.length() > 100) {
-                // Jika berupa base64, decode dan set bitmap
-                decodeBase64AndSetImage(imageData, holder.imgNews);
-            } else {
-                // Data tidak valid
-                setDefaultImage(holder.imgNews);
-            }
-        } else {
-            setDefaultImage(holder.imgNews);
-        }
+        // PERBAIKAN: Handle image loading dengan lebih robust
+        loadNewsImage(item.getImageUrl(), holder.imgNews);
     }
 
-    private void decodeBase64AndSetImage(String base64String, ImageView imageView) {
+    private void loadNewsImage(String imageData, ImageView imageView) {
+        // Reset image dulu
+        setDefaultImage(imageView);
+
+        if (imageData == null || imageData.trim().isEmpty()) {
+            Log.d("NewsAdapter", "Image data is null or empty");
+            return;
+        }
+
+        // PERBAIKAN: Cek jika data adalah base64 yang valid
+        String cleanBase64 = imageData.trim();
+
+        // Validasi panjang base64 (minimal 100 karakter untuk gambar kecil)
+        if (cleanBase64.length() < 100) {
+            Log.w("NewsAdapter", "Base64 too short: " + cleanBase64.length());
+            return;
+        }
+
         try {
-            // Bersihkan base64 string jika mengandung prefix "data:image"
-            String base64Image;
-            if (base64String.contains(",")) {
-                base64Image = base64String.split(",")[1];
-            } else {
-                base64Image = base64String;
+            // PERBAIKAN: Decode base64 dengan error handling yang lebih baik
+            byte[] decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
+
+            if (decodedBytes == null || decodedBytes.length == 0) {
+                Log.w("NewsAdapter", "Decoded bytes are empty");
+                return;
             }
 
-            // Decode base64 to bitmap
-            byte[] decodedBytes = android.util.Base64.decode(base64Image, android.util.Base64.DEFAULT);
-            android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+            // PERBAIKAN: Optimasi decode bitmap dengan options
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 2; // Reduce memory usage
+            options.inPreferredConfig = Bitmap.Config.RGB_565;
+
+            Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length, options);
 
             if (bitmap != null) {
                 imageView.setImageBitmap(bitmap);
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                Log.d("NewsAdapter", "✅ Image loaded successfully - Size: " + bitmap.getWidth() + "x" + bitmap.getHeight());
             } else {
+                Log.w("NewsAdapter", "Failed to decode bitmap from base64");
                 setDefaultImage(imageView);
-                Log.e("NewsAdapter", "Failed to decode base64 image");
             }
-        } catch (Exception e) {
+
+        } catch (IllegalArgumentException e) {
+            Log.e("NewsAdapter", "Invalid base64 string: " + e.getMessage());
             setDefaultImage(imageView);
-            Log.e("NewsAdapter", "Error decoding base64: " + e.getMessage());
+        } catch (OutOfMemoryError e) {
+            Log.e("NewsAdapter", "Out of memory when decoding image: " + e.getMessage());
+            setDefaultImage(imageView);
+        } catch (Exception e) {
+            Log.e("NewsAdapter", "Error loading image: " + e.getMessage());
+            setDefaultImage(imageView);
         }
     }
 
     private void setDefaultImage(ImageView imageView) {
-        imageView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.darker_gray));
-        imageView.setImageDrawable(null);
+        imageView.setImageResource(R.drawable.ic_placeholder); // Pastikan ada placeholder di drawable
         imageView.setScaleType(ImageView.ScaleType.CENTER);
     }
 
@@ -121,11 +116,17 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
     }
 
     public void removeItem(int position) {
-        NewsItem removedItem = newsItems.get(position);
-        newsItems.remove(position);
-        notifyItemRemoved(position);
+        if (position >= 0 && position < newsItems.size()) {
+            newsItems.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
 
-
+    // PERBAIKAN: Method untuk update data
+    public void updateData(List<NewsItem> newItems) {
+        newsItems.clear();
+        newsItems.addAll(newItems);
+        notifyDataSetChanged();
     }
 
     public static class NewsViewHolder extends RecyclerView.ViewHolder {

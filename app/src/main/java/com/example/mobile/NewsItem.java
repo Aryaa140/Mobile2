@@ -7,18 +7,16 @@ public class NewsItem {
     private String title;
     private String penginput;
     private String status;
-    private String action;
-
     private Date timestamp;
-    private String imageUrl;
+    private String imageUrl; // Ini akan berisi base64 string
     private int promoId;
 
+    // PERBAIKAN: Hapus field action yang tidak digunakan
     public NewsItem(int id, String title, String penginput, String status, Date timestamp, String imageUrl, int promoId) {
         this.id = id;
         this.title = title;
         this.penginput = penginput;
         this.status = status;
-        this.action = action;
         this.timestamp = timestamp;
         this.imageUrl = imageUrl;
         this.promoId = promoId;
@@ -30,8 +28,6 @@ public class NewsItem {
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
-
-    public String getAction() { return action; }
 
     public String getPenginput() { return penginput; }
     public void setPenginput(String penginput) { this.penginput = penginput; }

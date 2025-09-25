@@ -14,16 +14,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.GravityCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -33,11 +24,11 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class EditDataPromooActivity extends AppCompatActivity {
+
     private EditText editTextNamaPromo, editTextPenginput;
     private Spinner spinnerReferensi;
     private Button btnSimpan, btnBatal, btnPilihGambar;
-    private BottomNavigationView bottomNavigationView;
-    private MaterialToolbar topAppBar;
+
     private SharedPreferences sharedPreferences;
     private static final String PREFS_NAME = "LoginPrefs";
     private static final String KEY_USERNAME = "username";
@@ -50,65 +41,22 @@ public class EditDataPromooActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_edit_data_promoo);
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
+        setContentView(R.layout.activity_edit_data_promo);
 
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         initViews();
         receiveIntentData();
         setupAutoData();
         setupListeners();
-        setupNavigation();
     }
 
     private void initViews() {
-        bottomNavigationView = findViewById(R.id.bottom_navigation);
-        topAppBar = findViewById(R.id.topAppBar);
-        bottomNavigationView = findViewById(R.id.bottom_navigation);
-        topAppBar = findViewById(R.id.topAppBar);
         editTextNamaPromo = findViewById(R.id.editTextNama);
         editTextPenginput = findViewById(R.id.editTextProspek);
         spinnerReferensi = findViewById(R.id.spinnerRole);
         btnSimpan = findViewById(R.id.btnSimpan);
         btnBatal = findViewById(R.id.btnBatal);
         btnPilihGambar = findViewById(R.id.btnInputPromo);
-    }
-    private void setupNavigation() {
-        topAppBar.setNavigationOnClickListener(v -> {
-            Intent intent = new Intent(EditDataPromooActivity.this, NewBeranda.class);
-            startActivity(intent);
-            finish();
-        });
-
-        bottomNavigationView.setOnItemSelectedListener(item -> {
-            int id = item.getItemId();
-
-            if (id == R.id.nav_home) {
-                startActivity(new Intent(this, BerandaActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
-            } else if (id == R.id.nav_folder) {
-                startActivity(new Intent(this, LihatDataActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
-            } else if (id == R.id.nav_news) {
-                startActivity(new Intent(this, NewsActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
-            } else if (id == R.id.nav_profile) {
-                startActivity(new Intent(this, ProfileActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
-            }
-            return false;
-        });
     }
 
     private void receiveIntentData() {
@@ -343,4 +291,3 @@ public class EditDataPromooActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 }
-

@@ -196,6 +196,7 @@ public class NewsActivity extends AppCompatActivity {
 
     private void processPromoData(List<Promo> promoList) {
         List<NewsItem> newItems = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
 
         for (Promo promo : promoList) {
             boolean exists = false;
@@ -209,12 +210,13 @@ public class NewsActivity extends AppCompatActivity {
             if (!exists) {
                 String imageData = promo.getGambarBase64();
 
-                // Handle base64 image data
-                String imageUrl = null;
-                if (imageData != null && !imageData.isEmpty()) {
-                    // Jika data adalah base64, kita simpan sebagai string base64
-                    // NewsAdapter akan menangani decoding-nya
-                    imageUrl = imageData;
+                // PERBAIKAN: Validasi base64 data sebelum disimpan
+                String validImageData = null;
+                if (imageData != null && !imageData.trim().isEmpty() && imageData.length() > 100) {
+                    validImageData = imageData.trim();
+                    Log.d("NewsActivity", "Valid image data found for promo: " + promo.getNamaPromo() + ", length: " + validImageData.length());
+                } else {
+                    Log.w("NewsActivity", "Invalid or empty image data for promo: " + promo.getNamaPromo());
                 }
 
                 NewsItem newItem = new NewsItem(
@@ -222,8 +224,8 @@ public class NewsActivity extends AppCompatActivity {
                         promo.getNamaPromo(),
                         promo.getNamaPenginput(),
                         "Ditambahkan",
-                        new Date(),
-                        imageUrl, // Ini sekarang berisi string base64
+                        calendar.getTime(), // Gunakan waktu sekarang
+                        validImageData, // Base64 string atau null
                         promo.getIdPromo()
                 );
 
@@ -232,12 +234,22 @@ public class NewsActivity extends AppCompatActivity {
             }
         }
 
-        // Tambahkan semua item baru sekaligus
+        // Tambahkan item baru
         if (!newItems.isEmpty()) {
             newsItems.addAll(0, newItems);
+
+            // PERBAIKAN: Batasi jumlah news items (misal max 50)
+            if (newsItems.size() > 50) {
+                newsItems = newsItems.subList(0, 50);
+            }
+
             saveNewsData();
             newsAdapter.notifyDataSetChanged();
             removeOldNews();
+
+            Toast.makeText(this, "Ditemukan " + newItems.size() + " promo baru", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Tidak ada promo baru", Toast.LENGTH_SHORT).show();
         }
     }
 
