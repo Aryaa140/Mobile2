@@ -342,4 +342,3 @@ public class EditDataPromooActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 }
-

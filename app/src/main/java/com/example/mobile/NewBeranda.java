@@ -89,38 +89,9 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
     private void setupRecyclerView() {
         recyclerPromo.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         promoAdapter = new PromoAdapter(this, promoList);
-
-        // PERBAIKAN: Pastikan listener di-set SEBELUM setAdapter
         promoAdapter.setOnPromoActionListener(this);
-
         recyclerPromo.setAdapter(promoAdapter);
-
-        Log.d("NewBeranda", "RecyclerView setup completed");
     }
-
-    @Override
-    public void onPromoUpdated(int promoId, String updatedImage) {
-        Log.d("NewBeranda", "Promo updated - ID: " + promoId + ", Image: " +
-                (updatedImage != null ? updatedImage.length() + " chars" : "null"));
-
-        // PERBAIKAN: Handle null image
-        if (promoAdapter != null) {
-            promoAdapter.updatePromoItem(promoId, updatedImage);
-            Toast.makeText(this, "Promo berhasil diupdate", Toast.LENGTH_SHORT).show();
-        }
-
-        savePromoUpdateForNews(promoId, "Diubah", updatedImage);
-    }
-
-    @Override
-    public void onPromoDeleted(String promoTitle, String penginput) {
-        Log.d("NewBeranda", "Promo deleted: " + promoTitle);
-        Toast.makeText(this, "Promo '" + promoTitle + "' dihapus", Toast.LENGTH_SHORT).show();
-
-        savePromoDeleteForNews(promoTitle, penginput);
-    }
-
-    // PERBAIKAN: Tambah error handling di h
 
     private void loadPromoData() {
         Log.d("BerandaActivity", "Loading promo data...");
@@ -154,6 +125,30 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         });
     }
 
+    // IMPLEMENTASI METHOD DARI INTERFACE - YANG INI SUDAH ADA
+    @Override
+    public void onPromoUpdated(int promoId, String updatedImage) {
+        Log.d("BerandaActivity", "Promo updated - ID: " + promoId);
+
+        // Update item di adapter
+        if (promoAdapter != null) {
+            promoAdapter.updatePromoItem(promoId, updatedImage);
+            Toast.makeText(this, "Promo berhasil diupdate", Toast.LENGTH_SHORT).show();
+        }
+
+        // SIMPAN INFO UPDATE UNTUK NEWS ACTIVITY
+        savePromoUpdateForNews(promoId, "Diubah", updatedImage);
+    }
+
+    // IMPLEMENTASI METHOD BARU YANG DIBUTUHKAN
+    @Override
+    public void onPromoDeleted(String promoTitle, String penginput) {
+        Log.d("BerandaActivity", "Promo deleted: " + promoTitle);
+        Toast.makeText(this, "Promo '" + promoTitle + "' dihapus", Toast.LENGTH_SHORT).show();
+
+        // SIMPAN INFO DELETE UNTUK NEWS ACTIVITY
+        savePromoDeleteForNews(promoTitle, penginput);
+    }
 
     // METHOD UNTUK SIMPAN INFO UPDATE PROMO
     private void savePromoUpdateForNews(int promoId, String status, String updatedImage) {
