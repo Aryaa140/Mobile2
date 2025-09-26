@@ -29,7 +29,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class NewBeranda extends AppCompatActivity  implements PromoAdapter.OnPromoActionListener{
+public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnPromoActionListener {
     MaterialCardView cardWelcome, cardProspekM, cardFasilitasM, cardProyekM, cardUserpM, cardInputPromoM;
     private BottomNavigationView bottomNavigationView;
     private DrawerLayout drawerLayout;
@@ -44,13 +44,18 @@ public class NewBeranda extends AppCompatActivity  implements PromoAdapter.OnPro
     private static final String KEY_USERNAME = "username";
     private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
 
+    // SHARED PREFERENCES UNTUK NEWS
+    private SharedPreferences newsPrefs;
+    private static final String NEWS_PREFS_NAME = "NewsUpdates";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_new_beranda);
+        setContentView(R.layout.activity_beranda);
 
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        newsPrefs = getSharedPreferences(NEWS_PREFS_NAME, MODE_PRIVATE);
 
         initViews();
         setupRecyclerView();
@@ -84,9 +89,38 @@ public class NewBeranda extends AppCompatActivity  implements PromoAdapter.OnPro
     private void setupRecyclerView() {
         recyclerPromo.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         promoAdapter = new PromoAdapter(this, promoList);
-        promoAdapter.setOnPromoActionListener(this); // PERBAIKAN: Set listener ke this activity
+
+        // PERBAIKAN: Pastikan listener di-set SEBELUM setAdapter
+        promoAdapter.setOnPromoActionListener(this);
+
         recyclerPromo.setAdapter(promoAdapter);
+
+        Log.d("NewBeranda", "RecyclerView setup completed");
     }
+
+    @Override
+    public void onPromoUpdated(int promoId, String updatedImage) {
+        Log.d("NewBeranda", "Promo updated - ID: " + promoId + ", Image: " +
+                (updatedImage != null ? updatedImage.length() + " chars" : "null"));
+
+        // PERBAIKAN: Handle null image
+        if (promoAdapter != null) {
+            promoAdapter.updatePromoItem(promoId, updatedImage);
+            Toast.makeText(this, "Promo berhasil diupdate", Toast.LENGTH_SHORT).show();
+        }
+
+        savePromoUpdateForNews(promoId, "Diubah", updatedImage);
+    }
+
+    @Override
+    public void onPromoDeleted(String promoTitle, String penginput) {
+        Log.d("NewBeranda", "Promo deleted: " + promoTitle);
+        Toast.makeText(this, "Promo '" + promoTitle + "' dihapus", Toast.LENGTH_SHORT).show();
+
+        savePromoDeleteForNews(promoTitle, penginput);
+    }
+
+    // PERBAIKAN: Tambah error handling di h
 
     private void loadPromoData() {
         Log.d("BerandaActivity", "Loading promo data...");
@@ -120,34 +154,32 @@ public class NewBeranda extends AppCompatActivity  implements PromoAdapter.OnPro
         });
     }
 
-    // PERBAIKAN: Implementasi interface methods yang LENGKAP
-    @Override
-    public void onEditPromo(Promo promo) {
-        Log.d("BerandaActivity", "Edit promo requested: " + promo.getNamaPromo());
-        // Biarkan adapter yang menangani melalui openEditActivity
+
+    // METHOD UNTUK SIMPAN INFO UPDATE PROMO
+    private void savePromoUpdateForNews(int promoId, String status, String updatedImage) {
+        SharedPreferences.Editor editor = newsPrefs.edit();
+        editor.putInt("last_updated_promo_id", promoId);
+        editor.putString("last_updated_status", status);
+        editor.putString("last_updated_image", updatedImage != null ? updatedImage : "");
+        editor.putLong("last_update_time", System.currentTimeMillis());
+        editor.apply();
+
+        Log.d("BerandaActivity", "Saved update info for NewsActivity - Promo ID: " + promoId);
     }
 
-    @Override
-    public void onDeletePromo(Promo promo) {
-        Log.d("BerandaActivity", "Delete promo requested: " + promo.getNamaPromo());
-        // Biarkan adapter yang menangani delete secara langsung
-        // Atau jika ingin handle di activity, panggil method delete di adapter:
-        // deletePromoDirectly(promo);
+    // METHOD UNTUK SIMPAN INFO DELETE PROMO
+    private void savePromoDeleteForNews(String promoTitle, String penginput) {
+        SharedPreferences.Editor editor = newsPrefs.edit();
+        editor.putString("last_deleted_title", promoTitle);
+        editor.putString("last_deleted_inputter", penginput);
+        editor.putString("last_deleted_status", "Dihapus");
+        editor.putLong("last_delete_time", System.currentTimeMillis());
+        editor.apply();
+
+        Log.d("BerandaActivity", "Saved delete info for NewsActivity - Title: " + promoTitle);
     }
 
-    @Override
-    public void onPromoUpdated(int promoId, String updatedImage) {
-        Log.d("BerandaActivity", "Promo updated - ID: " + promoId + ", Image length: " +
-                (updatedImage != null ? updatedImage.length() : "null"));
-
-        // Update item di adapter
-        if (promoAdapter != null) {
-            promoAdapter.updatePromoItem(promoId, updatedImage);
-            Toast.makeText(this, "Promo berhasil diupdate", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    // PERBAIKAN: Handle activity result untuk update promo
+    // HANDLE ACTIVITY RESULT
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -163,10 +195,9 @@ public class NewBeranda extends AppCompatActivity  implements PromoAdapter.OnPro
         int updatedPromoId = data.getIntExtra("UPDATED_PROMO_ID", -1);
         String updatedImage = data.getStringExtra("UPDATED_IMAGE");
 
-        Log.d("BerandaActivity", "Handle edit result - ID: " + updatedPromoId +
-                ", Image: " + (updatedImage != null ? updatedImage.length() + " chars" : "null"));
+        Log.d("BerandaActivity", "Handle edit result - ID: " + updatedPromoId);
 
-        if (updatedPromoId != -1 && updatedImage != null && !updatedImage.isEmpty()) {
+        if (updatedPromoId != -1) {
             // Panggil method update melalui interface
             onPromoUpdated(updatedPromoId, updatedImage);
         } else {
@@ -283,8 +314,6 @@ public class NewBeranda extends AppCompatActivity  implements PromoAdapter.OnPro
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh data ketika activity resume
         loadPromoData();
     }
 }
-

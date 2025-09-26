@@ -50,7 +50,7 @@ public class TampilPromoActivity extends AppCompatActivity {
         topAppBar = findViewById(R.id.topAppBar);
 
         topAppBar.setNavigationOnClickListener(v -> {
-            Intent intent = new Intent(TampilPromoActivity.this, BerandaActivity.class);
+            Intent intent = new Intent(TampilPromoActivity.this, NewBeranda.class);
             startActivity(intent);
             finish();
         });

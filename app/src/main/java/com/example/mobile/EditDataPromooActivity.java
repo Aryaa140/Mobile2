@@ -14,7 +14,16 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.GravityCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -24,11 +33,11 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class EditDataPromooActivity extends AppCompatActivity {
-
     private EditText editTextNamaPromo, editTextPenginput;
     private Spinner spinnerReferensi;
     private Button btnSimpan, btnBatal, btnPilihGambar;
-
+    private BottomNavigationView bottomNavigationView;
+    private MaterialToolbar topAppBar;
     private SharedPreferences sharedPreferences;
     private static final String PREFS_NAME = "LoginPrefs";
     private static final String KEY_USERNAME = "username";
@@ -41,22 +50,65 @@ public class EditDataPromooActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_data_promo);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_edit_data_promoo);
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
 
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         initViews();
         receiveIntentData();
         setupAutoData();
         setupListeners();
+        setupNavigation();
     }
 
     private void initViews() {
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        topAppBar = findViewById(R.id.topAppBar);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        topAppBar = findViewById(R.id.topAppBar);
         editTextNamaPromo = findViewById(R.id.editTextNama);
         editTextPenginput = findViewById(R.id.editTextProspek);
         spinnerReferensi = findViewById(R.id.spinnerRole);
         btnSimpan = findViewById(R.id.btnSimpan);
         btnBatal = findViewById(R.id.btnBatal);
         btnPilihGambar = findViewById(R.id.btnInputPromo);
+    }
+    private void setupNavigation() {
+        topAppBar.setNavigationOnClickListener(v -> {
+            Intent intent = new Intent(EditDataPromooActivity.this, NewBeranda.class);
+            startActivity(intent);
+            finish();
+        });
+
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.nav_home) {
+                startActivity(new Intent(this, NewBeranda.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_folder) {
+                startActivity(new Intent(this, LihatDataActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_news) {
+                startActivity(new Intent(this, NewsActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            }
+            return false;
+        });
     }
 
     private void receiveIntentData() {
@@ -237,22 +289,21 @@ public class EditDataPromooActivity extends AppCompatActivity {
                     if (basicResponse.isSuccess()) {
                         Toast.makeText(EditDataPromooActivity.this, "Promo berhasil diupdate", Toast.LENGTH_SHORT).show();
 
-                        // PERBAIKAN: Selalu kirim gambar terbaru ke BerandaActivity
+                        // PERBAIKAN: Kirim gambar yang benar
                         Intent resultIntent = new Intent();
                         resultIntent.putExtra("UPDATED_PROMO_ID", promoId);
 
-                        // Jika gambar diubah, kirim yang baru; jika tidak, kirim yang original
-                        String imageToReturn = isImageChanged() ? currentImageBase64 : originalImageBase64;
+                        // Jika gambar berubah, kirim yang baru; jika tidak, kirim null
+                        String imageToReturn = isImageChanged() ? currentImageBase64 : null;
                         resultIntent.putExtra("UPDATED_IMAGE", imageToReturn);
 
                         setResult(RESULT_OK, resultIntent);
                         finish();
                     } else {
                         Toast.makeText(EditDataPromooActivity.this, "Gagal: " + basicResponse.getMessage(), Toast.LENGTH_SHORT).show();
-                        Log.e("EditPromo", "Server error: " + basicResponse.getMessage());
                     }
                 } else {
-                    Toast.makeText(EditDataPromooActivity.this, "Error response dari server: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditDataPromooActivity.this, "Error response dari server", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -260,10 +311,10 @@ public class EditDataPromooActivity extends AppCompatActivity {
             public void onFailure(Call<BasicResponse> call, Throwable t) {
                 showLoading(false);
                 Toast.makeText(EditDataPromooActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e("EditPromo", "Network error: " + t.getMessage());
             }
         });
     }
+
 
     // PERBAIKAN: Method untuk cek perubahan gambar
     private boolean isImageChanged() {
@@ -291,3 +342,4 @@ public class EditDataPromooActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 }
+

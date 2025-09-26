@@ -34,7 +34,7 @@ public class InputActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         TopAppBar.setNavigationOnClickListener(v -> {
-            Intent intent = new Intent(InputActivity.this, BerandaActivity.class);
+            Intent intent = new Intent(InputActivity.this, NewBeranda.class);
             startActivity(intent);
             finish();
         });

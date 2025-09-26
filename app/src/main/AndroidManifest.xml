@@ -172,9 +172,6 @@
             android:name=".LihatDataActivity"
             android:exported="false" />
         <activity
-            android:name=".BerandaActivity"
-            android:exported="false" />
-        <activity
             android:name=".TambahProspekActivity"
             android:exported="false" />
         <activity

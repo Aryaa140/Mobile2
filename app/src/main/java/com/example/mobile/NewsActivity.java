@@ -55,6 +55,9 @@ public class NewsActivity extends AppCompatActivity {
     private List<NewsItem> newsItems = new ArrayList<>();
     private SwipeRefreshLayout swipeRefreshLayout;
     private SharedPreferences sharedPreferences;
+
+    private SharedPreferences newsUpdatePrefs;
+    private static final String NEWS_UPDATES_PREFS = "NewsUpdates";
     private Gson gson = new Gson();
 
     @Override
@@ -66,7 +69,8 @@ public class NewsActivity extends AppCompatActivity {
         topAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         recyclerNews = findViewById(R.id.recyclerNews);
-        swipeRefreshLayout = new SwipeRefreshLayout(this);
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout); // PASTIKAN ID INI ADA DI LAYOUT
+        newsUpdatePrefs = getSharedPreferences(NEWS_UPDATES_PREFS, MODE_PRIVATE);
 
         // Setup SharedPreferences
         sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
@@ -105,7 +109,7 @@ public class NewsActivity extends AppCompatActivity {
         });
 
         // Setup RecyclerView
-        recyclerNews.setLayoutManager(new LinearLayoutManager(this));
+        recyclerNews.setLayoutManager(new LinearLayoutManager(this)); // TAMBAHKAN INI
         newsAdapter = new NewsAdapter(this, newsItems);
         recyclerNews.setAdapter(newsAdapter);
 
@@ -126,6 +130,201 @@ public class NewsActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkForPromoUpdates();
+    }
+
+    // METHOD BARU: CEK UPDATE DARI SHARED PREFERENCES
+    private void checkForPromoUpdates() {
+        long lastCheckTime = getLastNewsCheckTime();
+        long currentTime = System.currentTimeMillis();
+
+        // Cek update promo (dalam 5 menit terakhir)
+        long lastUpdateTime = newsUpdatePrefs.getLong("last_update_time", 0);
+        if (lastUpdateTime > lastCheckTime) {
+            int promoId = newsUpdatePrefs.getInt("last_updated_promo_id", -1);
+            String status = newsUpdatePrefs.getString("last_updated_status", "Diubah");
+            String updatedImage = newsUpdatePrefs.getString("last_updated_image", "");
+
+            if (promoId != -1) {
+                addNewsItemForUpdatedPromo(promoId, status, updatedImage);
+            }
+        }
+
+        // Cek delete promo (dalam 5 menit terakhir)
+        long lastDeleteTime = newsUpdatePrefs.getLong("last_delete_time", 0);
+        if (lastDeleteTime > lastCheckTime) {
+            String deletedTitle = newsUpdatePrefs.getString("last_deleted_title", "");
+            String deletedInputter = newsUpdatePrefs.getString("last_deleted_inputter", "");
+            String status = newsUpdatePrefs.getString("last_deleted_status", "Dihapus");
+
+            if (!deletedTitle.isEmpty()) {
+                addNewsItemForDeletedPromo(deletedTitle, deletedInputter, status);
+            }
+        }
+
+        // Update waktu check terakhir
+        saveLastNewsCheckTime(currentTime);
+    }
+
+    private void addNewsItemForUpdatedPromo(int promoId, String status, String updatedImage) {
+        refreshNewsDataWithUpdate(promoId, status, updatedImage);
+    }
+
+    // METHOD BARU: TAMBAH NEWS ITEM UNTUK PROMO YANG DIHAPUS
+    private void addNewsItemForDeletedPromo(String promoTitle, String penginput, String status) {
+        // Cek apakah sudah ada item untuk promo ini
+        boolean alreadyExists = false;
+        for (NewsItem item : newsItems) {
+            if (item.getTitle().equals(promoTitle) && item.getStatus().equals("Dihapus")) {
+                alreadyExists = true;
+                break;
+            }
+        }
+
+        if (!alreadyExists) {
+            NewsItem deletedItem = new NewsItem(
+                    generateNewId(),
+                    promoTitle,
+                    penginput,
+                    status,
+                    new Date(),
+                    null, // Gambar null untuk item yang dihapus
+                    -1 // ID negatif menandakan sudah dihapus
+            );
+
+            newsItems.add(0, deletedItem);
+            saveNewsData();
+            newsAdapter.notifyDataSetChanged();
+            showNotification(deletedItem);
+
+            Toast.makeText(this, "Promo '" + promoTitle + "' " + status.toLowerCase(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // METHOD BARU: REFRESH DATA DENGAN UPDATE KHUSUS
+    private void refreshNewsDataWithUpdate(int updatedPromoId, String status, String updatedImage) {
+        swipeRefreshLayout.setRefreshing(true);
+
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<PromoResponse> call = apiService.getSemuaPromo();
+
+        call.enqueue(new Callback<PromoResponse>() {
+            @Override
+            public void onResponse(Call<PromoResponse> call, Response<PromoResponse> response) {
+                swipeRefreshLayout.setRefreshing(false);
+
+                if (response.isSuccessful() && response.body() != null) {
+                    PromoResponse promoResponse = response.body();
+                    if (promoResponse.isSuccess()) {
+                        processPromoDataWithUpdate(promoResponse.getData(), updatedPromoId, status, updatedImage);
+                    } else {
+                        Toast.makeText(NewsActivity.this, "Gagal memuat data: " + promoResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(NewsActivity.this, "Error response dari server", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PromoResponse> call, Throwable t) {
+                swipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(NewsActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // METHOD BARU: PROCESS DATA DENGAN UPDATE KHUSUS
+    private void processPromoDataWithUpdate(List<Promo> promoList, int updatedPromoId, String status, String updatedImage) {
+        boolean promoFound = false;
+
+        // Cari promo yang diupdate di data server
+        for (Promo promo : promoList) {
+            if (promo.getIdPromo() == updatedPromoId) {
+                promoFound = true;
+
+                // Cek apakah sudah ada news item untuk promo ini
+                NewsItem existingItem = findNewsItemByPromoId(updatedPromoId);
+
+                if (existingItem != null) {
+                    // Update item yang sudah ada
+                    existingItem.setTitle(promo.getNamaPromo());
+                    existingItem.setPenginput(promo.getNamaPenginput());
+                    existingItem.setStatus(status);
+                    existingItem.setTimestamp(new Date());
+
+                    // Hanya update gambar jika ada perubahan
+                    if (updatedImage != null && !updatedImage.isEmpty()) {
+                        existingItem.setImageUrl(updatedImage);
+                    } else {
+                        existingItem.setImageUrl(promo.getGambarBase64());
+                    }
+                } else {
+                    // Buat item baru
+                    NewsItem updatedItem = new NewsItem(
+                            generateNewId(),
+                            promo.getNamaPromo(),
+                            promo.getNamaPenginput(),
+                            status,
+                            new Date(),
+                            updatedImage != null && !updatedImage.isEmpty() ? updatedImage : promo.getGambarBase64(),
+                            promo.getIdPromo()
+                    );
+                    newsItems.add(0, updatedItem);
+                }
+
+                saveNewsData();
+                newsAdapter.notifyDataSetChanged();
+
+                if (existingItem != null) {
+                    showNotification(existingItem);
+                }
+
+                Toast.makeText(this, "Promo '" + promo.getNamaPromo() + "' " + status.toLowerCase(), Toast.LENGTH_SHORT).show();
+                break;
+            }
+        }
+
+        // Jika promo tidak ditemukan di server (mungkin dihapus)
+        if (!promoFound) {
+            Log.w("NewsActivity", "Updated promo not found in server data");
+        }
+    }
+
+    // METHOD BARU: CARI NEWS ITEM BERDASARKAN PROMO ID
+    private NewsItem findNewsItemByPromoId(int promoId) {
+        for (NewsItem item : newsItems) {
+            if (item.getPromoId() == promoId) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    // METHOD BARU: GENERATE ID UNIK
+    private int generateNewId() {
+        int maxId = 0;
+        for (NewsItem item : newsItems) {
+            if (item.getId() > maxId) {
+                maxId = item.getId();
+            }
+        }
+        return maxId + 1;
+    }
+
+    // METHOD UNTUK MANAGE WAKTU CHECK
+    private long getLastNewsCheckTime() {
+        SharedPreferences prefs = getSharedPreferences("NewsActivityCheck", MODE_PRIVATE);
+        return prefs.getLong("last_news_check_time", 0);
+    }
+
+    private void saveLastNewsCheckTime(long time) {
+        SharedPreferences prefs = getSharedPreferences("NewsActivityCheck", MODE_PRIVATE);
+        prefs.edit().putLong("last_news_check_time", time).apply();
     }
 
     private void createNotificationChannel() {
@@ -151,13 +350,10 @@ public class NewsActivity extends AppCompatActivity {
                 newsItems.clear();
                 newsItems.addAll(savedNews);
                 newsAdapter.notifyDataSetChanged();
-
-                // Remove items older than 7 days
                 removeOldNews();
                 return;
             }
         }
-
         // If no saved data, load from API
         refreshNewsData();
     }
@@ -194,62 +390,98 @@ public class NewsActivity extends AppCompatActivity {
         });
     }
 
+    // PERBAIKAN BESAR: Method processPromoData
     private void processPromoData(List<Promo> promoList) {
         List<NewsItem> newItems = new ArrayList<>();
-        Calendar calendar = Calendar.getInstance();
 
         for (Promo promo : promoList) {
+            // Cek apakah promo sudah ada di newsItems
             boolean exists = false;
             for (NewsItem newsItem : newsItems) {
                 if (newsItem.getPromoId() == promo.getIdPromo()) {
                     exists = true;
+
+                    // Update data jika ada perubahan
+                    if (!newsItem.getTitle().equals(promo.getNamaPromo()) ||
+                            !newsItem.getPenginput().equals(promo.getNamaPenginput())) {
+
+                        newsItem.setTitle(promo.getNamaPromo());
+                        newsItem.setPenginput(promo.getNamaPenginput());
+                        newsItem.setTimestamp(new Date());
+
+                        // Jika gambar berubah, update juga
+                        if (promo.getGambarBase64() != null &&
+                                !promo.getGambarBase64().equals(newsItem.getImageUrl())) {
+                            newsItem.setImageUrl(promo.getGambarBase64());
+                        }
+                    }
                     break;
                 }
             }
 
+            // Hanya buat item baru jika promo benar-benar baru
             if (!exists) {
-                String imageData = promo.getGambarBase64();
-
-                // PERBAIKAN: Validasi base64 data sebelum disimpan
-                String validImageData = null;
-                if (imageData != null && !imageData.trim().isEmpty() && imageData.length() > 100) {
-                    validImageData = imageData.trim();
-                    Log.d("NewsActivity", "Valid image data found for promo: " + promo.getNamaPromo() + ", length: " + validImageData.length());
-                } else {
-                    Log.w("NewsActivity", "Invalid or empty image data for promo: " + promo.getNamaPromo());
-                }
-
                 NewsItem newItem = new NewsItem(
-                        newsItems.size() + 1,
+                        generateNewId(),
                         promo.getNamaPromo(),
                         promo.getNamaPenginput(),
                         "Ditambahkan",
-                        calendar.getTime(), // Gunakan waktu sekarang
-                        validImageData, // Base64 string atau null
+                        new Date(),
+                        promo.getGambarBase64(),
                         promo.getIdPromo()
                 );
-
                 newItems.add(newItem);
                 showNotification(newItem);
             }
         }
 
-        // Tambahkan item baru
+        // Tambahkan item baru ke awal list
         if (!newItems.isEmpty()) {
             newsItems.addAll(0, newItems);
-
-            // PERBAIKAN: Batasi jumlah news items (misal max 50)
-            if (newsItems.size() > 50) {
-                newsItems = newsItems.subList(0, 50);
-            }
-
             saveNewsData();
             newsAdapter.notifyDataSetChanged();
-            removeOldNews();
+        }
 
-            Toast.makeText(this, "Ditemukan " + newItems.size() + " promo baru", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Tidak ada promo baru", Toast.LENGTH_SHORT).show();
+        // Hapus news item untuk promo yang sudah tidak ada di server
+        removeDeletedPromos(promoList);
+        removeOldNews();
+    }
+
+    // METHOD BARU: HAPUS NEWS ITEM UNTUK PROMO YANG SUDAH DIHAPUS DARI SERVER
+    private void removeDeletedPromos(List<Promo> currentPromos) {
+        List<NewsItem> itemsToRemove = new ArrayList<>();
+
+        for (NewsItem newsItem : newsItems) {
+            if (newsItem.getPromoId() > 0) { // Hanya untuk item yang punya promoId valid
+                boolean promoStillExists = false;
+                for (Promo promo : currentPromos) {
+                    if (promo.getIdPromo() == newsItem.getPromoId()) {
+                        promoStillExists = true;
+                        break;
+                    }
+                }
+
+                if (!promoStillExists && !newsItem.getStatus().equals("Dihapus")) {
+                    // Buat item penghapusan
+                    NewsItem deletedItem = new NewsItem(
+                            generateNewId(),
+                            newsItem.getTitle(),
+                            newsItem.getPenginput(),
+                            "Dihapus",
+                            new Date(),
+                            null,
+                            -1
+                    );
+                    newsItems.add(0, deletedItem);
+                    itemsToRemove.add(newsItem); // Hapus item lama
+                }
+            }
+        }
+
+        newsItems.removeAll(itemsToRemove);
+        if (!itemsToRemove.isEmpty()) {
+            saveNewsData();
+            newsAdapter.notifyDataSetChanged();
         }
     }
 
@@ -294,6 +526,7 @@ public class NewsActivity extends AppCompatActivity {
         newsAdapter.notifyDataSetChanged();
         saveNewsData();
     }
+
 
     private void scheduleDailyCleanup() {
         Intent intent = new Intent(this, NewsCleanupReceiver.class);
@@ -374,10 +607,5 @@ public class NewsActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Refresh data when activity resumes
-        refreshNewsData();
-    }
+    
 }

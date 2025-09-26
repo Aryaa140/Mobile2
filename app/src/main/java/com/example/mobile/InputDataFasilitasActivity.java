@@ -76,13 +76,13 @@ public class InputDataFasilitasActivity extends AppCompatActivity {
 
         // Button Batal
         Batal.setOnClickListener(v -> {
-            Intent intent = new Intent(InputDataFasilitasActivity.this, BerandaActivity.class);
+            Intent intent = new Intent(InputDataFasilitasActivity.this, NewBeranda.class);
             startActivity(intent);
             finish();
         });
 
         TopAppBar.setNavigationOnClickListener(v -> {
-            Intent intent = new Intent(InputDataFasilitasActivity.this, BerandaActivity.class);
+            Intent intent = new Intent(InputDataFasilitasActivity.this, NewBeranda.class);
             startActivity(intent);
             finish();
         });

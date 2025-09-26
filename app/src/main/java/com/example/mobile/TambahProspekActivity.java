@@ -245,7 +245,7 @@ public class TambahProspekActivity extends AppCompatActivity {
                         Toast.makeText(TambahProspekActivity.this, "Data prospek berhasil disimpan", Toast.LENGTH_SHORT).show();
                         clearForm();
 
-                        Intent intent = new Intent(TambahProspekActivity.this, BerandaActivity.class);
+                        Intent intent = new Intent(TambahProspekActivity.this, NewBeranda.class);
                         startActivity(intent);
                         finish();
                     } else {

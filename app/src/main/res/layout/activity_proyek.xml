@@ -39,6 +39,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:fillViewport="true"
+            android:layout_marginTop="5dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -57,7 +58,7 @@
                 <LinearLayout
                     android:id="@+id/cardRiverside"
                     android:orientation="vertical"
-                    android:background="@drawable/bg_card"
+                    android:background="@drawable/biru_ungu"
                     android:padding="8dp"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -90,7 +91,7 @@
                 <LinearLayout
                     android:id="@+id/cardHarmony"
                     android:orientation="vertical"
-                    android:background="@drawable/bg_card"
+                    android:background="@drawable/biru_ungu"
                     android:padding="8dp"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -124,7 +125,7 @@
                 <LinearLayout
                     android:id="@+id/cardView"
                     android:orientation="vertical"
-                    android:background="@drawable/bg_card"
+                    android:background="@drawable/biru_ungu"
                     android:padding="8dp"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -156,7 +157,7 @@
                 <LinearLayout
                     android:id="@+id/cardGardenResidence"
                     android:orientation="vertical"
-                    android:background="@drawable/bg_card"
+                    android:background="@drawable/biru_ungu"
                     android:padding="8dp"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -188,7 +189,7 @@
                 <LinearLayout
                     android:id="@+id/cardResidence"
                     android:orientation="vertical"
-                    android:background="@drawable/bg_card"
+                    android:background="@drawable/biru_ungu"
                     android:padding="8dp"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"

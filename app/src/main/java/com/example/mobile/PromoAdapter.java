@@ -33,23 +33,18 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
     public static final int EDIT_PROMO_REQUEST = 1001;
 
     public interface OnPromoActionListener {
-        void onEditPromo(Promo promo);
-        void onDeletePromo(Promo promo);
         void onPromoUpdated(int promoId, String updatedImage);
+        void onPromoDeleted(String promoTitle, String penginput);
     }
 
     public PromoAdapter(Context context, List<Promo> promoList) {
         this.context = context;
         this.promoList = promoList;
-
-        // PERBAIKAN: Auto-set listener jika context adalah Activity
-        if (context instanceof OnPromoActionListener) {
-            this.actionListener = (OnPromoActionListener) context;
-        }
     }
 
     public void setOnPromoActionListener(OnPromoActionListener listener) {
         this.actionListener = listener;
+        Log.d("PromoAdapter", "Listener set: " + (listener != null));
     }
 
     @NonNull
@@ -65,7 +60,7 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
         holder.bind(promo);
 
         holder.btnMenu.setOnClickListener(v -> {
-            showPopupMenu(v, promo, position);
+            showPopupMenu(v, promo, holder.getAdapterPosition());
         });
     }
 
@@ -92,32 +87,48 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
     private void openEditActivity(Promo promo) {
         Log.d("PromoAdapter", "Opening EditActivity for promo ID: " + promo.getIdPromo());
 
-        Intent intent = new Intent(context, EditDataPromooActivity.class);
+        // PERBAIKAN: Validasi data sebelum dikirim
+        if (promo == null) {
+            Toast.makeText(context, "Data promo tidak valid", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        intent.putExtra("PROMO_ID", promo.getIdPromo());
-        intent.putExtra("PROMO_TITLE", promo.getNamaPromo());
-        intent.putExtra("PROMO_INPUTTER", promo.getNamaPenginput());
-        intent.putExtra("PROMO_REFERENCE", promo.getReferensiProyek());
-        intent.putExtra("PROMO_IMAGE", promo.getGambarBase64());
+        try {
+            Intent intent = new Intent(context, EditDataPromooActivity.class);
 
-        if (context instanceof android.app.Activity) {
-            ((android.app.Activity) context).startActivityForResult(intent, EDIT_PROMO_REQUEST);
-        } else {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
+            intent.putExtra("PROMO_ID", promo.getIdPromo());
+            intent.putExtra("PROMO_TITLE", promo.getNamaPromo() != null ? promo.getNamaPromo() : "");
+            intent.putExtra("PROMO_INPUTTER", promo.getNamaPenginput() != null ? promo.getNamaPenginput() : "");
+            intent.putExtra("PROMO_REFERENCE", promo.getReferensiProyek() != null ? promo.getReferensiProyek() : "");
+            intent.putExtra("PROMO_IMAGE", promo.getGambarBase64() != null ? promo.getGambarBase64() : "");
+
+            if (context instanceof android.app.Activity) {
+                ((android.app.Activity) context).startActivityForResult(intent, EDIT_PROMO_REQUEST);
+            } else {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            }
+        } catch (Exception e) {
+            Log.e("PromoAdapter", "Error opening edit activity: " + e.getMessage());
+            Toast.makeText(context, "Gagal membuka halaman edit", Toast.LENGTH_SHORT).show();
         }
     }
 
-    // PERBAIKAN: Method update yang lebih robust
     public void updatePromoItem(int promoId, String updatedImage) {
         Log.d("PromoAdapter", "=== UPDATE PROMO ITEM ===");
-        Log.d("PromoAdapter", "Target ID: " + promoId);
+        Log.d("PromoAdapter", "Target ID: " + promoId + ", Image: " +
+                (updatedImage != null ? updatedImage.length() + " chars" : "null"));
 
         for (int i = 0; i < promoList.size(); i++) {
             Promo promo = promoList.get(i);
             if (promo.getIdPromo() == promoId) {
                 Log.d("PromoAdapter", "Found promo at position: " + i);
-                promo.setGambarBase64(updatedImage);
+
+                // PERBAIKAN: Only update image if not null
+                if (updatedImage != null) {
+                    promo.setGambarBase64(updatedImage);
+                }
+
                 notifyItemChanged(i);
                 break;
             }
@@ -125,24 +136,32 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
     }
 
     private void showDeleteConfirmationDialog(Promo promo, int position) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Konfirmasi Hapus");
-        builder.setMessage("Apakah Anda yakin ingin menghapus promo '" + promo.getNamaPromo() + "'?");
+        try {
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle("Konfirmasi Hapus");
+            builder.setMessage("Apakah Anda yakin ingin menghapus promo '" + promo.getNamaPromo() + "'?");
 
-        builder.setPositiveButton("Ya, Hapus", (dialog, which) -> {
-            // PERBAIKAN: Selalu gunakan method delete di adapter, bukan melalui listener
-            deletePromoDirectly(promo, position);
-        });
+            builder.setPositiveButton("Ya, Hapus", (dialog, which) -> {
+                deletePromoDirectly(promo, position);
+            });
 
-        builder.setNegativeButton("Batal", (dialog, which) -> dialog.dismiss());
+            builder.setNegativeButton("Batal", (dialog, which) -> dialog.dismiss());
 
-        AlertDialog dialog = builder.create();
-        dialog.show();
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        } catch (Exception e) {
+            Log.e("PromoAdapter", "Error showing delete dialog: " + e.getMessage());
+        }
     }
 
-    // PERBAIKAN: Method delete langsung di adapter (tidak melalui listener)
     private void deletePromoDirectly(Promo promo, int position) {
         Log.d("PromoAdapter", "Deleting promo with ID: " + promo.getIdPromo());
+
+        // PERBAIKAN: Validasi position
+        if (position < 0 || position >= promoList.size()) {
+            Toast.makeText(context, "Posisi promo tidak valid", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
         Call<BasicResponse> call = apiService.deletePromo(promo.getIdPromo());
@@ -153,31 +172,45 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
                 if (response.isSuccessful() && response.body() != null) {
                     BasicResponse basicResponse = response.body();
                     if (basicResponse.isSuccess()) {
-                        // Hapus dari list dan update UI
-                        promoList.remove(position);
-                        notifyItemRemoved(position);
-                        Toast.makeText(context, "Promo berhasil dihapus", Toast.LENGTH_SHORT).show();
+                        // PERBAIKAN: Validasi ulang position sebelum remove
+                        if (position >= 0 && position < promoList.size()) {
+                            promoList.remove(position);
+                            notifyItemRemoved(position);
+                            notifyItemRangeChanged(position, promoList.size());
 
-                        // PERBAIKAN: Also notify range changed untuk update positions
-                        notifyItemRangeChanged(position, promoList.size());
+                            Toast.makeText(context, "Promo berhasil dihapus", Toast.LENGTH_SHORT).show();
+
+                            // PANGGIL LISTENER UNTUK NEWS
+                            if (actionListener != null) {
+                                actionListener.onPromoDeleted(
+                                        promo.getNamaPromo() != null ? promo.getNamaPromo() : "Unknown",
+                                        promo.getNamaPenginput() != null ? promo.getNamaPenginput() : "Unknown"
+                                );
+                            } else {
+                                Log.w("PromoAdapter", "Action listener is null!");
+                            }
+                        } else {
+                            Toast.makeText(context, "Posisi tidak valid setelah penghapusan", Toast.LENGTH_SHORT).show();
+                        }
                     } else {
                         Toast.makeText(context, "Gagal menghapus: " + basicResponse.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(context, "Error response dari server", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Error response dari server: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
                 Toast.makeText(context, "Error koneksi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("PromoAdapter", "Network error: " + t.getMessage());
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return promoList.size();
+        return promoList != null ? promoList.size() : 0;
     }
 
     public static class PromoViewHolder extends RecyclerView.ViewHolder {
@@ -206,7 +239,6 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
             try {
                 String cleanBase64 = base64Image.trim();
 
-                // Validasi base64
                 if (cleanBase64.length() < 100) {
                     Log.w("PromoViewHolder", "Base64 too short: " + cleanBase64.length());
                     return;
@@ -219,7 +251,6 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
                     return;
                 }
 
-                // Decode bitmap
                 Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
 
                 if (bitmap != null) {
