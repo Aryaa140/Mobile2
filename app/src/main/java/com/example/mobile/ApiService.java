@@ -26,6 +26,9 @@ public interface ApiService {
             @Field("Password") String password
     );
     @FormUrlEncoded
+    @POST("check_nip.php")
+    Call<CheckNIPResponse> checkNIP(@Field("NIP") String nip);
+    @FormUrlEncoded
     @POST("update_password.php")
     Call<BasicResponse> updatePassword(
             @Field("username") String username,

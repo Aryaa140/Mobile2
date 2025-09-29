@@ -21,12 +21,14 @@ import retrofit2.Response;
 import android.app.ProgressDialog;
 import android.util.Log;
 import java.io.IOException;
+
 public class MainActivity extends AppCompatActivity {
 
     private EditText editTextUsername, editTextPassword;
     private TextView buatAkun, lupaPassword;
     private Button buttonLogin;
     private SharedPreferences sharedPreferences;
+    private ProgressDialog progressDialog;
 
     // Keys untuk SharedPreferences (Remember Me)
     private static final String PREFS_NAME = "LoginPrefs";
@@ -46,6 +48,11 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        // Inisialisasi ProgressDialog
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Sedang login...");
+        progressDialog.setCancelable(false);
 
         // Inisialisasi SharedPreferences
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -153,10 +160,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 🔹 Proses login dengan Retrofit (ke PHP MySQL API)
-    // 🔹 Proses login dengan Retrofit (ke PHP MySQL API)
     private void loginUser(String username, String password) {
-        // Tampilkan progress dialog atau loading indicator
-        Log.d("LoginDebug", "Attempting login with: " + username + "/" + password);
+        Log.d("LoginDebug", "Attempting login with: " + username);
         showLoading(true);
 
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
@@ -167,43 +172,45 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 showLoading(false);
                 Log.d("LoginDebug", "Response code: " + response.code());
-                Log.d("LoginDebug", "Response body: " + response.body());
+
                 if (response.isSuccessful() && response.body() != null) {
                     LoginResponse loginResponse = response.body();
+                    Log.d("LoginDebug", "Response success: " + loginResponse.isSuccess());
+                    Log.d("LoginDebug", "Response message: " + loginResponse.getMessage());
 
                     if (loginResponse.isSuccess()) {
                         Toast.makeText(MainActivity.this, "Login berhasil!", Toast.LENGTH_SHORT).show();
 
                         // Simpan status login (Remember Me)
-                        // Perhatikan struktur response, jika ada objek data
-                        if (loginResponse.getData() != null) {
-                            // Jika response menggunakan struktur data
-                            saveLoginStatus(
-                                    loginResponse.getData().getUsername(),
-                                    loginResponse.getData().getDivisi(),
-                                    loginResponse.getData().getNIP()
-                            );
-                        } else {
-                            // Jika response langsung di root
-                            saveLoginStatus(
-                                    username,  // karena username tidak dikembalikan di response
-                                    loginResponse.getDivisi(),
-                                    loginResponse.getNIP()
-                            );
-                        }
+                        // Sesuai dengan struktur response dari PHP yang sudah diperbaiki
+                        saveLoginStatus(
+                                username,  // username dari input
+                                loginResponse.getDivisi(),  // divisi dari response
+                                loginResponse.getNIP()      // NIP dari response
+                        );
 
                         // Pindah ke beranda
                         redirectToBeranda();
 
                     } else {
-                        Toast.makeText(MainActivity.this, "Login gagal: " + loginResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                        // Tampilkan pesan error dari server
+                        String errorMessage = loginResponse.getMessage();
+                        Toast.makeText(MainActivity.this, "Login gagal: " + errorMessage, Toast.LENGTH_SHORT).show();
+
+                        // Berikan feedback spesifik untuk akun nonaktif
+                        if (errorMessage != null && errorMessage.contains("tidak aktif")) {
+                            editTextUsername.setError("Akun tidak aktif");
+                            editTextUsername.requestFocus();
+                        }
                     }
                 } else {
                     try {
                         String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
-                        Toast.makeText(MainActivity.this, "Error: " + errorBody, Toast.LENGTH_SHORT).show();
+                        Log.e("LoginDebug", "Error response: " + errorBody);
+                        Toast.makeText(MainActivity.this, "Error response dari server", Toast.LENGTH_SHORT).show();
                     } catch (IOException e) {
-                        Toast.makeText(MainActivity.this, "Response error!", Toast.LENGTH_SHORT).show();
+                        Log.e("LoginDebug", "Error parsing error response: " + e.getMessage());
+                        Toast.makeText(MainActivity.this, "Terjadi kesalahan pada server", Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -211,19 +218,31 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 showLoading(false);
+                Log.e("LoginError", "Network error: " + t.getMessage());
                 Toast.makeText(MainActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e("LoginError", "Error: " + t.getMessage());
             }
         });
     }
 
     // Method untuk menampilkan/menyembunyikan loading
     private void showLoading(boolean isLoading) {
-        // Implementasi progress dialog atau progress bar
         if (isLoading) {
-            // Tampilkan loading
+            if (!progressDialog.isShowing()) {
+                progressDialog.show();
+            }
         } else {
-            // Sembunyikan loading
+            if (progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Pastikan ProgressDialog di-dismiss saat activity dihancurkan
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
         }
     }
 }

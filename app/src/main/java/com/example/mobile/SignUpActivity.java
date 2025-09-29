@@ -75,8 +75,8 @@ public class SignUpActivity extends AppCompatActivity {
                     String nip = editTextNoNip.getText().toString().trim();
                     String password = editTextPassword.getText().toString().trim();
 
-                    // Registrasi menggunakan API PHP ke MySQL
-                    registerUserToMySQL(username, nip, selectedDivision, password);
+                    // Cek NIP terlebih dahulu sebelum registrasi
+                    checkNIPBeforeRegister(username, nip, selectedDivision, password);
                 }
             }
         });
@@ -93,8 +93,6 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
-    // Method untuk setup spinner dengan divisi
-    // Method untuk setup spinner dengan divisi
     // Method untuk setup spinner dengan divisi
     private void setupDivisionSpinner() {
         // Ambil divisi dari database helper (yang mengembalikan String[])
@@ -135,6 +133,7 @@ public class SignUpActivity extends AppCompatActivity {
             }
         });
     }
+
     // Method untuk validasi input
     private boolean validateInput() {
         String username = editTextUsername.getText().toString().trim();
@@ -180,11 +179,42 @@ public class SignUpActivity extends AppCompatActivity {
         return true;
     }
 
-    // METHOD UNTUK REGISTRASI KE MYSQL MELALUI API PHP
-    private void registerUserToMySQL(String username, String nip, String division, String password) {
-        // Tampilkan loading
+    // METHOD UNTUK CEK NIP SEBELUM REGISTRASI
+    private void checkNIPBeforeRegister(String username, String nip, String division, String password) {
         showLoading(true);
 
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<CheckNIPResponse> call = apiService.checkNIP(nip);
+
+        call.enqueue(new Callback<CheckNIPResponse>() {
+            @Override
+            public void onResponse(Call<CheckNIPResponse> call, Response<CheckNIPResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    CheckNIPResponse checkResponse = response.body();
+
+                    if (checkResponse.isExists()) {
+                        // NIP valid, lanjutkan registrasi
+                        registerUserToMySQL(username, nip, division, password);
+                    } else {
+                        showLoading(false);
+                        Toast.makeText(SignUpActivity.this, "NIP tidak terdaftar dalam sistem", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    showLoading(false);
+                    Toast.makeText(SignUpActivity.this, "Error saat memverifikasi NIP", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CheckNIPResponse> call, Throwable t) {
+                showLoading(false);
+                Toast.makeText(SignUpActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // METHOD UNTUK REGISTRASI KE MYSQL MELALUI API PHP
+    private void registerUserToMySQL(String username, String nip, String division, String password) {
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
         Call<RegisterResponse> call = apiService.registerUser(username, nip, division, password);
 
@@ -226,7 +256,7 @@ public class SignUpActivity extends AppCompatActivity {
         // Implementasi progress dialog atau progress bar
         if (isLoading) {
             // Tampilkan loading
-            Toast.makeText(this, "Mendaftarkan akun...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Memproses...", Toast.LENGTH_SHORT).show();
         }
     }
 }
