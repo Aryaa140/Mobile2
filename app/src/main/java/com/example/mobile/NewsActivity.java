@@ -35,6 +35,8 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -69,7 +71,7 @@ public class NewsActivity extends AppCompatActivity {
         topAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         recyclerNews = findViewById(R.id.recyclerNews);
-        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout); // PASTIKAN ID INI ADA DI LAYOUT
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         newsUpdatePrefs = getSharedPreferences(NEWS_UPDATES_PREFS, MODE_PRIVATE);
 
         // Setup SharedPreferences
@@ -109,7 +111,7 @@ public class NewsActivity extends AppCompatActivity {
         });
 
         // Setup RecyclerView
-        recyclerNews.setLayoutManager(new LinearLayoutManager(this)); // TAMBAHKAN INI
+        recyclerNews.setLayoutManager(new LinearLayoutManager(this));
         newsAdapter = new NewsAdapter(this, newsItems);
         recyclerNews.setAdapter(newsAdapter);
 
@@ -138,7 +140,7 @@ public class NewsActivity extends AppCompatActivity {
         checkForPromoUpdates();
     }
 
-    // METHOD BARU: CEK UPDATE DARI SHARED PREFERENCES
+    // METHOD YANG DIPERBAIKI: CEK UPDATE DARI SHARED PREFERENCES
     private void checkForPromoUpdates() {
         long lastCheckTime = getLastNewsCheckTime();
         long currentTime = System.currentTimeMillis();
@@ -147,7 +149,7 @@ public class NewsActivity extends AppCompatActivity {
         long lastUpdateTime = newsUpdatePrefs.getLong("last_update_time", 0);
         if (lastUpdateTime > lastCheckTime) {
             int promoId = newsUpdatePrefs.getInt("last_updated_promo_id", -1);
-            String status = newsUpdatePrefs.getString("last_updated_status", "Diubah");
+            String status = newsUpdatePrefs.getString("last_updated_status", "Diubah"); // PASTIKAN DEFAULT "Diubah"
             String updatedImage = newsUpdatePrefs.getString("last_updated_image", "");
 
             if (promoId != -1) {
@@ -160,7 +162,7 @@ public class NewsActivity extends AppCompatActivity {
         if (lastDeleteTime > lastCheckTime) {
             String deletedTitle = newsUpdatePrefs.getString("last_deleted_title", "");
             String deletedInputter = newsUpdatePrefs.getString("last_deleted_inputter", "");
-            String status = newsUpdatePrefs.getString("last_deleted_status", "Dihapus");
+            String status = newsUpdatePrefs.getString("last_deleted_status", "Dihapus"); // PASTIKAN DEFAULT "Dihapus"
 
             if (!deletedTitle.isEmpty()) {
                 addNewsItemForDeletedPromo(deletedTitle, deletedInputter, status);
@@ -171,13 +173,9 @@ public class NewsActivity extends AppCompatActivity {
         saveLastNewsCheckTime(currentTime);
     }
 
-    private void addNewsItemForUpdatedPromo(int promoId, String status, String updatedImage) {
-        refreshNewsDataWithUpdate(promoId, status, updatedImage);
-    }
-
-    // METHOD BARU: TAMBAH NEWS ITEM UNTUK PROMO YANG DIHAPUS
+    // METHOD YANG DIPERBAIKI: TAMBAH NEWS ITEM UNTUK PROMO YANG DIHAPUS
     private void addNewsItemForDeletedPromo(String promoTitle, String penginput, String status) {
-        // Cek apakah sudah ada item untuk promo ini
+        // Cek apakah sudah ada item untuk promo ini dengan status Dihapus
         boolean alreadyExists = false;
         for (NewsItem item : newsItems) {
             if (item.getTitle().equals(promoTitle) && item.getStatus().equals("Dihapus")) {
@@ -187,17 +185,21 @@ public class NewsActivity extends AppCompatActivity {
         }
 
         if (!alreadyExists) {
+            // Cari promo yang dihapus untuk mendapatkan gambar terakhir
+            String lastImageUrl = findLastImageForDeletedPromo(promoTitle);
+
             NewsItem deletedItem = new NewsItem(
                     generateNewId(),
                     promoTitle,
                     penginput,
-                    status,
+                    "Dihapus", // PASTIKAN STATUSNYA "Dihapus"
                     new Date(),
-                    null, // Gambar null untuk item yang dihapus
+                    lastImageUrl, // GUNAKAN GAMBAR TERAKHIR YANG DITEMUKAN
                     -1 // ID negatif menandakan sudah dihapus
             );
 
             newsItems.add(0, deletedItem);
+            sortNewsByTimestamp(); // URUTKAN ULANG
             saveNewsData();
             newsAdapter.notifyDataSetChanged();
             showNotification(deletedItem);
@@ -206,7 +208,18 @@ public class NewsActivity extends AppCompatActivity {
         }
     }
 
-    // METHOD BARU: REFRESH DATA DENGAN UPDATE KHUSUS
+    // METHOD BARU: CARI GAMBAR TERAKHIR UNTUK PROMO YANG DIHAPUS
+    private String findLastImageForDeletedPromo(String promoTitle) {
+        for (NewsItem item : newsItems) {
+            if (item.getTitle().equals(promoTitle) && item.getPromoId() > 0) {
+                // Kembalikan gambar dari item yang masih ada
+                return item.getImageUrl();
+            }
+        }
+        return null; // Jika tidak ditemukan, kembalikan null
+    }
+
+    // METHOD YANG DIPERBAIKI: REFRESH DATA DENGAN UPDATE KHUSUS
     private void refreshNewsDataWithUpdate(int updatedPromoId, String status, String updatedImage) {
         swipeRefreshLayout.setRefreshing(true);
 
@@ -238,7 +251,7 @@ public class NewsActivity extends AppCompatActivity {
         });
     }
 
-    // METHOD BARU: PROCESS DATA DENGAN UPDATE KHUSUS
+    // METHOD YANG DIPERBAIKI: PROCESS DATA DENGAN UPDATE KHUSUS
     private void processPromoDataWithUpdate(List<Promo> promoList, int updatedPromoId, String status, String updatedImage) {
         boolean promoFound = false;
 
@@ -251,20 +264,32 @@ public class NewsActivity extends AppCompatActivity {
                 NewsItem existingItem = findNewsItemByPromoId(updatedPromoId);
 
                 if (existingItem != null) {
-                    // Update item yang sudah ada
+                    // JANGAN UBAH JIKA SUDAH DIHAPUS
+                    if (existingItem.getStatus().equals("Dihapus")) {
+                        Log.w("NewsActivity", "Cannot update deleted item: " + promo.getNamaPromo());
+                        break;
+                    }
+
+                    // PERBAIKAN: UPDATE STATUS HANYA JIKA DITERIMA DARI EDIT
+                    if (status.equals("Diubah") || status.equals("Dihapus")) {
+                        existingItem.setStatus(status);
+                    }
+
+                    // Update data lainnya
                     existingItem.setTitle(promo.getNamaPromo());
                     existingItem.setPenginput(promo.getNamaPenginput());
-                    existingItem.setStatus(status);
                     existingItem.setTimestamp(new Date());
 
-                    // Hanya update gambar jika ada perubahan
+                    // Prioritaskan gambar yang di-update
                     if (updatedImage != null && !updatedImage.isEmpty()) {
                         existingItem.setImageUrl(updatedImage);
                     } else {
                         existingItem.setImageUrl(promo.getGambarBase64());
                     }
+
+                    Log.d("NewsActivity", "✅ PROMO MANUALLY UPDATED: " + promo.getNamaPromo() + " | New Status: " + status);
                 } else {
-                    // Buat item baru
+                    // Buat item baru jika tidak ada
                     NewsItem updatedItem = new NewsItem(
                             generateNewId(),
                             promo.getNamaPromo(),
@@ -277,6 +302,7 @@ public class NewsActivity extends AppCompatActivity {
                     newsItems.add(0, updatedItem);
                 }
 
+                sortNewsByTimestamp();
                 saveNewsData();
                 newsAdapter.notifyDataSetChanged();
 
@@ -289,13 +315,161 @@ public class NewsActivity extends AppCompatActivity {
             }
         }
 
-        // Jika promo tidak ditemukan di server (mungkin dihapus)
         if (!promoFound) {
             Log.w("NewsActivity", "Updated promo not found in server data");
         }
     }
 
-    // METHOD BARU: CARI NEWS ITEM BERDASARKAN PROMO ID
+    // METHOD BARU: URUTKAN BERDASARKAN TIMESTAMP (TERBARU DI ATAS)
+    private void sortNewsByTimestamp() {
+        Collections.sort(newsItems, new Comparator<NewsItem>() {
+            @Override
+            public int compare(NewsItem item1, NewsItem item2) {
+                return item2.getTimestamp().compareTo(item1.getTimestamp()); // Descending
+            }
+        });
+    }
+
+    // METHOD YANG DIPERBAIKI: LOAD DATA DARI SHARED PREFERENCES
+    private void loadNewsData() {
+        // First try to load from SharedPreferences
+        String json = sharedPreferences.getString(NEWS_KEY, null);
+        if (json != null) {
+            Type type = new TypeToken<List<NewsItem>>(){}.getType();
+            List<NewsItem> savedNews = gson.fromJson(json, type);
+            if (savedNews != null) {
+                newsItems.clear();
+                newsItems.addAll(savedNews);
+                sortNewsByTimestamp(); // URUTKAN SAAT LOAD
+                newsAdapter.notifyDataSetChanged();
+                removeOldNews();
+                return;
+            }
+        }
+        // If no saved data, load from API
+        refreshNewsData();
+    }
+
+    // METHOD YANG DIPERBAIKI: PROCESS DATA DARI SERVER
+    private void processPromoData(List<Promo> promoList) {
+        List<NewsItem> newItems = new ArrayList<>();
+
+        // Buat list promo IDs yang sudah ada di newsItems
+        List<Integer> existingPromoIds = new ArrayList<>();
+        for (NewsItem item : newsItems) {
+            if (item.getPromoId() > 0) {
+                existingPromoIds.add(item.getPromoId());
+            }
+        }
+
+        // Proses setiap promo dari server
+        for (Promo promo : promoList) {
+            // Cek apakah promo ini baru (belum ada di newsItems)
+            if (!existingPromoIds.contains(promo.getIdPromo())) {
+                NewsItem newItem = new NewsItem(
+                        generateNewId(),
+                        promo.getNamaPromo(),
+                        promo.getNamaPenginput(),
+                        "Ditambahkan",
+                        new Date(),
+                        promo.getGambarBase64(),
+                        promo.getIdPromo()
+                );
+                newItems.add(newItem);
+                showNotification(newItem);
+
+                Log.d("NewsActivity", "✅ NEW PROMO DETECTED: " + promo.getNamaPromo());
+            } else {
+                // Update existing promo jika ada perubahan
+                updateExistingPromoIfChanged(promo);
+            }
+        }
+
+        // Tambahkan semua item baru sekaligus
+        if (!newItems.isEmpty()) {
+            newsItems.addAll(0, newItems);
+            sortNewsByTimestamp(); // URUTKAN SETELAH MENAMBAH ITEM BARU
+            saveNewsData();
+            newsAdapter.notifyDataSetChanged();
+
+            Toast.makeText(this, "Ditemukan " + newItems.size() + " promo baru",
+                    Toast.LENGTH_SHORT).show();
+        }
+
+        // Handle promo yang dihapus dari server
+        removeDeletedPromos(promoList);
+        removeOldNews();
+    }
+
+    // METHOD YANG DIPERBAIKI: HAPUS NEWS ITEM UNTUK PROMO YANG SUDAH DIHAPUS DARI SERVER
+    private void removeDeletedPromos(List<Promo> currentPromos) {
+        List<NewsItem> itemsToRemove = new ArrayList<>();
+        List<NewsItem> itemsToAddAsDeleted = new ArrayList<>();
+
+        for (NewsItem newsItem : newsItems) {
+            if (newsItem.getPromoId() > 0) { // Hanya untuk item yang punya promoId valid
+                boolean promoStillExists = false;
+                for (Promo promo : currentPromos) {
+                    if (promo.getIdPromo() == newsItem.getPromoId()) {
+                        promoStillExists = true;
+                        break;
+                    }
+                }
+
+                // PERBAIKAN: HANYA TANDAI SEBAGAI DIHAPUS JIKA STATUSNYA BELUM "Dihapus"
+                // DAN PROMO TIDAK ADA DI SERVER
+                if (!promoStillExists && !newsItem.getStatus().equals("Dihapus")) {
+                    // Simpan gambar sebelum menghapus
+                    String deletedImageUrl = newsItem.getImageUrl();
+
+                    // Buat item penghapusan DENGAN GAMBAR
+                    NewsItem deletedItem = new NewsItem(
+                            generateNewId(),
+                            newsItem.getTitle(),
+                            newsItem.getPenginput(),
+                            "Dihapus", // STATUS DIUBAH MENJADI DIHAPUS
+                            new Date(),
+                            deletedImageUrl, // PASTIKAN GAMBAR TERSIMPAN
+                            -1
+                    );
+                    itemsToAddAsDeleted.add(deletedItem);
+                    itemsToRemove.add(newsItem);
+
+                    Log.d("NewsActivity", "✅ PROMO DELETED FROM SERVER: " + newsItem.getTitle());
+                }
+            }
+        }
+
+        // Hapus item lama dan tambahkan item deleted
+        newsItems.removeAll(itemsToRemove);
+        if (!itemsToAddAsDeleted.isEmpty()) {
+            newsItems.addAll(0, itemsToAddAsDeleted);
+            sortNewsByTimestamp(); // URUTKAN SETELAH PERUBAHAN
+        }
+
+        if (!itemsToRemove.isEmpty() || !itemsToAddAsDeleted.isEmpty()) {
+            saveNewsData();
+            newsAdapter.notifyDataSetChanged();
+
+            // Tampilkan notifikasi untuk setiap item yang dihapus
+            for (NewsItem deletedItem : itemsToAddAsDeleted) {
+                showNotification(deletedItem);
+            }
+        }
+    }
+
+    // METHOD YANG DIPERBAIKI: SIMPAN DATA DENGAN URUTAN YANG BENAR
+    private void saveNewsData() {
+        sortNewsByTimestamp(); // URUTKAN SEBELUM SIMPAN
+        String json = gson.toJson(newsItems);
+        sharedPreferences.edit().putString(NEWS_KEY, json).apply();
+    }
+
+    // METHOD-METHOD YANG TIDAK BERUBAH (tetap diperlukan)
+    private void addNewsItemForUpdatedPromo(int promoId, String status, String updatedImage) {
+        refreshNewsDataWithUpdate(promoId, status, updatedImage);
+    }
+
     private NewsItem findNewsItemByPromoId(int promoId) {
         for (NewsItem item : newsItems) {
             if (item.getPromoId() == promoId) {
@@ -305,7 +479,6 @@ public class NewsActivity extends AppCompatActivity {
         return null;
     }
 
-    // METHOD BARU: GENERATE ID UNIK
     private int generateNewId() {
         int maxId = 0;
         for (NewsItem item : newsItems) {
@@ -316,7 +489,6 @@ public class NewsActivity extends AppCompatActivity {
         return maxId + 1;
     }
 
-    // METHOD UNTUK MANAGE WAKTU CHECK
     private long getLastNewsCheckTime() {
         SharedPreferences prefs = getSharedPreferences("NewsActivityCheck", MODE_PRIVATE);
         return prefs.getLong("last_news_check_time", 0);
@@ -338,24 +510,6 @@ public class NewsActivity extends AppCompatActivity {
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
-    }
-
-    private void loadNewsData() {
-        // First try to load from SharedPreferences
-        String json = sharedPreferences.getString(NEWS_KEY, null);
-        if (json != null) {
-            Type type = new TypeToken<List<NewsItem>>(){}.getType();
-            List<NewsItem> savedNews = gson.fromJson(json, type);
-            if (savedNews != null) {
-                newsItems.clear();
-                newsItems.addAll(savedNews);
-                newsAdapter.notifyDataSetChanged();
-                removeOldNews();
-                return;
-            }
-        }
-        // If no saved data, load from API
-        refreshNewsData();
     }
 
     private void refreshNewsData() {
@@ -390,135 +544,35 @@ public class NewsActivity extends AppCompatActivity {
         });
     }
 
-    // PERBAIKAN BESAR: Method processPromoData
-    private void processPromoData(List<Promo> promoList) {
-        List<NewsItem> newItems = new ArrayList<>();
-
-        // Buat list promo IDs yang sudah ada di newsItems
-        List<Integer> existingPromoIds = new ArrayList<>();
-        for (NewsItem item : newsItems) {
-            if (item.getPromoId() > 0) {
-                existingPromoIds.add(item.getPromoId());
-            }
-        }
-
-        // Proses setiap promo dari server
-        for (Promo promo : promoList) {
-            // Cek apakah promo ini baru (belum ada di newsItems)
-            if (!existingPromoIds.contains(promo.getIdPromo())) {
-                NewsItem newItem = new NewsItem(
-                        generateNewId(),
-                        promo.getNamaPromo(),
-                        promo.getNamaPenginput(),
-                        "Ditambahkan", // Status untuk promo baru
-                        new Date(),
-                        promo.getGambarBase64(),
-                        promo.getIdPromo()
-                );
-                newItems.add(newItem);
-                showNotification(newItem);
-
-                Log.d("NewsActivity", "✅ NEW PROMO DETECTED: " + promo.getNamaPromo());
-            } else {
-                // Update existing promo jika ada perubahan
-                updateExistingPromoIfChanged(promo);
-            }
-        }
-
-        // Tambahkan semua item baru sekaligus
-        if (!newItems.isEmpty()) {
-            newsItems.addAll(0, newItems);
-            saveNewsData();
-            newsAdapter.notifyDataSetChanged();
-
-            Toast.makeText(this, "Ditemukan " + newItems.size() + " promo baru",
-                    Toast.LENGTH_SHORT).show();
-        }
-
-        // PANGGIL METHOD removeDeletedPromos UNTUK HANDLE PROMO YANG DIHAPUS DARI SERVER
-        removeDeletedPromos(promoList);
-        removeOldNews();
-    }
     private void updateExistingPromoIfChanged(Promo promo) {
         for (NewsItem newsItem : newsItems) {
             if (newsItem.getPromoId() == promo.getIdPromo()) {
-                // Cek jika ada perubahan data
+                // JANGAN UPDATE JIKA SUDAH DIHAPUS
+                if (newsItem.getStatus().equals("Dihapus")) {
+                    Log.d("NewsActivity", "Item already deleted, skipping update: " + promo.getNamaPromo());
+                    break;
+                }
+
+                // CEK PERUBAHAN DATA
                 boolean hasChanges = !newsItem.getTitle().equals(promo.getNamaPromo()) ||
                         !newsItem.getPenginput().equals(promo.getNamaPenginput()) ||
                         (promo.getGambarBase64() != null &&
                                 !promo.getGambarBase64().equals(newsItem.getImageUrl()));
 
-                if (hasChanges && !newsItem.getStatus().equals("Diubah")) {
-                    // Update data yang berubah
+                if (hasChanges) {
+                    // PERBAIKAN: UPDATE DATA TANPA MENGUBAH STATUS
+                    // Status hanya diubah melalui mekanisme khusus (edit/delete)
                     newsItem.setTitle(promo.getNamaPromo());
                     newsItem.setPenginput(promo.getNamaPenginput());
                     newsItem.setImageUrl(promo.getGambarBase64());
                     newsItem.setTimestamp(new Date());
-                    newsItem.setStatus("Diubah");
+                    // STATUS TIDAK DIUBAH di sini
 
-                    Log.d("NewsActivity", "✅ PROMO UPDATED: " + promo.getNamaPromo());
+                    Log.d("NewsActivity", "✅ PROMO DATA SYNCED: " + promo.getNamaPromo() + " | Status remains: " + newsItem.getStatus());
                 }
                 break;
             }
         }
-    }
-    // METHOD BARU: HAPUS NEWS ITEM UNTUK PROMO YANG SUDAH DIHAPUS DARI SERVER
-    private void removeDeletedPromos(List<Promo> currentPromos) {
-        List<NewsItem> itemsToRemove = new ArrayList<>();
-        List<NewsItem> itemsToAddAsDeleted = new ArrayList<>();
-
-        for (NewsItem newsItem : newsItems) {
-            if (newsItem.getPromoId() > 0) { // Hanya untuk item yang punya promoId valid
-                boolean promoStillExists = false;
-                for (Promo promo : currentPromos) {
-                    if (promo.getIdPromo() == newsItem.getPromoId()) {
-                        promoStillExists = true;
-                        break;
-                    }
-                }
-
-                if (!promoStillExists && !newsItem.getStatus().equals("Dihapus")) {
-                    // Simpan gambar sebelum menghapus
-                    String deletedImageUrl = newsItem.getImageUrl();
-
-                    // Buat item penghapusan DENGAN GAMBAR
-                    NewsItem deletedItem = new NewsItem(
-                            generateNewId(),
-                            newsItem.getTitle(),
-                            newsItem.getPenginput(),
-                            "Dihapus",
-                            new Date(),
-                            deletedImageUrl, // SIMPAN GAMBAR
-                            -1
-                    );
-                    itemsToAddAsDeleted.add(deletedItem);
-                    itemsToRemove.add(newsItem); // Tandai item lama untuk dihapus
-
-                    Log.d("NewsActivity", "✅ PROMO DELETED FROM SERVER: " + newsItem.getTitle());
-                }
-            }
-        }
-
-        // Hapus item lama dan tambahkan item deleted
-        newsItems.removeAll(itemsToRemove);
-        if (!itemsToAddAsDeleted.isEmpty()) {
-            newsItems.addAll(0, itemsToAddAsDeleted);
-        }
-
-        if (!itemsToRemove.isEmpty() || !itemsToAddAsDeleted.isEmpty()) {
-            saveNewsData();
-            newsAdapter.notifyDataSetChanged();
-
-            // Tampilkan notifikasi untuk setiap item yang dihapus
-            for (NewsItem deletedItem : itemsToAddAsDeleted) {
-                showNotification(deletedItem);
-            }
-        }
-    }
-
-    private void saveNewsData() {
-        String json = gson.toJson(newsItems);
-        sharedPreferences.edit().putString(NEWS_KEY, json).apply();
     }
 
     private void setupSwipeToDismiss() {
@@ -558,25 +612,21 @@ public class NewsActivity extends AppCompatActivity {
         saveNewsData();
     }
 
-
     private void scheduleDailyCleanup() {
         Intent intent = new Intent(this, NewsCleanupReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
-        // Set alarm to trigger at 2:00 AM daily
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
         calendar.set(Calendar.HOUR_OF_DAY, 2);
         calendar.set(Calendar.MINUTE, 0);
 
-        // If it's already past 2:00 AM, schedule for next day
         if (calendar.getTimeInMillis() < System.currentTimeMillis()) {
             calendar.add(Calendar.DAY_OF_YEAR, 1);
         }
 
-        // Check for permissions on Android 12+ (API 31+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (alarmManager.canScheduleExactAlarms()) {
                 alarmManager.setInexactRepeating(
@@ -586,13 +636,10 @@ public class NewsActivity extends AppCompatActivity {
                         pendingIntent
                 );
             } else {
-                // Handle case where permission is not granted
                 Log.w("NewsActivity", "Cannot schedule exact alarms - permission not granted");
-                // You might want to request the permission here
                 requestAlarmPermission();
             }
         } else {
-            // For older versions, just set the alarm
             alarmManager.setInexactRepeating(
                     AlarmManager.RTC_WAKEUP,
                     calendar.getTimeInMillis(),
@@ -601,6 +648,7 @@ public class NewsActivity extends AppCompatActivity {
             );
         }
     }
+
     private void requestAlarmPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             Intent intent = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
@@ -613,11 +661,9 @@ public class NewsActivity extends AppCompatActivity {
     }
 
     private void showNotification(NewsItem newsItem) {
-        // Check notification permission for Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
-                // Permission not granted, don't show notification
                 return;
             }
         }
@@ -637,6 +683,4 @@ public class NewsActivity extends AppCompatActivity {
             Log.e("NewsActivity", "Notification permission denied", e);
         }
     }
-
-
 }

@@ -51,45 +51,42 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
     }
 
     private void loadNewsImage(String imageData, ImageView imageView) {
-
         // Reset image dulu
         setDefaultImage(imageView);
 
-        if (imageData == null) {
-            Log.d("NewsAdapter", "Image data is null (possibly deleted item)");
+        if (imageData == null || imageData.trim().isEmpty()) {
+            Log.d("NewsAdapter", "Image data is null or empty");
             setDefaultImage(imageView);
-            return;
-        }
-
-        if (imageData.trim().isEmpty()) {
-            Log.d("NewsAdapter", "Image data is empty");
             return;
         }
 
         try {
             String cleanBase64 = imageData.trim();
 
-            // Validasi base64 string
-            if (cleanBase64.length() < 100 || !cleanBase64.contains("base64")) {
-                // Coba decode langsung
-                byte[] decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
-
-                if (decodedBytes != null && decodedBytes.length > 0) {
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inSampleSize = 2;
-
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length, options);
-
-                    if (bitmap != null) {
-                        imageView.setImageBitmap(bitmap);
-                        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                        Log.d("NewsAdapter", "✅ Image loaded successfully");
-                        return;
-                    }
+            // Handle case untuk item yang dihapus (masih punya gambar)
+            if (cleanBase64.startsWith("data:image") || cleanBase64.contains("base64")) {
+                // Extract base64 dari data URL jika diperlukan
+                if (cleanBase64.contains("base64,")) {
+                    cleanBase64 = cleanBase64.split("base64,")[1];
                 }
             }
 
-            // Jika gagal, set default image
+            byte[] decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
+
+            if (decodedBytes != null && decodedBytes.length > 0) {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inSampleSize = 2;
+
+                Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length, options);
+
+                if (bitmap != null) {
+                    imageView.setImageBitmap(bitmap);
+                    imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                    Log.d("NewsAdapter", "✅ Image loaded successfully");
+                    return;
+                }
+            }
+
             setDefaultImage(imageView);
 
         } catch (Exception e) {

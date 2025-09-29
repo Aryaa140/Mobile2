@@ -4,7 +4,6 @@
     <string-array name="opsi_spinner">
         <item>Pilih Divisi...</item>
         <item>Marketting</item>
-        <item>Electronic Data Processing</item>
     </string-array>
 
     <string-array name="opsi_spinnerProspek">

@@ -52,7 +52,7 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_beranda);
+        setContentView(R.layout.activity_new_beranda);
 
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         newsPrefs = getSharedPreferences(NEWS_PREFS_NAME, MODE_PRIVATE);
