@@ -25,7 +25,7 @@
             android:name=".StatusAkunActivity"
             android:exported="false" />
         <activity
-            android:name=".InputNIPActivity"
+            android:name=".InputNipActivity"
             android:exported="false" />
         <activity
             android:name=".EditDataPromooActivity"
