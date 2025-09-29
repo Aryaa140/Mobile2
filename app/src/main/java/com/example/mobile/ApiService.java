@@ -50,6 +50,18 @@ public interface ApiService {
             @Field("username") String username,
             @Field("current_username") String currentUsername
     );
+    @GET("get_all_users.php")
+    Call<UserResponse> getSemuaUser();
+
+    @FormUrlEncoded
+    @POST("update_status_user.php")
+    Call<BasicResponse> updateStatusUser(
+            @Field("user_id") int userId,
+            @Field("status_akun") String statusAkun
+    );
+    @FormUrlEncoded
+    @POST("input_nip.php")
+    Call<BasicResponse> inputNIP(@Field("no_nip") String noNip);
     @FormUrlEncoded
     @POST("update_username_relations.php")
     Call<BasicResponse> updateUsernameInRelatedTables(

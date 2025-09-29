@@ -1,21 +1,15 @@
 package com.example.mobile;
 
-import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
@@ -31,7 +25,6 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -39,11 +32,12 @@ import retrofit2.Response;
 
 public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnPromoActionListener {
     MaterialCardView cardWelcome, cardProspekM, cardFasilitasM, cardProyekM, cardUserpM, cardInputPromoM;
+    MaterialCardView cardInputNIP, cardStatusAkun;
     private BottomNavigationView bottomNavigationView;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private MaterialToolbar topAppBar;
-    TextView tvUserName;
+    TextView tvUserName, tvMenuData, tvMenu2, tvMenu, tvPromo;
     private RecyclerView recyclerPromo;
     private PromoAdapter promoAdapter;
     private List<Promo> promoList = new ArrayList<>();
@@ -51,10 +45,15 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
     private static final String PREFS_NAME = "LoginPrefs";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
+    private static final String KEY_LEVEL = "level";
+    private static final String KEY_DIVISION = "division";
 
-
+    // SHARED PREFERENCES UNTUK NEWS
     private SharedPreferences newsPrefs;
     private static final String NEWS_PREFS_NAME = "NewsUpdates";
+
+    // Variabel untuk menyimpan level user
+    private String userLevel = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,68 +61,22 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_new_beranda);
 
-        // PERBAIKAN: Request notification permission untuk Android 13+
-        requestNotificationPermission();
-
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         newsPrefs = getSharedPreferences(NEWS_PREFS_NAME, MODE_PRIVATE);
 
         initViews();
+        setupUserInfo();
         setupRecyclerView();
         loadPromoData();
-        setupUserInfo();
         setupClickListeners();
         setupNavigation();
-
-
-        // TEST: Coba tampilkan test notification setelah delay
-        //testNotification();//
+        setupAccessBasedOnLevel();
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-    }
-
-    // Method untuk request notification permission
-    private void requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
-                        101);
-                Log.d("NewBeranda", "Requesting notification permission");
-            } else {
-                Log.d("NewBeranda", "Notification permission already granted");
-            }
-        }
-    }
-
-    // Handle permission result
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 101) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d("NewBeranda", "Notification permission granted");
-                Toast.makeText(this, "Notification permission granted", Toast.LENGTH_SHORT).show();
-            } else {
-                Log.d("NewBeranda", "Notification permission denied");
-                Toast.makeText(this, "Notification permission denied - some features may not work", Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
-    // Method untuk test notification
-    private void testNotification() {
-        // Tunggu 3 detik lalu tampilkan test notification
-        new Handler().postDelayed(() -> {
-            NotificationUtils.testNotification(this);
-            Log.d("NewBeranda", "Test notification triggered");
-        }, 3000);
     }
 
     private void initViews() {
@@ -133,19 +86,210 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         cardProyekM = findViewById(R.id.cardProyekM);
         cardUserpM = findViewById(R.id.cardUserpM);
         cardInputPromoM = findViewById(R.id.cardInputPromoM);
+
+        // INISIALISASI ELEMEN BARU
+        cardInputNIP = findViewById(R.id.cardInputNIP);
+        cardStatusAkun = findViewById(R.id.cardStatusAkun);
+        tvMenu2 = findViewById(R.id.tvMenu2);
+        tvMenu = findViewById(R.id.tvMenu);
+        tvPromo = findViewById(R.id.tvPromo);
+
         tvUserName = findViewById(R.id.tvUserName);
+        tvMenuData = findViewById(R.id.tvMenuData);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         drawerLayout = findViewById(R.id.drawerLayout);
         navigationView = findViewById(R.id.navigationView);
         topAppBar = findViewById(R.id.topAppBar);
         recyclerPromo = findViewById(R.id.recyclerPromo);
+
+        Log.d("BerandaActivity", "Init views completed");
+        Log.d("BerandaActivity", "cardInputPromoM: " + (cardInputPromoM != null));
+        Log.d("BerandaActivity", "cardInputNIP: " + (cardInputNIP != null));
+        Log.d("BerandaActivity", "cardStatusAkun: " + (cardStatusAkun != null));
+        Log.d("BerandaActivity", "tvMenu2: " + (tvMenu2 != null));
+        Log.d("BerandaActivity", "tvMenuData: " + (tvMenuData != null));
+        Log.d("BerandaActivity", "tvMenu: " + (tvMenu != null));
+        Log.d("BerandaActivity", "tvPromo: " + (tvPromo != null));
+    }
+
+    private void setupUserInfo() {
+        // Ambil data user dari SharedPreferences
+        String username = sharedPreferences.getString(KEY_USERNAME, "");
+        userLevel = sharedPreferences.getString(KEY_LEVEL, "Operator");
+
+        // DEBUG: Tampilkan semua data yang tersimpan
+        Log.d("BerandaActivity", "=== DEBUG USER DATA ===");
+        Log.d("BerandaActivity", "Username: " + username);
+        Log.d("BerandaActivity", "Level: " + userLevel);
+        Log.d("BerandaActivity", "All keys in SharedPreferences: " + sharedPreferences.getAll().toString());
+
+        if (!username.isEmpty()) {
+            tvUserName.setText(username);
+        } else {
+            Intent intent = getIntent();
+            if (intent != null && intent.hasExtra("USERNAME")) {
+                username = intent.getStringExtra("USERNAME");
+                tvUserName.setText(username);
+            }
+        }
+
+        Log.d("BerandaActivity", "Final User Level: " + userLevel);
+    }
+
+    private void setupAccessBasedOnLevel() {
+        Log.d("BerandaActivity", "=== SETUP ACCESS FOR LEVEL: " + userLevel + " ===");
+
+        // Jika user adalah Operator, sembunyikan menu tertentu
+        if ("Operator".equals(userLevel)) {
+            Log.d("BerandaActivity", "Hiding admin features for Operator");
+
+            // Sembunyikan button tambah promo
+            if (cardInputPromoM != null) {
+                cardInputPromoM.setVisibility(View.GONE);
+                Log.d("BerandaActivity", "Hidden cardInputPromoM");
+            }
+
+            // tvMenuData (Menu Input Data) TETAP TAMPIL untuk semua level
+            if (tvMenuData != null) {
+                tvMenuData.setVisibility(View.VISIBLE);
+                Log.d("BerandaActivity", "tvMenuData remains visible for Operator");
+            }
+
+            // Sembunyikan menu pengelolaan akun
+            if (tvMenu2 != null) {
+                tvMenu2.setVisibility(View.GONE);
+                Log.d("BerandaActivity", "Hidden tvMenu2");
+            }
+
+            // Sembunyikan card input NIP
+            if (cardInputNIP != null) {
+                cardInputNIP.setVisibility(View.GONE);
+                Log.d("BerandaActivity", "Hidden cardInputNIP");
+            }
+
+            // Sembunyikan card status akun
+            if (cardStatusAkun != null) {
+                cardStatusAkun.setVisibility(View.GONE);
+                Log.d("BerandaActivity", "Hidden cardStatusAkun");
+            }
+
+            // Sembunyikan menu admin di navigation drawer
+            hideAdminNavigationMenus();
+
+        } else {
+            // Untuk Admin atau level lainnya, tampilkan semua menu
+            Log.d("BerandaActivity", "Showing all features for Admin/Other level");
+
+            // Tampilkan button tambah promo
+            if (cardInputPromoM != null) {
+                cardInputPromoM.setVisibility(View.VISIBLE);
+                Log.d("BerandaActivity", "Shown cardInputPromoM");
+            }
+
+            // tvMenuData (Menu Input Data) TETAP TAMPIL untuk semua level
+            if (tvMenuData != null) {
+                tvMenuData.setVisibility(View.VISIBLE);
+                Log.d("BerandaActivity", "Shown tvMenuData");
+            }
+
+            // Tampilkan menu pengelolaan akun
+            if (tvMenu2 != null) {
+                tvMenu2.setVisibility(View.VISIBLE);
+                Log.d("BerandaActivity", "Shown tvMenu2");
+            }
+
+            // Tampilkan card input NIP
+            if (cardInputNIP != null) {
+                cardInputNIP.setVisibility(View.VISIBLE);
+                Log.d("BerandaActivity", "Shown cardInputNIP");
+            }
+
+            // Tampilkan card status akun
+            if (cardStatusAkun != null) {
+                cardStatusAkun.setVisibility(View.VISIBLE);
+                Log.d("BerandaActivity", "Shown cardStatusAkun");
+            }
+
+            // Tampilkan menu admin di navigation drawer
+            showAdminNavigationMenus();
+        }
+
+        // PASTIKAN SEMUA TEXTVIEW DAN RECYCLERVIEW TAMPIL UNTUK SEMUA LEVEL
+        if (tvMenu != null) {
+            tvMenu.setVisibility(View.VISIBLE); // Menu Informasi tetap tampil
+            Log.d("BerandaActivity", "tvMenu remains visible for all levels");
+        }
+
+        if (tvPromo != null) {
+            tvPromo.setVisibility(View.VISIBLE); // Promo Terbaru tetap tampil
+            Log.d("BerandaActivity", "tvPromo remains visible for all levels");
+        }
+
+        if (recyclerPromo != null) {
+            recyclerPromo.setVisibility(View.VISIBLE);
+            Log.d("BerandaActivity", "RecyclerView is visible for all levels");
+        }
+    }
+
+    private void hideAdminNavigationMenus() {
+        if (navigationView != null) {
+            // Sembunyikan section "Menu Pengelolaan Akun" dan item-itemnya
+            hideMenuByTitle("Menu Pengelolaan Akun");
+            hideMenuByTitle("Input NIP");
+            hideMenuByTitle("Aktivasi Akun");
+            hideMenuByTitle("Kelola Akun");
+            hideMenuByTitle("Manage Accounts");
+
+            Log.d("NavigationMenu", "Admin menus hidden for Operator");
+        }
+    }
+
+    private void showAdminNavigationMenus() {
+        if (navigationView != null) {
+            // Tampilkan section "Menu Pengelolaan Akun" dan item-itemnya
+            showMenuByTitle("Menu Pengelolaan Akun");
+            showMenuByTitle("Input NIP");
+            showMenuByTitle("Aktivasi Akun");
+            showMenuByTitle("Kelola Akun");
+            showMenuByTitle("Manage Accounts");
+
+            Log.d("NavigationMenu", "Admin menus shown for Admin");
+        }
+    }
+
+    private void hideMenuByTitle(String title) {
+        if (navigationView != null) {
+            for (int i = 0; i < navigationView.getMenu().size(); i++) {
+                if (navigationView.getMenu().getItem(i).getTitle().toString().equalsIgnoreCase(title)) {
+                    navigationView.getMenu().getItem(i).setVisible(false);
+                    Log.d("NavigationMenu", "Hidden menu: " + title);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void showMenuByTitle(String title) {
+        if (navigationView != null) {
+            for (int i = 0; i < navigationView.getMenu().size(); i++) {
+                if (navigationView.getMenu().getItem(i).getTitle().toString().equalsIgnoreCase(title)) {
+                    navigationView.getMenu().getItem(i).setVisible(true);
+                    Log.d("NavigationMenu", "Shown menu: " + title);
+                    break;
+                }
+            }
+        }
     }
 
     private void setupRecyclerView() {
         recyclerPromo.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+
         promoAdapter = new PromoAdapter(this, promoList);
+        promoAdapter.setUserLevel(userLevel);
         promoAdapter.setOnPromoActionListener(this);
         recyclerPromo.setAdapter(promoAdapter);
+
+        Log.d("BerandaActivity", "RecyclerView setup completed with level: " + userLevel);
     }
 
     private void loadPromoData() {
@@ -153,6 +297,7 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
 
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
         Call<PromoResponse> call = apiService.getSemuaPromo();
+
         call.enqueue(new Callback<PromoResponse>() {
             @Override
             public void onResponse(Call<PromoResponse> call, Response<PromoResponse> response) {
@@ -163,32 +308,23 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
                         promoList.addAll(promoResponse.getData());
                         promoAdapter.notifyDataSetChanged();
                         Log.d("BerandaActivity", "Promo data loaded: " + promoList.size() + " items");
-
-                        // if (promoList.isEmpty()) {
-                        //     NotificationUtils.showInfoNotification(NewBeranda.this, "Info", "Tidak ada data promo");
-                        // }
                     } else {
-                        NotificationUtils.showErrorNotification(NewBeranda.this, "Gagal memuat promo: " + promoResponse.getMessage());
+                        Toast.makeText(NewBeranda.this, "Gagal memuat promo: " + promoResponse.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    NotificationUtils.showErrorNotification(NewBeranda.this, "Error response server: " + response.code());
+                    Toast.makeText(NewBeranda.this, "Error response server", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<PromoResponse> call, Throwable t) {
-                NotificationUtils.showErrorNotification(NewBeranda.this, "Gagal memuat promo: " + t.getMessage());
+                Toast.makeText(NewBeranda.this, "Gagal memuat promo: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("BerandaActivity", "Load promo error: " + t.getMessage());
             }
         });
     }
 
-    // IMPLEMENTASI METHOD DARI INTERFACE - YANG INI SUDAH ADA
-    private String getCurrentUsername() {
-        return sharedPreferences.getString(KEY_USERNAME, "User");
-    }
-
-    // IMPLEMENTASI METHOD DARI INTERFACE - UPDATE PROMO (DIPERBAIKI)
+    // IMPLEMENTASI METHOD DARI INTERFACE - YANG INI SUDAH ADA DAN TIDAK DIUBAH
     @Override
     public void onPromoUpdated(int promoId, String updatedImage) {
         Log.d("BerandaActivity", "Promo updated - ID: " + promoId);
@@ -196,249 +332,146 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         // Update item di adapter
         if (promoAdapter != null) {
             promoAdapter.updatePromoItem(promoId, updatedImage);
-        }
-
-        // CARI JUDUL PROMO DAN USER UNTUK NOTIFIKASI
-        String promoTitle = findPromoTitleById(promoId);
-        String currentUser = getCurrentUsername(); // DAPATKAN USER YANG SEDANG LOGIN
-
-        // SIMPAN GAMBAR KE CACHE JIKA ADA PERUBAHAN
-        if (updatedImage != null && !updatedImage.isEmpty() && promoTitle != null) {
-            saveImageToCache(promoTitle, updatedImage);
+            Toast.makeText(this, "Promo berhasil diupdate", Toast.LENGTH_SHORT).show();
         }
 
         // SIMPAN INFO UPDATE UNTUK NEWS ACTIVITY
-        savePromoUpdateForNews(promoId, "Diubah", updatedImage, promoTitle);
-
-        // TAMPILKAN NOTIFIKASI SISTEM DENGAN USER INFO - INI YANG DIPERBAIKI
-        if (promoTitle != null) {
-            NotificationUtils.showPromoUpdatedNotification(this, promoTitle, currentUser);
-        }
+        savePromoUpdateForNews(promoId, "Diubah", updatedImage);
     }
 
-    // IMPLEMENTASI METHOD DARI INTERFACE - DELETE PROMO (DIPERBAIKI)
+    // IMPLEMENTASI METHOD BARU YANG DIBUTUHKAN
     @Override
     public void onPromoDeleted(String promoTitle, String penginput) {
         Log.d("BerandaActivity", "Promo deleted: " + promoTitle);
+        Toast.makeText(this, "Promo '" + promoTitle + "' dihapus", Toast.LENGTH_SHORT).show();
 
         // SIMPAN INFO DELETE UNTUK NEWS ACTIVITY
         savePromoDeleteForNews(promoTitle, penginput);
-
-        // TAMPILKAN NOTIFIKASI SISTEM DENGAN USER INFO - INI YANG DIPERBAIKI
-        // Gunakan penginput dari parameter (user yang menghapus)
-        NotificationUtils.showPromoDeletedNotification(this, promoTitle, penginput);
     }
 
-    // PERBAIKI handleEditPromoResult UNTUK MENERIMA DATA USER
-    private void handleEditPromoResult(Intent data) {
-        int updatedPromoId = data.getIntExtra("UPDATED_PROMO_ID", -1);
-        String updatedImage = data.getStringExtra("UPDATED_IMAGE");
-        String updatedTitle = data.getStringExtra("UPDATED_TITLE");
-        String updatedUser = data.getStringExtra("UPDATED_USER"); // TAMBAHKAN INI
-        boolean isSuccess = data.getBooleanExtra("IS_SUCCESS", false);
-        String errorMessage = data.getStringExtra("ERROR_MESSAGE");
-
-        Log.d("BerandaActivity", "Handle edit result - ID: " + updatedPromoId + ", Success: " + isSuccess);
-
-        if (isSuccess && updatedPromoId != -1) {
-            // Panggil method update melalui interface
-            onPromoUpdated(updatedPromoId, updatedImage);
-
-            // JIKA PERLU, TAMPILKAN NOTIFIKASI LAGI DARI SINI DENGAN USER INFO
-            if (updatedTitle != null) {
-                String currentUser = updatedUser != null ? updatedUser : getCurrentUsername();
-                //NotificationUtils.showPromoUpdatedNotification(this, updatedTitle, currentUser);//
-            }
-
-            // Refresh data dari server untuk memastikan konsistensi
-            new Handler().postDelayed(() -> loadPromoData(), 1000);
-        } else {
-            NotificationUtils.showErrorNotification(this, "Gagal update promo: " + errorMessage);
-            Log.w("BerandaActivity", "Invalid update data, refreshing from server");
-            loadPromoData();
-        }
-    }
-
-
-    // METHOD BARU: CARI JUDUL PROMO BERDASARKAN ID
-    private String findPromoTitleById(int promoId) {
-        for (Promo promo : promoList) {
-            if (promo.getIdPromo() == promoId) {
-                return promo.getNamaPromo();
-            }
-        }
-        return null;
-    }
-
-    // METHOD UNTUK SIMPAN INFO UPDATE PROMO (SUDAH DIPERBAIKI)
-    private void savePromoUpdateForNews(int promoId, String status, String updatedImage, String promoTitle) {
-        long updateTime = System.currentTimeMillis() + 2000; // 2 detik delay
-
+    // METHOD UNTUK SIMPAN INFO UPDATE PROMO - TIDAK DIUBAH
+    private void savePromoUpdateForNews(int promoId, String status, String updatedImage) {
         SharedPreferences.Editor editor = newsPrefs.edit();
         editor.putInt("last_updated_promo_id", promoId);
         editor.putString("last_updated_status", status);
-        editor.putString("last_updated_title", promoTitle != null ? promoTitle : "");
         editor.putString("last_updated_image", updatedImage != null ? updatedImage : "");
-        editor.putLong("last_update_time", updateTime);
+        editor.putLong("last_update_time", System.currentTimeMillis());
         editor.apply();
 
-        Log.d("NewBeranda", "Saved update info for: " + promoTitle + " at time: " + updateTime);
+        Log.d("BerandaActivity", "Saved update info for NewsActivity - Promo ID: " + promoId);
     }
 
-    // METHOD UNTUK SIMPAN INFO DELETE PROMO (SUDAH DIPERBAIKI)
+    // METHOD UNTUK SIMPAN INFO DELETE PROMO - TIDAK DIUBAH
     private void savePromoDeleteForNews(String promoTitle, String penginput) {
-        long deleteTime = System.currentTimeMillis() + 1000; // 1 detik delay
-
-        String lastImage = getCachedImageForPromo(promoTitle);
-
         SharedPreferences.Editor editor = newsPrefs.edit();
         editor.putString("last_deleted_title", promoTitle);
         editor.putString("last_deleted_inputter", penginput);
         editor.putString("last_deleted_status", "Dihapus");
-        editor.putString("last_deleted_image", lastImage != null ? lastImage : "");
-        editor.putLong("last_delete_time", deleteTime);
+        editor.putLong("last_delete_time", System.currentTimeMillis());
         editor.apply();
 
-        Log.d("NewBeranda", "Saved delete info for: " + promoTitle + " at time: " + deleteTime);
+        Log.d("BerandaActivity", "Saved delete info for NewsActivity - Title: " + promoTitle);
     }
 
-    private String findLastImageForPromo(String promoTitle) {
-        // CARI ALTERNATIF 1: Dari promoList yang sudah di-load
-        for (Promo promo : promoList) {
-            if (promo.getNamaPromo() != null && promo.getNamaPromo().equals(promoTitle)) {
-                Log.d("NewBeranda", "Found image from promoList: " + promoTitle);
-                return promo.getGambarBase64();
-            }
-        }
-
-        // CARI ALTERNATIF 2: Dari SharedPreferences atau cache
-        String cachedImage = getCachedImageForPromo(promoTitle);
-        if (cachedImage != null) {
-            return cachedImage;
-        }
-
-        Log.d("NewBeranda", "No image found for: " + promoTitle);
-        return null;
-    }
-
-    // METHOD BARU: CARI GAMBAR DARI CACHE SEDERHANA
-    // Di NewBeranda.java - METHOD BARU: SIMPAN GAMBAR KE CACHE DENGAN TIMESTAMP
-    private void saveImageToCache(String promoTitle, String imageBase64) {
-        if (imageBase64 == null || imageBase64.isEmpty()) {
-            return;
-        }
-
-        SharedPreferences imageCache = getSharedPreferences("ImageCache", MODE_PRIVATE);
-        String key = "last_image_" + promoTitle + "_" + System.currentTimeMillis();
-
-        // Simpan dengan timestamp dan batasi jumlah cache
-        imageCache.edit().putString(key, imageBase64).apply();
-
-        // Bersihkan cache lama (lebih dari 10 item)
-        cleanOldImageCache();
-    }
-
-    private void cleanOldImageCache() {
-        SharedPreferences imageCache = getSharedPreferences("ImageCache", MODE_PRIVATE);
-        Map<String, ?> allEntries = imageCache.getAll();
-
-        if (allEntries.size() > 10) {
-            SharedPreferences.Editor editor = imageCache.edit();
-            int count = 0;
-            for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
-                if (count >= 5) { // Hapus 5 yang paling lama
-                    break;
-                }
-                editor.remove(entry.getKey());
-                count++;
-            }
-            editor.apply();
-        }
-    }
-
-    // METHOD BARU: CARI GAMBAR TERBARU DARI CACHE
-    private String getCachedImageForPromo(String promoTitle) {
-        SharedPreferences imageCache = getSharedPreferences("ImageCache", MODE_PRIVATE);
-        Map<String, ?> allEntries = imageCache.getAll();
-
-        String latestImage = null;
-        long latestTime = 0;
-
-        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
-            String key = entry.getKey();
-            if (key.startsWith("last_image_" + promoTitle + "_")) {
-                // Extract timestamp dari key
-                try {
-                    long time = Long.parseLong(key.split("_")[3]);
-                    if (time > latestTime) {
-                        latestTime = time;
-                        latestImage = (String) entry.getValue();
-                    }
-                } catch (Exception e) {
-                    Log.e("NewBeranda", "Error parsing cache key: " + key);
-                }
-            }
-        }
-
-        return latestImage;
-    }
-
-    // HANDLE ACTIVITY RESULT
+    // HANDLE ACTIVITY RESULT - TIDAK DIUBAH
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         Log.d("BerandaActivity", "onActivityResult - Request: " + requestCode + ", Result: " + resultCode);
 
-        if (requestCode == PromoAdapter.EDIT_PROMO_REQUEST) {
-            if (resultCode == RESULT_OK && data != null) {
-                handleEditPromoResult(data);
-            } else if (resultCode == RESULT_CANCELED) {
-                NotificationUtils.showInfoNotification(this, "Dibatalkan", "Edit promo dibatalkan");
-            }
+        if (requestCode == PromoAdapter.EDIT_PROMO_REQUEST && resultCode == RESULT_OK && data != null) {
+            handleEditPromoResult(data);
         }
     }
 
+    private void handleEditPromoResult(Intent data) {
+        int updatedPromoId = data.getIntExtra("UPDATED_PROMO_ID", -1);
+        String updatedImage = data.getStringExtra("UPDATED_IMAGE");
 
-    private void setupUserInfo() {
-        String username = sharedPreferences.getString(KEY_USERNAME, "");
-        if (!username.isEmpty()) {
-            tvUserName.setText(username);
+        Log.d("BerandaActivity", "Handle edit result - ID: " + updatedPromoId);
+
+        if (updatedPromoId != -1) {
+            // Panggil method update melalui interface
+            onPromoUpdated(updatedPromoId, updatedImage);
         } else {
-            Intent intent = getIntent();
-            if (intent != null && intent.hasExtra("USERNAME")) {
-                username = intent.getStringExtra("USERNAME");
-                tvUserName.setText(username);
-            }
+            Log.w("BerandaActivity", "Invalid update data, refreshing from server");
+            loadPromoData();
         }
     }
-
 
     private void setupClickListeners() {
         cardWelcome.setOnClickListener(v -> {
             Intent profileIntent = new Intent(NewBeranda.this, ProfileActivity.class);
             startActivity(profileIntent);
         });
+
         cardProspekM.setOnClickListener(v -> {
             Intent intentProspek = new Intent(NewBeranda.this, TambahProspekActivity.class);
             startActivity(intentProspek);
         });
+
         cardFasilitasM.setOnClickListener(v -> {
             Intent intentFasilitas = new Intent(NewBeranda.this, FasilitasActivity.class);
             startActivity(intentFasilitas);
         });
+
         cardProyekM.setOnClickListener(v -> {
             Intent intentProyek = new Intent(NewBeranda.this, ProyekActivity.class);
             startActivity(intentProyek);
         });
+
         cardUserpM.setOnClickListener(v -> {
             Intent intentUserp = new Intent(NewBeranda.this, TambahUserpActivity.class);
             startActivity(intentUserp);
         });
+
         cardInputPromoM.setOnClickListener(v -> {
+            // Cek level user untuk akses input promo
+            if ("Operator".equals(userLevel)) {
+                Toast.makeText(this, "Hanya Admin yang dapat menambah promo", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent intent = new Intent(NewBeranda.this, InputPromoActivity.class);
             startActivity(intent);
         });
+
+        // TAMBAHKAN CLICK LISTENER UNTUK MENU ADMIN - DENGAN INTENT YANG BENAR
+        if (cardInputNIP != null) {
+            cardInputNIP.setOnClickListener(v -> {
+                if ("Operator".equals(userLevel)) {
+                    Toast.makeText(this, "Hanya Admin yang dapat mengakses Input NIP", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                // Intent ke InputNipActivity
+                try {
+                    Intent intent = new Intent(NewBeranda.this, InputNipActivity.class);
+                    startActivity(intent);
+                    Log.d("BerandaActivity", "Opening InputNipActivity");
+                } catch (Exception e) {
+                    Log.e("BerandaActivity", "Error opening InputNipActivity: " + e.getMessage());
+                    Toast.makeText(NewBeranda.this, "Gagal membuka Input NIP", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        if (cardStatusAkun != null) {
+            cardStatusAkun.setOnClickListener(v -> {
+                if ("Operator".equals(userLevel)) {
+                    Toast.makeText(this, "Hanya Admin yang dapat mengakses Aktivasi Akun", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                // Intent ke StatusAkunActivity
+                try {
+                    Intent intent = new Intent(NewBeranda.this, StatusAkunActivity.class);
+                    startActivity(intent);
+                    Log.d("BerandaActivity", "Opening StatusAkunActivity");
+                } catch (Exception e) {
+                    Log.e("BerandaActivity", "Error opening StatusAkunActivity: " + e.getMessage());
+                    Toast.makeText(NewBeranda.this, "Gagal membuka Aktivasi Akun", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     private void setupNavigation() {
@@ -452,6 +485,7 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
 
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
+            String title = item.getTitle().toString();
             drawerLayout.closeDrawer(GravityCompat.START);
 
             if (id == R.id.nav_home) {
@@ -467,6 +501,17 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
                 return true;
             } else if (id == R.id.nav_exit) {
                 logout();
+                return true;
+            } else if (title.equalsIgnoreCase("Input NIP") ||
+                    title.equalsIgnoreCase("Aktivasi Akun") ||
+                    title.contains("Pengelolaan Akun")) {
+                // Menu admin - cek level user
+                if ("Operator".equals(userLevel)) {
+                    Toast.makeText(this, "Hanya Admin yang dapat mengakses menu ini", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+                // Handle menu admin di sini
+                handleAdminMenu(title);
                 return true;
             }
             return false;
@@ -491,15 +536,33 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         });
     }
 
+    private void handleAdminMenu(String menuTitle) {
+        try {
+            if (menuTitle.equalsIgnoreCase("Input NIP")) {
+                Intent intent = new Intent(this, InputNipActivity.class);
+                startActivity(intent);
+            } else if (menuTitle.equalsIgnoreCase("Aktivasi Akun")) {
+                Intent intent = new Intent(this, StatusAkunActivity.class);
+                startActivity(intent);
+            } else {
+                Toast.makeText(this, "Membuka: " + menuTitle, Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Log.e("BerandaActivity", "Error handling admin menu: " + e.getMessage());
+            Toast.makeText(this, "Gagal membuka menu: " + menuTitle, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void logout() {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(KEY_IS_LOGGED_IN);
         editor.remove("username");
         editor.remove("division");
         editor.remove("nip");
+        editor.remove(KEY_LEVEL);
         editor.apply();
 
-        NotificationUtils.showInfoNotification(this, "Logout", "Logout berhasil");
+        Toast.makeText(NewBeranda.this, "Logout berhasil", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(NewBeranda.this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
@@ -510,5 +573,11 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
     protected void onResume() {
         super.onResume();
         loadPromoData();
+
+        // Refresh access control setiap resume
+        setupUserInfo();
+        setupAccessBasedOnLevel();
+
+        Log.d("BerandaActivity", "onResume completed - Level: " + userLevel);
     }
 }

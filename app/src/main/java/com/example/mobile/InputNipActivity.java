@@ -1,22 +1,30 @@
 package com.example.mobile;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class InputNipActivity extends AppCompatActivity {
-    BottomNavigationView bottomNavigationView;
+
     private MaterialToolbar topAppBar;
+    private EditText editTextNoNIP;
+    private Button btnSimpan, btnBatal;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,42 +32,113 @@ public class InputNipActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_input_nip_activity);
 
-        bottomNavigationView = findViewById(R.id.bottom_navigation);
-        topAppBar = findViewById(R.id.topAppBar);
-
-        topAppBar.setNavigationOnClickListener(v -> {
-            Intent intent = new Intent(InputNipActivity.this, NewBeranda.class);
-            startActivity(intent);
-            finish();
-        });
-
-        bottomNavigationView.setOnItemSelectedListener(item -> {
-            int id = item.getItemId();
-
-            if (id == R.id.nav_home) {
-                startActivity(new Intent(this, NewBeranda.class));
-                overridePendingTransition(0, 0);
-                return true;
-            } else if (id == R.id.nav_folder) {
-                startActivity(new Intent(this, LihatDataActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
-            } else if (id == R.id.nav_news) {
-                startActivity(new Intent(this, NewsActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
-            } else if (id == R.id.nav_profile) {
-                startActivity(new Intent(this, ProfileActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
-            }
-            return false;
-        });
+        initViews();
+        setupToolbar();
+        setupClickListeners();
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    private void initViews() {
+        topAppBar = findViewById(R.id.topAppBar);
+        editTextNoNIP = findViewById(R.id.editTextNoNIP);
+        btnSimpan = findViewById(R.id.btnSimpan);
+        btnBatal = findViewById(R.id.btnBatal);
+    }
+
+    private void setupToolbar() {
+        topAppBar.setNavigationOnClickListener(v -> {
+            onBackPressed();
+        });
+    }
+
+    private void setupClickListeners() {
+        btnSimpan.setOnClickListener(v -> {
+            simpanNIP();
+        });
+
+        btnBatal.setOnClickListener(v -> {
+            onBackPressed();
+        });
+    }
+
+    private void simpanNIP() {
+        String noNIP = editTextNoNIP.getText().toString().trim();
+
+        // Validasi input
+        if (TextUtils.isEmpty(noNIP)) {
+            editTextNoNIP.setError("No. NIP tidak boleh kosong");
+            editTextNoNIP.requestFocus();
+            return;
+        }
+
+        if (noNIP.length() < 3) {
+            editTextNoNIP.setError("No. NIP minimal 3 digit");
+            editTextNoNIP.requestFocus();
+            return;
+        }
+
+        // Cek apakah NIP hanya berisi angka
+        if (!noNIP.matches("\\d+")) {
+            editTextNoNIP.setError("No. NIP harus berupa angka");
+            editTextNoNIP.requestFocus();
+            return;
+        }
+
+        // Tampilkan loading
+        showLoading(true);
+
+        // Kirim data ke server
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<BasicResponse> call = apiService.inputNIP(noNIP);
+
+        call.enqueue(new Callback<BasicResponse>() {
+            @Override
+            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                showLoading(false);
+
+                if (response.isSuccessful() && response.body() != null) {
+                    BasicResponse basicResponse = response.body();
+                    if (basicResponse.isSuccess()) {
+                        Toast.makeText(InputNipActivity.this, "NIP berhasil disimpan", Toast.LENGTH_SHORT).show();
+                        editTextNoNIP.setText(""); // Kosongkan field
+                        editTextNoNIP.clearFocus();
+                    } else {
+                        Toast.makeText(InputNipActivity.this, "Gagal menyimpan NIP: " + basicResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(InputNipActivity.this, "Error response server", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BasicResponse> call, Throwable t) {
+                showLoading(false);
+                Toast.makeText(InputNipActivity.this, "Gagal menyimpan NIP: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("InputNipActivity", "Save NIP error: " + t.getMessage());
+            }
+        });
+    }
+
+    private void showLoading(boolean isLoading) {
+        if (isLoading) {
+            btnSimpan.setText("Menyimpan...");
+            btnSimpan.setEnabled(false);
+            btnBatal.setEnabled(false);
+        } else {
+            btnSimpan.setText("Simpan");
+            btnSimpan.setEnabled(true);
+            btnBatal.setEnabled(true);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 }

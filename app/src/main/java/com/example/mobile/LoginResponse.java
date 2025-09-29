@@ -1,73 +1,50 @@
 package com.example.mobile;
 
-import com.google.gson.annotations.SerializedName;
-
 public class LoginResponse {
-    @SerializedName("success")
     private boolean success;
-
-    @SerializedName("message")
     private String message;
-
-    @SerializedName("NIP")
     private String NIP;
-
-    @SerializedName("Divisi")
     private String Divisi;
+    private String Level;
 
-    @SerializedName("data")
-    private UserData data;
-
-    // Getter dan Setter
+    // Getters and setters
     public boolean isSuccess() {
         return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 
     public String getMessage() {
         return message;
     }
 
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public String getNIP() {
         return NIP;
+    }
+
+    public void setNIP(String NIP) {
+        this.NIP = NIP;
     }
 
     public String getDivisi() {
         return Divisi;
     }
 
-    public UserData getData() {
-        return data;
+    public void setDivisi(String divisi) {
+        Divisi = divisi;
     }
 
-    // Inner class untuk data user jika response menggunakan struktur data
-    public static class UserData {
-        @SerializedName("user_id")
-        private String userId;
+    public String getLevel() {
+        return Level;
+    }
 
-        @SerializedName("NIP")
-        private String NIP;
-
-        @SerializedName("Divisi")
-        private String Divisi;
-
-        @SerializedName("username")
-        private String username;
-
-        // Getter dan Setter
-        public String getUserId() {
-            return userId;
-        }
-
-        public String getNIP() {
-            return NIP;
-        }
-
-        public String getDivisi() {
-            return Divisi;
-        }
-
-        public String getUsername() {
-            return username;
-        }
+    public void setLevel(String level) {
+        Level = level;
     }
 }

@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String KEY_USERNAME = "username";
     private static final String KEY_DIVISION = "division";
     private static final String KEY_NIP = "nip";
+    private static final String KEY_LEVEL = "level";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,17 +95,27 @@ public class MainActivity extends AppCompatActivity {
 
     // 🔹 Cek apakah user sudah login
     private boolean isUserLoggedIn() {
-        return sharedPreferences.getBoolean(KEY_IS_LOGGED_IN, false);
+        boolean isLoggedIn = sharedPreferences.getBoolean(KEY_IS_LOGGED_IN, false);
+        Log.d("MainActivity", "isUserLoggedIn: " + isLoggedIn);
+        return isLoggedIn;
     }
 
     // 🔹 Simpan status login ke SharedPreferences
-    private void saveLoginStatus(String username, String division, String nip) {
+    private void saveLoginStatus(String username, String division, String nip, String level) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(KEY_IS_LOGGED_IN, true);
         editor.putString(KEY_USERNAME, username);
         editor.putString(KEY_DIVISION, division);
         editor.putString(KEY_NIP, nip);
+        editor.putString(KEY_LEVEL, level != null ? level : "Operator");
         editor.apply();
+
+        Log.d("MainActivity", "=== LOGIN DATA SAVED ===");
+        Log.d("MainActivity", "Username: " + username);
+        Log.d("MainActivity", "Division: " + division);
+        Log.d("MainActivity", "NIP: " + nip);
+        Log.d("MainActivity", "Level: " + level);
+        Log.d("MainActivity", "All saved data: " + sharedPreferences.getAll().toString());
     }
 
     // 🔹 Redirect ke BerandaActivity
@@ -112,11 +123,19 @@ public class MainActivity extends AppCompatActivity {
         String username = sharedPreferences.getString(KEY_USERNAME, "");
         String division = sharedPreferences.getString(KEY_DIVISION, "");
         String nip = sharedPreferences.getString(KEY_NIP, "");
+        String level = sharedPreferences.getString(KEY_LEVEL, "Operator");
+
+        Log.d("MainActivity", "=== REDIRECTING TO BERANDA ===");
+        Log.d("MainActivity", "Username: " + username);
+        Log.d("MainActivity", "Division: " + division);
+        Log.d("MainActivity", "NIP: " + nip);
+        Log.d("MainActivity", "Level: " + level);
 
         Intent intent = new Intent(MainActivity.this, NewBeranda.class);
         intent.putExtra("USERNAME", username);
         intent.putExtra("DIVISION", division);
         intent.putExtra("NIP", nip);
+        intent.putExtra("LEVEL", level);
         startActivity(intent);
         finish();
     }
@@ -127,6 +146,8 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
         editor.apply();
+
+        Log.d("MainActivity", "=== LOGOUT EXECUTED ===");
 
         Intent intent = new Intent(activity, MainActivity.class);
         activity.startActivity(intent);
@@ -161,7 +182,10 @@ public class MainActivity extends AppCompatActivity {
 
     // 🔹 Proses login dengan Retrofit (ke PHP MySQL API)
     private void loginUser(String username, String password) {
-        Log.d("LoginDebug", "Attempting login with: " + username);
+        Log.d("MainActivity", "=== ATTEMPTING LOGIN ===");
+        Log.d("MainActivity", "Username: " + username);
+        Log.d("MainActivity", "Password length: " + password.length());
+
         showLoading(true);
 
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
@@ -171,22 +195,25 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 showLoading(false);
-                Log.d("LoginDebug", "Response code: " + response.code());
+                Log.d("MainActivity", "Response code: " + response.code());
 
                 if (response.isSuccessful() && response.body() != null) {
                     LoginResponse loginResponse = response.body();
-                    Log.d("LoginDebug", "Response success: " + loginResponse.isSuccess());
-                    Log.d("LoginDebug", "Response message: " + loginResponse.getMessage());
+                    Log.d("MainActivity", "Response success: " + loginResponse.isSuccess());
+                    Log.d("MainActivity", "Response message: " + loginResponse.getMessage());
+                    Log.d("MainActivity", "Response level: " + loginResponse.getLevel());
+                    Log.d("MainActivity", "Response division: " + loginResponse.getDivisi());
+                    Log.d("MainActivity", "Response NIP: " + loginResponse.getNIP());
 
                     if (loginResponse.isSuccess()) {
                         Toast.makeText(MainActivity.this, "Login berhasil!", Toast.LENGTH_SHORT).show();
 
                         // Simpan status login (Remember Me)
-                        // Sesuai dengan struktur response dari PHP yang sudah diperbaiki
                         saveLoginStatus(
                                 username,  // username dari input
                                 loginResponse.getDivisi(),  // divisi dari response
-                                loginResponse.getNIP()      // NIP dari response
+                                loginResponse.getNIP(),      // NIP dari response
+                                loginResponse.getLevel()     // level dari response
                         );
 
                         // Pindah ke beranda
@@ -206,10 +233,10 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     try {
                         String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
-                        Log.e("LoginDebug", "Error response: " + errorBody);
-                        Toast.makeText(MainActivity.this, "Error response dari server", Toast.LENGTH_SHORT).show();
+                        Log.e("MainActivity", "Error response: " + errorBody);
+                        Toast.makeText(MainActivity.this, "Error response dari server: " + response.code(), Toast.LENGTH_SHORT).show();
                     } catch (IOException e) {
-                        Log.e("LoginDebug", "Error parsing error response: " + e.getMessage());
+                        Log.e("MainActivity", "Error parsing error response: " + e.getMessage());
                         Toast.makeText(MainActivity.this, "Terjadi kesalahan pada server", Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -218,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 showLoading(false);
-                Log.e("LoginError", "Network error: " + t.getMessage());
+                Log.e("MainActivity", "Network error: " + t.getMessage());
                 Toast.makeText(MainActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

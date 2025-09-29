@@ -29,6 +29,7 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
     private Context context;
     private List<Promo> promoList;
     private OnPromoActionListener actionListener;
+    private String userLevel = "Operator"; // Default ke Operator
 
     public static final int EDIT_PROMO_REQUEST = 1001;
 
@@ -40,6 +41,12 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
     public PromoAdapter(Context context, List<Promo> promoList) {
         this.context = context;
         this.promoList = promoList;
+    }
+
+    // METHOD BARU: Set user level
+    public void setUserLevel(String level) {
+        this.userLevel = level != null ? level : "Operator";
+        Log.d("PromoAdapter", "User level set to: " + this.userLevel);
     }
 
     public void setOnPromoActionListener(OnPromoActionListener listener) {
@@ -59,9 +66,15 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
         Promo promo = promoList.get(position);
         holder.bind(promo);
 
-        holder.btnMenu.setOnClickListener(v -> {
-            showPopupMenu(v, promo, holder.getAdapterPosition());
-        });
+        // ATUR VISIBILITAS TOMBOL MENU BERDASARKAN LEVEL USER
+        if ("Admin".equals(userLevel)) {
+            holder.btnMenu.setVisibility(View.VISIBLE);
+            holder.btnMenu.setOnClickListener(v -> {
+                showPopupMenu(v, promo, holder.getAdapterPosition());
+            });
+        } else {
+            holder.btnMenu.setVisibility(View.GONE);
+        }
     }
 
     private void showPopupMenu(View view, Promo promo, int position) {
