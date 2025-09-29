@@ -44,7 +44,7 @@ public class EditDataPromooActivity extends AppCompatActivity {
 
     private int promoId;
     private String currentImageBase64;
-    private String originalImageBase64; // PERBAIKAN: Simpan gambar original
+    private String originalImageBase64;
     private static final int PICK_IMAGE_REQUEST = 100;
 
     @Override
@@ -58,7 +58,6 @@ public class EditDataPromooActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
 
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         initViews();
@@ -80,6 +79,7 @@ public class EditDataPromooActivity extends AppCompatActivity {
         btnBatal = findViewById(R.id.btnBatal);
         btnPilihGambar = findViewById(R.id.btnInputPromo);
     }
+
     private void setupNavigation() {
         topAppBar.setNavigationOnClickListener(v -> {
             Intent intent = new Intent(EditDataPromooActivity.this, NewBeranda.class);
@@ -120,7 +120,6 @@ public class EditDataPromooActivity extends AppCompatActivity {
             String promoReference = intent.getStringExtra("PROMO_REFERENCE");
             currentImageBase64 = intent.getStringExtra("PROMO_IMAGE");
 
-            // PERBAIKAN: Simpan gambar original untuk comparison
             originalImageBase64 = currentImageBase64;
 
             editTextNamaPromo.setText(promoTitle);
@@ -182,19 +181,16 @@ public class EditDataPromooActivity extends AppCompatActivity {
         try {
             InputStream inputStream = getContentResolver().openInputStream(imageUri);
 
-            // Decode bitmap dengan optimization
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inSampleSize = 2;
             Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
 
             if (bitmap != null) {
-                // Compress ke JPEG
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
                 byte[] imageBytes = baos.toByteArray();
                 currentImageBase64 = Base64.encodeToString(imageBytes, Base64.DEFAULT);
 
-                // Clean up
                 baos.close();
                 if (inputStream != null) {
                     inputStream.close();
@@ -228,7 +224,7 @@ public class EditDataPromooActivity extends AppCompatActivity {
             return;
         }
 
-        // PERBAIKAN: Deteksi perubahan yang lebih akurat
+        // Deteksi perubahan
         String originalTitle = getIntent().getStringExtra("PROMO_TITLE");
         String originalInputter = getIntent().getStringExtra("PROMO_INPUTTER");
         String originalReference = getIntent().getStringExtra("PROMO_REFERENCE");
@@ -250,10 +246,7 @@ public class EditDataPromooActivity extends AppCompatActivity {
             return;
         }
 
-        // PERBAIKAN: Tentukan apa yang akan dikirim ke server
         String imageToSend = currentImageBase64;
-
-        // Jika gambar tidak berubah, kirim null ke server (biarkan server handle)
         if (!isImageChanged()) {
             imageToSend = null;
             Log.d("EditPromo", "Gambar tidak berubah, kirim null ke server");
@@ -261,7 +254,6 @@ public class EditDataPromooActivity extends AppCompatActivity {
 
         showLoading(true);
 
-        // Debug final data
         Log.d("EditPromo", "=== DATA AKHIR UNTUK SERVER ===");
         Log.d("EditPromo", "ID: " + promoId);
         Log.d("EditPromo", "Nama: " + namaPromo);
@@ -287,47 +279,64 @@ public class EditDataPromooActivity extends AppCompatActivity {
                     BasicResponse basicResponse = response.body();
 
                     if (basicResponse.isSuccess()) {
+                        // DAPATKAN USERNAME YANG SEDANG LOGIN
+                        String currentUser = editTextPenginput.getText().toString().trim();
+
+                        // TAMPILKAN NOTIFIKASI SISTEM DENGAN USER INFO
+                        //NotificationUtils.showPromoUpdatedNotification(EditDataPromooActivity.this, namaPromo, currentUser);//
+
                         Toast.makeText(EditDataPromooActivity.this, "Promo berhasil diupdate", Toast.LENGTH_SHORT).show();
 
-                        // PERBAIKAN: Kirim gambar yang benar
+                        // KIRIM DATA YANG LENGKAP KE NewBeranda - TAMBAHKAN UPDATED_USER
                         Intent resultIntent = new Intent();
                         resultIntent.putExtra("UPDATED_PROMO_ID", promoId);
-
-                        // Jika gambar berubah, kirim yang baru; jika tidak, kirim null
-                        String imageToReturn = isImageChanged() ? currentImageBase64 : null;
-                        resultIntent.putExtra("UPDATED_IMAGE", imageToReturn);
+                        resultIntent.putExtra("UPDATED_IMAGE", isImageChanged() ? currentImageBase64 : null);
+                        resultIntent.putExtra("UPDATED_TITLE", namaPromo);
+                        resultIntent.putExtra("UPDATED_USER", currentUser); // KIRIM USER INFO
+                        resultIntent.putExtra("IS_SUCCESS", true);
 
                         setResult(RESULT_OK, resultIntent);
                         finish();
                     } else {
-                        Toast.makeText(EditDataPromooActivity.this, "Gagal: " + basicResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                        Intent resultIntent = new Intent();
+                        resultIntent.putExtra("IS_SUCCESS", false);
+                        resultIntent.putExtra("ERROR_MESSAGE", basicResponse.getMessage());
+                        setResult(RESULT_OK, resultIntent);
+                        finish();
                     }
                 } else {
-                    Toast.makeText(EditDataPromooActivity.this, "Error response dari server", Toast.LENGTH_SHORT).show();
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("IS_SUCCESS", false);
+                    resultIntent.putExtra("ERROR_MESSAGE", "Error response dari server: " + response.code());
+                    setResult(RESULT_OK, resultIntent);
+                    finish();
                 }
             }
 
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
                 showLoading(false);
-                Toast.makeText(EditDataPromooActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("IS_SUCCESS", false);
+                resultIntent.putExtra("ERROR_MESSAGE", "Koneksi gagal: " + t.getMessage());
+                setResult(RESULT_OK, resultIntent);
+                finish();
             }
         });
     }
 
-
-    // PERBAIKAN: Method untuk cek perubahan gambar
+    // Method untuk cek perubahan gambar
     private boolean isImageChanged() {
         if (originalImageBase64 == null && currentImageBase64 == null) {
-            return false; // Keduanya null, tidak ada perubahan
+            return false;
         }
         if (originalImageBase64 == null && currentImageBase64 != null) {
-            return true; // Dari null ke ada gambar
+            return true;
         }
         if (originalImageBase64 != null && currentImageBase64 == null) {
-            return true; // Dari ada gambar ke null
+            return true;
         }
-        // Bandingkan string base64 (gunakan substring untuk efisiensi)
         return !originalImageBase64.equals(currentImageBase64);
     }
 

@@ -72,6 +72,8 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
             int id = item.getItemId();
 
             if (id == R.id.menu_edit) {
+                // HAPUS BARIS BERIKUT UNTUK TIDAK MENAMPILKAN NOTIFIKASI
+                // NotificationUtils.showInfoNotification(context, "Membuka Editor", "Mengedit promo: " + getSafePromoName(promo));
                 openEditActivity(promo);
                 return true;
             } else if (id == R.id.menu_delete) {
@@ -89,7 +91,7 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
 
         // PERBAIKAN: Validasi data sebelum dikirim
         if (promo == null) {
-            Toast.makeText(context, "Data promo tidak valid", Toast.LENGTH_SHORT).show();
+            NotificationUtils.showErrorNotification(context, "Data promo tidak valid");
             return;
         }
 
@@ -110,28 +112,39 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
             }
         } catch (Exception e) {
             Log.e("PromoAdapter", "Error opening edit activity: " + e.getMessage());
-            Toast.makeText(context, "Gagal membuka halaman edit", Toast.LENGTH_SHORT).show();
+            NotificationUtils.showErrorNotification(context, "Gagal membuka halaman edit");
         }
     }
 
     public void updatePromoItem(int promoId, String updatedImage) {
         Log.d("PromoAdapter", "=== UPDATE PROMO ITEM ===");
-        Log.d("PromoAdapter", "Target ID: " + promoId + ", Image: " +
-                (updatedImage != null ? updatedImage.length() + " chars" : "null"));
+        Log.d("PromoAdapter", "Target ID: " + promoId);
+
+        boolean found = false;
 
         for (int i = 0; i < promoList.size(); i++) {
             Promo promo = promoList.get(i);
             if (promo.getIdPromo() == promoId) {
                 Log.d("PromoAdapter", "Found promo at position: " + i);
+                found = true;
 
-                // PERBAIKAN: Only update image if not null
-                if (updatedImage != null) {
+                // Update data
+                if (updatedImage != null && !updatedImage.isEmpty()) {
                     promo.setGambarBase64(updatedImage);
                 }
 
                 notifyItemChanged(i);
+
+                // HAPUS NOTIFIKASI INI JIKA TIDAK DIPERLUKAN
+                // NotificationUtils.showPromoUpdatedNotification(context, getSafePromoName(promo));
+
                 break;
             }
+        }
+
+        if (!found) {
+            Log.w("PromoAdapter", "Promo not found for update: " + promoId);
+            // JANGAN TAMPILKAN NOTIFIKASI ERROR UNTUK KASUS INI
         }
     }
 
@@ -145,21 +158,25 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
                 deletePromoDirectly(promo, position);
             });
 
-            builder.setNegativeButton("Batal", (dialog, which) -> dialog.dismiss());
+            builder.setNegativeButton("Batal", (dialog, which) -> {
+                NotificationUtils.showInfoNotification(context, "Dibatalkan", "Penghapusan promo dibatalkan");
+                dialog.dismiss();
+            });
 
             AlertDialog dialog = builder.create();
             dialog.show();
         } catch (Exception e) {
             Log.e("PromoAdapter", "Error showing delete dialog: " + e.getMessage());
+            NotificationUtils.showErrorNotification(context, "Error menampilkan dialog");
         }
     }
 
     private void deletePromoDirectly(Promo promo, int position) {
         Log.d("PromoAdapter", "Deleting promo with ID: " + promo.getIdPromo());
 
-        // PERBAIKAN: Validasi position
+        // Validasi position
         if (position < 0 || position >= promoList.size()) {
-            Toast.makeText(context, "Posisi promo tidak valid", Toast.LENGTH_SHORT).show();
+            NotificationUtils.showErrorNotification(context, "Posisi promo tidak valid");
             return;
         }
 
@@ -172,37 +189,37 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
                 if (response.isSuccessful() && response.body() != null) {
                     BasicResponse basicResponse = response.body();
                     if (basicResponse.isSuccess()) {
-                        // PERBAIKAN: Validasi ulang position sebelum remove
+                        // Validasi ulang position sebelum remove
                         if (position >= 0 && position < promoList.size()) {
+                            String promoName = getSafePromoName(promo);
+                            String penginput = promo.getNamaPenginput() != null ? promo.getNamaPenginput() : "Unknown";
+
+                            // Hapus dari list
                             promoList.remove(position);
                             notifyItemRemoved(position);
                             notifyItemRangeChanged(position, promoList.size());
 
-                            Toast.makeText(context, "Promo berhasil dihapus", Toast.LENGTH_SHORT).show();
-
-                            // PANGGIL LISTENER UNTUK NEWS
+                            // PANGGIL LISTENER UNTUK NEWS DAN NOTIFIKASI - PASTIKAN MENGIRIM USERNAME
                             if (actionListener != null) {
-                                actionListener.onPromoDeleted(
-                                        promo.getNamaPromo() != null ? promo.getNamaPromo() : "Unknown",
-                                        promo.getNamaPenginput() != null ? promo.getNamaPenginput() : "Unknown"
-                                );
+                                actionListener.onPromoDeleted(promoName, penginput);
+                                Log.d("PromoAdapter", "Listener called for delete: " + promoName + " by " + penginput);
                             } else {
-                                Log.w("PromoAdapter", "Action listener is null!");
+                                Log.w("PromoAdapter", "Action listener is null for delete!");
+                                // Fallback: tampilkan notifikasi langsung dengan user info
+                                NotificationUtils.showPromoDeletedNotification(context, promoName, penginput);
                             }
-                        } else {
-                            Toast.makeText(context, "Posisi tidak valid setelah penghapusan", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        Toast.makeText(context, "Gagal menghapus: " + basicResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                        NotificationUtils.showErrorNotification(context, "Gagal menghapus: " + basicResponse.getMessage());
                     }
                 } else {
-                    Toast.makeText(context, "Error response dari server: " + response.code(), Toast.LENGTH_SHORT).show();
+                    NotificationUtils.showErrorNotification(context, "Error response dari server: " + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
-                Toast.makeText(context, "Error koneksi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                NotificationUtils.showErrorNotification(context, "Error koneksi: " + t.getMessage());
                 Log.e("PromoAdapter", "Network error: " + t.getMessage());
             }
         });
@@ -211,6 +228,11 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
     @Override
     public int getItemCount() {
         return promoList != null ? promoList.size() : 0;
+    }
+
+    // Helper method untuk mendapatkan nama promo yang aman
+    private String getSafePromoName(Promo promo) {
+        return promo.getNamaPromo() != null ? promo.getNamaPromo() : "Unknown";
     }
 
     public static class PromoViewHolder extends RecyclerView.ViewHolder {

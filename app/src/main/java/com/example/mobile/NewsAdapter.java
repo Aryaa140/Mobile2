@@ -63,36 +63,71 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
         try {
             String cleanBase64 = imageData.trim();
 
-            // Handle case untuk item yang dihapus (masih punya gambar)
-            if (cleanBase64.startsWith("data:image") || cleanBase64.contains("base64")) {
-                // Extract base64 dari data URL jika diperlukan
-                if (cleanBase64.contains("base64,")) {
-                    cleanBase64 = cleanBase64.split("base64,")[1];
-                }
+            // VALIDASI: Pastikan base64 string cukup panjang
+            if (cleanBase64.length() < 100) {
+                Log.w("NewsAdapter", "Base64 too short: " + cleanBase64.length());
+                setDefaultImage(imageView);
+                return;
             }
 
+            // VALIDASI: Decode base64
             byte[] decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
 
-            if (decodedBytes != null && decodedBytes.length > 0) {
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inSampleSize = 2;
-
-                Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length, options);
-
-                if (bitmap != null) {
-                    imageView.setImageBitmap(bitmap);
-                    imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                    Log.d("NewsAdapter", "✅ Image loaded successfully");
-                    return;
-                }
+            if (decodedBytes == null || decodedBytes.length == 0) {
+                Log.w("NewsAdapter", "Decoded bytes are empty");
+                setDefaultImage(imageView);
+                return;
             }
 
-            setDefaultImage(imageView);
+            // VALIDASI: Decode bitmap dengan error handling
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length, options);
 
+            if (options.outWidth <= 0 || options.outHeight <= 0) {
+                Log.w("NewsAdapter", "Invalid image dimensions");
+                setDefaultImage(imageView);
+                return;
+            }
+
+            // Decode actual bitmap
+            options.inJustDecodeBounds = false;
+            options.inSampleSize = calculateInSampleSize(options, 300, 300);
+
+            Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length, options);
+
+            if (bitmap != null) {
+                imageView.setImageBitmap(bitmap);
+                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                Log.d("NewsAdapter", "✅ Image loaded successfully - Size: " + bitmap.getWidth() + "x" + bitmap.getHeight());
+            } else {
+                Log.w("NewsAdapter", "Failed to decode bitmap");
+                setDefaultImage(imageView);
+            }
+
+        } catch (IllegalArgumentException e) {
+            Log.e("NewsAdapter", "Illegal base64 string: " + e.getMessage());
+            setDefaultImage(imageView);
         } catch (Exception e) {
             Log.e("NewsAdapter", "Error loading image: " + e.getMessage());
             setDefaultImage(imageView);
         }
+    }
+
+    private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+        return inSampleSize;
     }
 
     private void setDefaultImage(ImageView imageView) {

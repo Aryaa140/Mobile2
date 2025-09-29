@@ -332,20 +332,19 @@ public class InputPromoActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     BasicResponse basicResponse = response.body();
                     if (basicResponse.isSuccess()) {
-                        Toast.makeText(InputPromoActivity.this, "Promo berhasil disimpan", Toast.LENGTH_SHORT).show();
-                        setResult(RESULT_OK); // Beri tahu activity sebelumnya bahwa data berhasil disimpan
+                        SharedPreferences loginPrefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+                        String username = loginPrefs.getString("username", "User");
+
+                        // ✅ GUNAKAN METHOD YANG SUDAH ADA
+                        String message = "Promo \"" + namaPromo + "\" telah ditambahkan oleh " + username;
+                        NotificationUtils.showInfoNotification(InputPromoActivity.this, "Promo Ditambahkan", message);
+
                         finish();
                     } else {
+                        // Untuk error server, cukup toast saja (opsional)
                         Toast.makeText(InputPromoActivity.this, "Gagal: " + basicResponse.getMessage(), Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "Server error: " + basicResponse.getMessage());
                     }
                 } else {
-                    try {
-                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
-                        Log.e(TAG, "Error response code: " + response.code() + ", body: " + errorBody);
-                    } catch (IOException e) {
-                        Log.e(TAG, "Error reading error body: " + e.getMessage());
-                    }
                     Toast.makeText(InputPromoActivity.this, "Error dari server: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -354,7 +353,6 @@ public class InputPromoActivity extends AppCompatActivity {
             public void onFailure(Call<BasicResponse> call, Throwable t) {
                 resetButtonState();
                 Toast.makeText(InputPromoActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "Network error: " + t.getMessage());
             }
         });
     }
