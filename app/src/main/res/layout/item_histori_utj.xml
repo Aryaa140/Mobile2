@@ -69,6 +69,26 @@
                     android:singleLine="true" />
 
                 <TextView
+                    android:id="@+id/tvStatusNPWP"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Status NPWP : -"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="14sp"
+                    android:ellipsize="end"
+                    android:singleLine="true" />
+
+                <TextView
+                    android:id="@+id/tvStatusBPJS"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Status BPJS : -"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="14sp"
+                    android:ellipsize="end"
+                    android:singleLine="true" />
+
+                <TextView
                     android:id="@+id/tvEmail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -121,67 +141,14 @@
                     android:maxLines="2" />
 
                 <TextView
-                    android:id="@+id/tvStatusBPJS"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Status BPJS: -"
-                    android:textColor="@android:color/darker_gray"
-                    android:textSize="14sp"
-                    android:ellipsize="end"
-                    android:maxLines="2" />
-
-                <TextView
-                    android:id="@+id/tvStatusNPWP"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Status NPWP : -"
-                    android:textColor="@android:color/darker_gray"
-                    android:textSize="14sp"
-                    android:ellipsize="end"
-                    android:maxLines="2" />
-
-                <TextView
                     android:id="@+id/tvJumlahUangTandaJadi"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="DP : -"
+                    android:text="Jumlah Uang Tanda Jadi: -"
                     android:textColor="@android:color/darker_gray"
                     android:textSize="14sp"
                     android:ellipsize="end"
                     android:maxLines="2" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:layout_marginStart="8dp">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnEdit"
-                    android:layout_width="96dp"
-                    android:layout_height="48dp"
-                    android:layout_marginBottom="8dp"
-                    android:text="Edit"
-                    android:textAllCaps="false"
-                    android:textColor="@android:color/white"
-                    android:textSize="14sp"
-                    app:cornerRadius="8dp"
-                    app:backgroundTint="@android:color/holo_blue_dark" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnHistori"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Histori"
-                    android:textAllCaps="false"
-                    android:textColor="@android:color/white"
-                    android:textSize="14sp"
-                    app:cornerRadius="8dp"
-                    app:backgroundTint="@color/brown_500" />
-
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
