@@ -282,8 +282,8 @@ public class EditDataPromooActivity extends AppCompatActivity {
                         // DAPATKAN USERNAME YANG SEDANG LOGIN
                         String currentUser = editTextPenginput.getText().toString().trim();
 
-                        // TAMPILKAN NOTIFIKASI SISTEM DENGAN USER INFO
-                        //NotificationUtils.showPromoUpdatedNotification(EditDataPromooActivity.this, namaPromo, currentUser);//
+                        // ✅ TAMBAHKAN: TAMPILKAN LOCAL NOTIFICATION
+                        showLocalUpdateNotification(namaPromo, currentUser);
 
                         Toast.makeText(EditDataPromooActivity.this, "Promo berhasil diupdate", Toast.LENGTH_SHORT).show();
 
@@ -324,6 +324,25 @@ public class EditDataPromooActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    // ✅ METHOD BARU: TAMPILKAN LOCAL NOTIFICATION UNTUK UPDATE
+    private void showLocalUpdateNotification(String promoName, String updatedBy) {
+        try {
+            String title = "Promo Diupdate ✏️";
+            String body = "Promo \"" + promoName + "\" berhasil diupdate";
+
+            if (updatedBy != null && !updatedBy.isEmpty()) {
+                body += " oleh " + updatedBy;
+            }
+
+            // Tampilkan local notification
+            NotificationHelper.showSimpleNotification(this, title, body);
+            Log.d("EditPromo", "Local update notification shown: " + body);
+
+        } catch (Exception e) {
+            Log.e("EditPromo", "Error showing local update notification: " + e.getMessage());
+        }
     }
 
     // Method untuk cek perubahan gambar

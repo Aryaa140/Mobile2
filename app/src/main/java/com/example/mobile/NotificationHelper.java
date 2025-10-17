@@ -102,6 +102,52 @@ public class NotificationHelper {
     }
 
     /**
+     * ✅ METHOD BARU: NOTIFIKASI SEDERHANA TANPA DATA TAMBAHAN
+     * Untuk digunakan di PromoAdapter
+     */
+    public static void showSimpleNotification(Context context, String title, String body) {
+        try {
+            createNotificationChannel(context);
+
+            // Intent untuk buka MainActivity ketika notifikasi diklik
+            Intent intent = new Intent(context, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+            // PendingIntent dengan FLAG_IMMUTABLE untuk Android 12+
+            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                flags |= PendingIntent.FLAG_IMMUTABLE;
+            }
+
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, flags);
+
+            // Buat notifikasi sederhana
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                    .setSmallIcon(getNotificationIcon())
+                    .setContentTitle(title)
+                    .setContentText(body)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true)
+                    .setDefaults(android.app.Notification.DEFAULT_ALL)
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(body));
+
+            // Tampilkan notifikasi
+            NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (manager != null) {
+                int notificationId = (int) System.currentTimeMillis(); // ID unik
+                manager.notify(notificationId, builder.build());
+                Log.d(TAG, "✅ Simple notification shown: " + title);
+            } else {
+                Log.e(TAG, "❌ NotificationManager is null");
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Error showing simple notification: " + e.getMessage());
+        }
+    }
+
+    /**
      * ✅ DAPATKAN NOTIFICATION ICON
      */
     private static int getNotificationIcon() {
