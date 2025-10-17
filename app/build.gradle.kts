@@ -15,6 +15,7 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+
     }
 
     buildTypes {
@@ -43,8 +44,8 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.storage)
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.messaging)
 
-    // Retrofit & Gson
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
     implementation(libs.gson)
@@ -59,4 +60,7 @@ dependencies {
     implementation("androidx.work:work-runtime:2.7.1")
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
+
+
+
 }

@@ -10,7 +10,7 @@ public class NewsItem {
     private Date timestamp;
     private String imageUrl; // Ini akan berisi base64 string
     private int promoId;
-
+    private boolean isActive;
     // PERBAIKAN: Hapus field action yang tidak digunakan
     public NewsItem(int id, String title, String penginput, String status, Date timestamp, String imageUrl, int promoId) {
         this.id = id;
@@ -20,6 +20,7 @@ public class NewsItem {
         this.timestamp = timestamp;
         this.imageUrl = imageUrl;
         this.promoId = promoId;
+        this.isActive = true;
     }
 
     // Getter dan Setter
@@ -43,4 +44,6 @@ public class NewsItem {
 
     public int getPromoId() { return promoId; }
     public void setPromoId(int promoId) { this.promoId = promoId; }
+    public boolean isActive() { return isActive; }
+    public void setActive(boolean active) { isActive = active; }
 }

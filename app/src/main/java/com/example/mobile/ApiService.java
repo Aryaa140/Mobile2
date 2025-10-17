@@ -1,12 +1,13 @@
 package com.example.mobile;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 import retrofit2.http.GET;
-import retrofit2.http.Path;
 import retrofit2.http.Query;
 public interface ApiService {
     @FormUrlEncoded
@@ -34,7 +35,11 @@ public interface ApiService {
             @Field("username") String username,
             @Field("new_password") String newPassword
     );
-
+    @FormUrlEncoded
+    @POST("check_date_out.php")
+    Call<DateOutResponse> checkDateOut(
+            @Field("username") String username
+    );
     @FormUrlEncoded
     @POST("update_profile.php")
     Call<BasicResponse> updateProfile(
@@ -52,6 +57,8 @@ public interface ApiService {
     );
     @GET("get_all_users.php")
     Call<UserResponse> getSemuaUser();
+    // ada kemungkinan tidak berfungsi untuk display response userp
+
 
     @FormUrlEncoded
     @POST("update_status_user.php")
@@ -59,6 +66,11 @@ public interface ApiService {
             @Field("user_id") int userId,
             @Field("status_akun") String statusAkun
     );
+    @GET("get_latest_nip_id.php")
+    Call<LatestIdResponse> getLatestNipId();
+
+    @POST("input_nip.php")
+    Call<BasicResponse> inputNIP(@Body NipRequest nipRequest);
     @FormUrlEncoded
     @POST("input_nip.php")
     Call<BasicResponse> inputNIP(@Field("no_nip") String noNip);
@@ -90,7 +102,11 @@ public interface ApiService {
     );
     @GET("get_prospek_by_penginput.php")
     Call<ProspekResponse> getProspekByPenginput(@Query("penginput") String penginput);
-
+    @GET("get_prospek_by_penginput.php")
+    Call<ProspekResponse> getProspekByPenginput(
+            @Query("penginput") String penginput,
+            @Query("user_level") String userLevel
+    );
     @GET("get_prospek_by_id.php")
     Call<ProspekDetailResponse> getProspekById(@Query("id") int id);
 
@@ -109,11 +125,11 @@ public interface ApiService {
             @Field("status_bpjs") String statusBpjs
     );
 
-    @FormUrlEncoded
-    @POST("delete_prospek.php")
+    @DELETE("delete_prospek.php")
     Call<BasicResponse> deleteProspekByData(
-            @Field("nama_penginput") String namaPenginput,
-            @Field("nama_prospek") String namaProspek
+            @Query("nama_penginput") String namaPenginput,
+            @Query("nama_prospek") String namaProspek,
+            @Query("user_level") String userLevel
     );
     @FormUrlEncoded
     @POST("tambah_promo.php")
@@ -138,6 +154,102 @@ public interface ApiService {
             @Field("nama_penginput") String namaPenginput,
             @Field("referensi_proyek") String referensiProyek,
             @Field("gambar_base64") String gambarBase64
+    );
+    @FormUrlEncoded
+    @POST("check_new_promo.php")
+    Call<PollingResponse> checkNewPromos(
+            @Field("user_id") int userId,
+            @Field("username") String username,
+            @Field("device_id") String deviceId,
+            @Field("last_check") String lastCheck
+    );
+    // Method untuk mendapatkan data prospek - tambahkan parameter penginput
+    @GET("api_userprospek.php")
+    Call<ProspekResponse> getProspekData(@Query("action") String action, @Query("penginput") String penginput);
+
+    // Method untuk mendapatkan data proyek
+    @GET("api_userprospek.php")
+    Call<ProyekResponse> getProyekData(@Query("action") String action);
+
+    // Method untuk mendapatkan hunian berdasarkan proyek
+    @GET("api_userprospek.php")
+    Call<HunianResponse> getHunianByProyek(@Query("action") String action, @Query("proyek") String proyek);
+
+    // Method untuk menambah user prospek - menggunakan BasicResponse
+    @POST("api_userprospek.php")
+    Call<BasicResponse> addUserProspek(@Body UserProspekRequest request);
+    @GET("api_userprospek.php")
+    Call<UserProspekSimpleResponse> getUserProspekSimpleData(
+            @Query("action") String action,
+            @Query("penginput") String penginput
+    );
+    @GET("api_userprospek.php")
+    Call<KavlingResponse> getKavlingByProyek(
+            @Query("action") String action,
+            @Query("proyek") String proyek
+    );
+    @GET("api_userprospek.php")
+    Call<UpdateStatusResponse> updateStatusKavling(
+            @Query("action") String action,
+            @Query("proyek") String proyek,
+            @Query("hunian") String hunian,
+            @Query("tipe_hunian") String tipeHunian
+    );
+    @FormUrlEncoded
+    @POST("api_proyek.php") // Sesuaikan dengan path file PHP Anda
+    Call<BasicResponse> addProyek(
+            @Field("action") String action,
+            @Field("nama_proyek") String namaProyek
+    );
+
+
+    // Method untuk menambah hunian (tambahkan ini)
+    @FormUrlEncoded
+    @POST("api_hunian.php")
+    Call<BasicResponse> addHunian(
+            @Field("action") String action,
+            @Field("nama_hunian") String namaHunian,
+            @Field("nama_proyek") String namaProyek
+    );
+    @FormUrlEncoded
+    @POST("api_kavling.php")
+    Call<BasicResponse> tambahKavlingForm(
+            @Field("action") String action,
+            @Field("tipe_hunian") String tipeHunian,
+            @Field("hunian") String hunian,
+            @Field("proyek") String proyek,
+            @Field("status_penjualan") String statusPenjualan,
+            @Field("kode_kavling") String kodeKavling
+    );
+    // Method khusus untuk get proyek
+    @GET("get_proyek.php")
+    Call<ProyekResponse> getProyek();
+
+    // Method khusus untuk get hunian by proyek
+    @GET("get_hunian_by_proyek.php")
+    Call<HunianResponse> getHunianByProyek(@Query("id_proyek") int idProyek);
+    @FormUrlEncoded
+    @POST("update_userprospek_with_histori.php") // PASTIKAN NAMA FILE BENAR
+    Call<ResponseBody> updateUserProspekWithHistori(
+            @Field("action") String action,
+            @Field("id_userprospek") int idUserProspek,
+            @Field("nama_penginput") String namaPenginput,
+            @Field("nama_user") String namaUser,
+            @Field("email") String email,
+            @Field("no_hp") String noHp,
+            @Field("alamat") String alamat,
+            @Field("proyek") String proyek,
+            @Field("hunian") String hunian,
+            @Field("tipe_hunian") String tipeHunian,
+            @Field("dp") int dp,
+            @Field("status_bpjs") String statusBpjs,
+            @Field("status_npwp") String statusNpwp
+    );
+    @FormUrlEncoded
+    @POST("get_histori_userprospek.php")
+    Call<HistoriUserProspekResponse> getHistoriUserProspek(
+            @Field("action") String action,
+            @Field("id_userprospek") int idUserProspek
     );
 
 }

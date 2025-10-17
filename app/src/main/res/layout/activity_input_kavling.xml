@@ -55,40 +55,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <EditText
-                android:id="@+id/editTextKavling"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:textColor="@android:color/black"
-                android:background="@android:drawable/edit_text"
-                android:drawableStart="@drawable/ic_kavling"
-                android:drawablePadding="8dp"
-                android:hint="Masukkan Kode Kavling"
-                android:padding="12dp"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="16dp"
-                android:text="Pilih Refrensi Nama Hunian"
-                android:textColor="@android:color/black"
-                android:textSize="15sp" />
-
-            <Spinner
-                android:id="@+id/spinnerRoleHunian"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:textColor="@android:color/black"
-                android:background="@android:drawable/edit_text"
-                android:drawablePadding="8dp" />
-
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -114,6 +80,41 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:layout_marginLeft="16dp"
+                android:text="Pilih Refrensi Nama Hunian"
+                android:textColor="@android:color/black"
+                android:textSize="15sp" />
+
+            <Spinner
+                android:id="@+id/spinnerRoleHunian"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:textColor="@android:color/black"
+                android:background="@android:drawable/edit_text"
+                android:drawablePadding="8dp" />
+
+            <EditText
+                android:id="@+id/editTextKavling"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginTop="5dp"
+                android:textColor="@android:color/black"
+                android:background="@android:drawable/edit_text"
+                android:drawableStart="@drawable/ic_kavling"
+                android:drawablePadding="8dp"
+                android:hint="Masukkan Kode Kavling"
+                android:padding="12dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="16dp"
                 android:text="Pilih Refrensi Status Penjualan Proyek"
                 android:textColor="@android:color/black"
                 android:textSize="15sp" />
@@ -128,7 +129,6 @@
                 android:textColor="@android:color/black"
                 android:background="@android:drawable/edit_text"
                 android:drawablePadding="8dp" />
-
 
             <LinearLayout
                 android:layout_width="match_parent"

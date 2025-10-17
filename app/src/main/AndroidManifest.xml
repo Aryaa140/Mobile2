@@ -2,15 +2,35 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- PERMISSIONS UTAMA -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- PERMISSIONS UNTUK NOTIFIKASI ONE SIGNAL -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
+
+    <!-- HAPUS PERMISSIONS YANG TIDAK DIPERLUKAN UNTUK ONE SIGNAL -->
+    <!--
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+    <uses-permission android:name="android.permission.BROADCAST_PACKAGE_ADDED" />
+    <uses-permission android:name="android.permission.BROADCAST_PACKAGE_CHANGED" />
+    <uses-permission android:name="android.permission.BROADCAST_PACKAGE_INSTALL" />
+    <uses-permission android:name="android.permission.BROADCAST_PACKAGE_REPLACED" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    -->
 
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -21,15 +41,48 @@
         android:theme="@style/Theme.Mobile"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <service
+            android:name=".MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- Firebase Instance ID Service (deprecated but may be needed) -->
+        <service
+            android:name="com.google.firebase.messaging.FirebaseMessagingService"
+            android:exported="false">
+            <intent-filter android:priority="-500">
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <meta-data
+            android:name="com.onesignal.messaging.default_notification_channel_id"
+            android:value="high_importance_channel" />
+
         <activity
             android:name=".StatusAkunActivity"
             android:exported="false" />
+        <activity
+            android:name=".InputHunianActivity"
+            android:exported="true">
+        </activity>
+        <activity
+            android:name=".InputKavlingActivity"
+            android:exported="true">
+        </activity>
         <activity
             android:name=".InputNipActivity"
             android:exported="false" />
         <activity
             android:name=".EditDataPromooActivity"
             android:exported="false" />
+        <activity
+            android:name=".LihatDataHistoriUserProspek"
+            android:exported="false"
+            android:parentActivityName=".LihatDataUserpActivity" />
         <activity
             android:name=".TampilPromoActivity"
             android:exported="false" />
@@ -183,20 +236,23 @@
         <activity
             android:name=".NewBeranda"
             android:exported="false" />
+
+        <!-- ✅ MAIN ACTIVITY -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
+        <!-- OPSIONAL: JIKA MASIH DIPERLUKAN -->
         <receiver
             android:name=".NewsCleanupReceiver"
             android:enabled="true"
             android:exported="false" />
+
     </application>
 
 </manifest>

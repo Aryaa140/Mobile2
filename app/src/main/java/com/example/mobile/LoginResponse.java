@@ -6,6 +6,9 @@ public class LoginResponse {
     private String NIP;
     private String Divisi;
     private String Level;
+    private String date_out; // TAMBAH INI
+    private String warning;  // Opsional: untuk warning masa tenggang
+    private int days_until_expiry; // Opsional: untuk info hari sampai expired
 
     // Getters and setters
     public boolean isSuccess() {
@@ -46,5 +49,32 @@ public class LoginResponse {
 
     public void setLevel(String level) {
         Level = level;
+    }
+
+    // TAMBAH GETTER SETTER UNTUK DATE_OUT
+    public String getDate_out() {
+        return date_out;
+    }
+
+    public void setDate_out(String date_out) {
+        this.date_out = date_out;
+    }
+
+    // Opsional: getter setter untuk warning
+    public String getWarning() {
+        return warning;
+    }
+
+    public void setWarning(String warning) {
+        this.warning = warning;
+    }
+
+    // Opsional: getter setter untuk days_until_expiry
+    public int getDays_until_expiry() {
+        return days_until_expiry;
+    }
+
+    public void setDays_until_expiry(int days_until_expiry) {
+        this.days_until_expiry = days_until_expiry;
     }
 }

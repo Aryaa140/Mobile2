@@ -9,12 +9,15 @@ activity = "1.10.1"
 constraintlayout = "2.2.1"
 firebaseDatabase = "22.0.0"
 firebaseBom = "32.7.0"
+firebaseMessaging = "23.4.0"
 firebaseStorage = "21.0.0"
 firebaseAuth = "23.0.0"
 googleServices = "4.4.0"
 retrofit = "2.9.0"
 okhttp = "4.9.3"
 gson = "2.10.1"
+androidx-core = "1.12.0"
+androidx-multidex = "2.0.1"
 
 [libraries]
 # Android libraries
@@ -34,6 +37,11 @@ firebase-database = { group = "com.google.firebase", name = "firebase-database",
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
+# ✅ TAMBAHKAN INI
+androidx-core = { group = "androidx.core", name = "core", version.ref = "androidx-core" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
+androidx-multidex = { group = "androidx.multidex", name = "multidex", version.ref = "androidx-multidex" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

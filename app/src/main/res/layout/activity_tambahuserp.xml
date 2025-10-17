@@ -40,7 +40,7 @@
             android:layout_height="match_parent"
             android:fillViewport="true">
 
-        <LinearLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -158,6 +158,48 @@
                     android:textColor="@android:color/black"
                     android:background="@android:drawable/edit_text"
                     android:entries="@array/opsi_spinnerRefrensiProyek"
+                    android:drawablePadding="8dp" />
+
+                <!-- Spinner Hunian -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="16dp"
+                    android:text="Pilih Hunian"
+                    android:textColor="@android:color/black"
+                    android:textSize="15sp" />
+
+                <Spinner
+                    android:id="@+id/hunian"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:textColor="@android:color/black"
+                    android:background="@android:drawable/edit_text"
+                    android:drawablePadding="8dp" />
+
+                <!-- Spinner Tipe Unit Hunian (BARU) -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="16dp"
+                    android:text="Pilih Tipe Unit Hunian"
+                    android:textColor="@android:color/black"
+                    android:textSize="15sp" />
+
+                <Spinner
+                    android:id="@+id/spinnerTipeUnit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:textColor="@android:color/black"
+                    android:background="@android:drawable/edit_text"
                     android:drawablePadding="8dp" />
 
                 <EditText

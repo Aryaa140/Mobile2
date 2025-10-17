@@ -2,118 +2,93 @@ package com.example.mobile;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class InputDataProyekActivity extends AppCompatActivity {
 
-    Button btnSimpan, btnBatal;
-    MaterialToolbar TopAppBar;
-    BottomNavigationView bottomNavigationView;
-    EditText editTextNamaProyek, editTextLokasiProyek;
-    Spinner spinnerStatusProyek;
-    DatabaseHelper databaseHelper;
+    private static final String TAG = "InputDataProyekActivity";
+
+    private Button btnSimpan, btnBatal;
+    private MaterialToolbar topAppBar;
+    private BottomNavigationView bottomNavigationView;
+    private EditText editTextNamaProyek;
+    private ApiService apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_input_data_proyek);
+        setContentView(R.layout.activity_input_proyek);
 
-        // Inisialisasi database helper
-        databaseHelper = new DatabaseHelper(this);
+        // Inisialisasi API Service
+        apiService = RetrofitClient.getClient().create(ApiService.class);
 
         // Inisialisasi view
+        initViews();
+        setupNavigation();
+        setupButtonListeners();
+    }
+
+    private void initViews() {
         btnSimpan = findViewById(R.id.btnSimpan);
         btnBatal = findViewById(R.id.btnBatal);
         editTextNamaProyek = findViewById(R.id.editTextNamaProyek);
-        editTextLokasiProyek = findViewById(R.id.editTextLokasiProyek);
-        spinnerStatusProyek = findViewById(R.id.spinnerRoleProspek);
-
-        TopAppBar = findViewById(R.id.topAppBar);
+        topAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+    }
 
-        // Setup spinner untuk status proyek
-        setupStatusSpinner();
-
-        // Simpan data proyek
-        btnSimpan.setOnClickListener(v -> {
-            simpanDataProyek();
-            Intent intent = new Intent(InputDataProyekActivity.this, NewBeranda.class);
-            startActivity(intent);
-            finish();
-        });
-
-        // Batal input
-        btnBatal.setOnClickListener(v -> {
-            Intent intent = new Intent(InputDataProyekActivity.this, NewBeranda.class);
-            startActivity(intent);
-            finish();
-        });
-
+    private void setupNavigation() {
         // Navigasi toolbar
-        TopAppBar.setNavigationOnClickListener(v -> {
-            Intent intent = new Intent(InputDataProyekActivity.this, NewBeranda.class);
-            startActivity(intent);
-            finish();
+        topAppBar.setNavigationOnClickListener(v -> {
+            navigateToHome();
         });
 
         // Bottom navigation
+        bottomNavigationView.setSelectedItemId(R.id.nav_home);
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
                 startActivity(new Intent(this, NewBeranda.class));
-                overridePendingTransition(0, 0);
+                finish();
                 return true;
             } else if (id == R.id.nav_folder) {
                 startActivity(new Intent(this, LihatDataActivity.class));
-                overridePendingTransition(0, 0);
+                finish();
                 return true;
             } else if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
-                overridePendingTransition(0, 0);
+                finish();
                 return true;
             }
             return false;
         });
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
     }
 
-    private void setupStatusSpinner() {
-        // Opsi status proyek (sesuaikan dengan array yang ada di strings.xml)
-        String[] statusOptions = getResources().getStringArray(R.array.opsi_spinnerStatusProyek);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_item,
-                statusOptions
-        );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerStatusProyek.setAdapter(adapter);
+    private void setupButtonListeners() {
+        // Simpan data proyek
+        btnSimpan.setOnClickListener(v -> simpanDataProyek());
+
+        // Batal input
+        btnBatal.setOnClickListener(v -> {
+            navigateToHome();
+        });
     }
 
     private void simpanDataProyek() {
         // Validasi input
         String namaProyek = editTextNamaProyek.getText().toString().trim();
-        String lokasiProyek = editTextLokasiProyek.getText().toString().trim();
-        String statusProyek = spinnerStatusProyek.getSelectedItem().toString();
 
         if (namaProyek.isEmpty()) {
             editTextNamaProyek.setError("Nama proyek harus diisi");
@@ -121,38 +96,136 @@ public class InputDataProyekActivity extends AppCompatActivity {
             return;
         }
 
-        if (lokasiProyek.isEmpty()) {
-            editTextLokasiProyek.setError("Lokasi proyek harus diisi");
-            editTextLokasiProyek.requestFocus();
-            return;
+        // Tampilkan loading
+        btnSimpan.setEnabled(false);
+        btnSimpan.setText("Menyimpan...");
+
+        // Debug log
+        Log.d(TAG, "Mengirim data proyek: " + namaProyek);
+
+        // Kirim data ke server
+        Call<BasicResponse> call = apiService.addProyek("addProyek", namaProyek);
+        call.enqueue(new Callback<BasicResponse>() {
+            @Override
+            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                btnSimpan.setEnabled(true);
+                btnSimpan.setText("Simpan");
+
+                Log.d(TAG, "Response code: " + response.code());
+                Log.d(TAG, "Response successful: " + response.isSuccessful());
+
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        BasicResponse basicResponse = response.body();
+                        Log.d(TAG, "Response body - success: " + basicResponse.isSuccess());
+                        Log.d(TAG, "Response body - message: " + basicResponse.getMessage());
+
+                        if (basicResponse.isSuccess()) {
+                            Toast.makeText(InputDataProyekActivity.this,
+                                    basicResponse.getMessage(), Toast.LENGTH_SHORT).show();
+
+                            // Kosongkan form
+                            editTextNamaProyek.setText("");
+
+                            // Redirect ke halaman beranda setelah delay singkat
+                            new android.os.Handler().postDelayed(
+                                    () -> navigateToHome(),
+                                    1000
+                            );
+                        } else {
+                            String errorMsg = basicResponse.getMessage();
+                            String displayMsg = errorMsg.isEmpty() ? "Gagal menyimpan data" : errorMsg;
+                            Toast.makeText(InputDataProyekActivity.this,
+                                    displayMsg, Toast.LENGTH_LONG).show();
+                            Log.e(TAG, "Server error: " + errorMsg);
+                        }
+                    } else {
+                        Log.e(TAG, "Response body is null");
+                        Toast.makeText(InputDataProyekActivity.this,
+                                "Response dari server kosong", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    // Handle error response
+                    handleErrorResponse(response);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BasicResponse> call, Throwable t) {
+                btnSimpan.setEnabled(true);
+                btnSimpan.setText("Simpan");
+
+                Log.e(TAG, "Network error: " + t.getMessage(), t);
+                Toast.makeText(InputDataProyekActivity.this,
+                        "Error koneksi: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void handleErrorResponse(Response<BasicResponse> response) {
+        String errorMessage = "Gagal menyimpan data. ";
+
+        try {
+            if (response.errorBody() != null) {
+                String errorBody = response.errorBody().string();
+                Log.e(TAG, "Raw error body: " + errorBody);
+
+                // Coba parse error body sebagai JSON
+                try {
+                    com.google.gson.Gson gson = new com.google.gson.Gson();
+                    BasicResponse errorResponse = gson.fromJson(errorBody, BasicResponse.class);
+                    if (errorResponse != null && !errorResponse.getMessage().isEmpty()) {
+                        errorMessage = errorResponse.getMessage();
+                        Log.d(TAG, "Parsed error message: " + errorMessage);
+                    } else {
+                        errorMessage += "HTTP " + response.code() + " - " + errorBody;
+                    }
+                } catch (com.google.gson.JsonSyntaxException e) {
+                    // Jika bukan JSON, tampilkan raw error
+                    Log.e(TAG, "Error body is not JSON: " + errorBody);
+                    errorMessage += "HTTP " + response.code() + " - " + getHttpErrorDescription(response.code());
+
+                    // Jika error body mengandung pesan yang bisa dibaca
+                    if (errorBody.toLowerCase().contains("error") || errorBody.toLowerCase().contains("message")) {
+                        errorMessage += "\n" + errorBody;
+                    }
+                }
+            } else {
+                errorMessage += "HTTP " + response.code() + " - " + getHttpErrorDescription(response.code());
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error parsing error body: " + e.getMessage());
+            errorMessage += "HTTP " + response.code() + " - " + getHttpErrorDescription(response.code());
         }
 
-        // Simpan data ke database (hanya 3 parameter)
-        long result = databaseHelper.addProyek(namaProyek, lokasiProyek, statusProyek);
+        Log.e(TAG, "Final error message: " + errorMessage);
+        Toast.makeText(InputDataProyekActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+    }
 
-        if (result != -1) {
-            Toast.makeText(this, "Data proyek berhasil disimpan", Toast.LENGTH_SHORT).show();
-
-            // Kosongkan form
-            editTextNamaProyek.setText("");
-            editTextLokasiProyek.setText("");
-            spinnerStatusProyek.setSelection(0);
-
-            // Redirect ke halaman input activity
-            Intent intent = new Intent(InputDataProyekActivity.this, InputActivity.class);
-            startActivity(intent);
-            finish();
-        } else {
-            Toast.makeText(this, "Gagal menyimpan data proyek", Toast.LENGTH_SHORT).show();
+    private String getHttpErrorDescription(int code) {
+        switch (code) {
+            case 400: return "Bad Request - Permintaan tidak valid";
+            case 401: return "Unauthorized - Tidak terotorisasi";
+            case 403: return "Forbidden - Akses ditolak";
+            case 404: return "Not Found - API tidak ditemukan";
+            case 405: return "Method Not Allowed - Method tidak diizinkan";
+            case 500: return "Internal Server Error - Error server internal";
+            case 502: return "Bad Gateway - Gateway error";
+            case 503: return "Service Unavailable - Layanan tidak tersedia";
+            default: return "Error " + code;
         }
     }
 
+    private void navigateToHome() {
+        Intent intent = new Intent(InputDataProyekActivity.this, NewBeranda.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+    }
+
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // Tutup koneksi database
-        if (databaseHelper != null) {
-            databaseHelper.close();
-        }
+    public void onBackPressed() {
+        super.onBackPressed();
+        navigateToHome();
     }
 }

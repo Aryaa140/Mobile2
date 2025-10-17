@@ -38,8 +38,8 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/cardForm"
         android:layout_width="0dp"
-        android:layout_height="200dp"
-        android:layout_marginTop="180dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="150dp"
         android:layout_marginRight="18dp"
         android:layout_marginLeft="18dp"
         app:cardCornerRadius="16dp"
@@ -54,6 +54,20 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Spinner Divisi -->
+            <Spinner
+                android:id="@+id/spinnerDivisi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@android:drawable/edit_text"
+                android:drawableStart="@drawable/ic_inputt2"
+                android:drawablePadding="8dp"
+                android:padding="12dp"
+                android:textColor="@android:color/black" />
+
             <EditText
                 android:id="@+id/editTextNoNIP"
                 android:layout_width="match_parent"
@@ -67,6 +81,20 @@
                 android:inputType="number"
                 android:drawablePadding="8dp"
                 android:hint="Masukkan No. NIP User"
+                android:padding="12dp" />
+
+            <Button
+                android:id="@+id/btnDateOut"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:textColor="@android:color/black"
+                android:backgroundTint="@android:color/white"
+                android:drawablePadding="8dp"
+                android:hint="Masukkan Tanggal Keluar"
                 android:padding="12dp" />
 
             <LinearLayout
@@ -129,4 +157,3 @@
         app:itemActiveIndicatorStyle="@style/BottomNav" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

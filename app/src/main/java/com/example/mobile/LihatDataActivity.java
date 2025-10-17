@@ -1,7 +1,10 @@
 package com.example.mobile;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,12 +16,17 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class LihatDataActivity extends AppCompatActivity {
 
     MaterialToolbar TopAppBar;
     MaterialCardView cardProspek, cardBooking;
     BottomNavigationView bottomNavigationView;
-
+    private SharedPreferences sharedPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,5 +87,23 @@ public class LihatDataActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+    private void checkAccountExpiry() {
+        String dateOutStr = sharedPreferences.getString("date_out", null);
+
+        if (dateOutStr != null && !dateOutStr.isEmpty()) {
+            try {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                Date dateOut = dateFormat.parse(dateOutStr);
+                Date today = new Date();
+
+                if (today.after(dateOut)) {
+                    Toast.makeText(this, "Akun telah expired. Silakan hubungi administrator.", Toast.LENGTH_LONG).show();
+                    MainActivity.logout(this);
+                }
+            } catch (ParseException e) {
+                Log.e("NewBeranda", "Error parsing date_out: " + e.getMessage());
+            }
+        }
     }
 }

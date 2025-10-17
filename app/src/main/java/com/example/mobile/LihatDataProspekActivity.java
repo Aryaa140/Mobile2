@@ -33,6 +33,7 @@ public class LihatDataProspekActivity extends AppCompatActivity {
     private ArrayList<Prospek2> prospekListFull;
     private EditText searchEditText;
     private SharedPreferences sharedPreferences;
+    private String userLevel;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -51,6 +52,14 @@ public class LihatDataProspekActivity extends AppCompatActivity {
         // Inisialisasi SharedPreferences
         sharedPreferences = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
 
+        // Ambil user level dari SharedPreferences
+        userLevel = sharedPreferences.getString("level", "Operator");
+
+        // Debug logging di Activity
+        Log.d("LihatDataProspek", "=== ACTIVITY DEBUG ===");
+        Log.d("LihatDataProspek", "User Level: " + userLevel);
+        Log.d("LihatDataProspek", "All SharedPrefs: " + sharedPreferences.getAll().toString());
+
         TopAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         searchEditText = findViewById(R.id.searchEditText);
@@ -59,7 +68,12 @@ public class LihatDataProspekActivity extends AppCompatActivity {
         prospekList = new ArrayList<>();
         prospekListFull = new ArrayList<>();
 
-        adapter = new ProspekAdapter2(this, prospekList);
+        // Pastikan userLevel tidak null
+        if (userLevel == null) {
+            userLevel = "Operator";
+        }
+
+        adapter = new ProspekAdapter2(this, prospekList, userLevel);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
@@ -79,6 +93,9 @@ public class LihatDataProspekActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {}
         });
+
+        // Update judul app bar berdasarkan level user
+        updateAppBarTitle();
 
         TopAppBar.setNavigationOnClickListener(v -> {
             Intent intent = new Intent(LihatDataProspekActivity.this, LihatDataActivity.class);
@@ -117,12 +134,20 @@ public class LihatDataProspekActivity extends AppCompatActivity {
         });
     }
 
+    private void updateAppBarTitle() {
+        if ("Admin".equals(userLevel)) {
+            TopAppBar.setTitle("Semua Data Prospek");
+        } else {
+            TopAppBar.setTitle("Data Prospek Saya");
+        }
+    }
+
     private void loadDataFromMySQL() {
         String username = sharedPreferences.getString("username", "");
-        Log.d("LihatDataProspek", "Loading data for username: " + username);
+        Log.d("LihatDataProspek", "Loading data for username: " + username + ", level: " + userLevel);
 
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-        Call<ProspekResponse> call = apiService.getProspekByPenginput(username);
+        Call<ProspekResponse> call = apiService.getProspekByPenginput(username, userLevel);
 
         call.enqueue(new Callback<ProspekResponse>() {
             @Override
@@ -148,8 +173,19 @@ public class LihatDataProspekActivity extends AppCompatActivity {
 
                         adapter.notifyDataSetChanged();
 
+                        // Tampilkan pesan berdasarkan level
                         if (data == null || data.isEmpty()) {
-                            Toast.makeText(LihatDataProspekActivity.this, "Tidak ada data prospek", Toast.LENGTH_SHORT).show();
+                            if ("Admin".equals(userLevel)) {
+                                Toast.makeText(LihatDataProspekActivity.this, "Tidak ada data prospek di sistem", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(LihatDataProspekActivity.this, "Tidak ada data prospek milik Anda", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            if ("Admin".equals(userLevel)) {
+                                Toast.makeText(LihatDataProspekActivity.this, "Menampilkan semua data (" + data.size() + " items)", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(LihatDataProspekActivity.this, "Menampilkan data milik Anda (" + data.size() + " items)", Toast.LENGTH_SHORT).show();
+                            }
                         }
                     } else {
                         Toast.makeText(LihatDataProspekActivity.this, "Gagal memuat data: " + prospekResponse.getMessage(), Toast.LENGTH_SHORT).show();

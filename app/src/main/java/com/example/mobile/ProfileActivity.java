@@ -3,6 +3,7 @@ package com.example.mobile;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,6 +20,11 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class ProfileActivity extends AppCompatActivity {
     BottomNavigationView bottomNavigationView;
@@ -62,7 +68,7 @@ public class ProfileActivity extends AppCompatActivity {
         tvUsername.setText(username);
         tvNip.setText("NIP: " + nip);
         tvDivisi.setText("Divisi: " + division);
-
+        checkAccountExpiry();
 
         cardEditProfil.setOnClickListener(v -> {
             Intent intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
@@ -138,7 +144,24 @@ public class ProfileActivity extends AppCompatActivity {
             return insets;
         });
     }
+    private void checkAccountExpiry() {
+        String dateOutStr = sharedPreferences.getString("date_out", null);
 
+        if (dateOutStr != null && !dateOutStr.isEmpty()) {
+            try {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                Date dateOut = dateFormat.parse(dateOutStr);
+                Date today = new Date();
+
+                if (today.after(dateOut)) {
+                    Toast.makeText(this, "Akun telah expired. Silakan hubungi administrator.", Toast.LENGTH_LONG).show();
+                    MainActivity.logout(this);
+                }
+            } catch (ParseException e) {
+                Log.e("NewBeranda", "Error parsing date_out: " + e.getMessage());
+            }
+        }
+    }
     // Method untuk logout
     private void logout() {
         SharedPreferences.Editor editor = sharedPreferences.edit();

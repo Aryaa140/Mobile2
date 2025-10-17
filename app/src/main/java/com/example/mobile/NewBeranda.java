@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,9 +23,15 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -32,12 +39,13 @@ import retrofit2.Response;
 
 public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnPromoActionListener {
     MaterialCardView cardWelcome, cardProspekM, cardFasilitasM, cardProyekM, cardUserpM, cardInputPromoM;
-    MaterialCardView cardInputNIP, cardStatusAkun;
+    MaterialCardView cardInputNIP, cardStatusAkun, cardInputProyek, cardInputHunian, cardInputKavling;
     private BottomNavigationView bottomNavigationView;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private MaterialToolbar topAppBar;
-    TextView tvUserName, tvMenuData, tvMenu2, tvMenu, tvPromo;
+    TextView tvUserName, tvMenuData, tvMenu2, tvMenu, tvPromo, tvMenuData2;
+    ImageView icbookakun, icbookproyek;
     private RecyclerView recyclerPromo;
     private PromoAdapter promoAdapter;
     private List<Promo> promoList = new ArrayList<>();
@@ -51,7 +59,7 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
     // SHARED PREFERENCES UNTUK NEWS
     private SharedPreferences newsPrefs;
     private static final String NEWS_PREFS_NAME = "NewsUpdates";
-
+    private static final String TAG = "NewBeranda";
     // Variabel untuk menyimpan level user
     private String userLevel = "";
 
@@ -72,11 +80,133 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         setupNavigation();
         setupAccessBasedOnLevel();
 
+        checkAccountExpiry();
+        checkAccountExpiryRealTime();
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+    private void checkAccountExpiryRealTime() {
+        String username = sharedPreferences.getString(KEY_USERNAME, "");
+
+        if (username.isEmpty()) {
+            Log.d("RealTimeCheck", "Username tidak ditemukan, skip real-time check");
+            checkAccountExpiry(); // Fallback ke local check
+            return;
+        }
+
+        Log.d("RealTimeCheck", "Checking real-time expiry for: " + username);
+
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<DateOutResponse> call = apiService.checkDateOut(username);
+
+        call.enqueue(new Callback<DateOutResponse>() {
+            @Override
+            public void onResponse(Call<DateOutResponse> call, Response<DateOutResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    DateOutResponse dateOutResponse = response.body();
+
+                    if (dateOutResponse.isSuccess()) {
+                        String currentDateOut = dateOutResponse.getDate_out();
+                        boolean isExpired = dateOutResponse.isIs_expired();
+
+                        Log.d("RealTimeCheck", "Server Date Out: " + currentDateOut);
+                        Log.d("RealTimeCheck", "Is Expired: " + isExpired);
+
+                        // Update SharedPreferences dengan data terbaru
+                        if (currentDateOut != null) {
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("date_out", currentDateOut);
+                            editor.apply();
+                            Log.d("RealTimeCheck", "Updated SharedPreferences date_out: " + currentDateOut);
+                        }
+
+                        // Jika expired, logout
+                        if (isExpired) {
+                            Log.d("RealTimeCheck", "*** ACCOUNT EXPIRED - LOGGING OUT ***");
+                            Toast.makeText(NewBeranda.this,
+                                    "Akun telah expired. Silakan hubungi administrator.",
+                                    Toast.LENGTH_LONG).show();
+                            MainActivity.logout(NewBeranda.this);
+                        } else {
+                            Log.d("RealTimeCheck", "Account still valid");
+                            // Fallback ke local check untuk memastikan
+                            checkAccountExpiry();
+                        }
+
+                    } else {
+                        Log.e("RealTimeCheck", "Server response not successful: " + dateOutResponse.getMessage());
+                        checkAccountExpiry(); // Fallback ke local check
+                    }
+                } else {
+                    Log.e("RealTimeCheck", "Network error in real-time check");
+                    checkAccountExpiry(); // Fallback ke local check
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DateOutResponse> call, Throwable t) {
+                Log.e("RealTimeCheck", "Real-time check failed: " + t.getMessage());
+                checkAccountExpiry(); // Fallback ke local check
+            }
+        });
+    }
+
+    private void checkAccountExpiry() {
+        String dateOutStr = sharedPreferences.getString("date_out", null);
+
+        Log.d("AccountExpiry", "=== DEBUG ACCOUNT EXPIRY ===");
+        Log.d("AccountExpiry", "Date_out from SharedPreferences: " + dateOutStr);
+
+        if (dateOutStr != null && !dateOutStr.isEmpty()) {
+            try {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                Date dateOut = dateFormat.parse(dateOutStr);
+                Date today = new Date();
+
+                // Format today untuk debug
+                String todayStr = dateFormat.format(today);
+                Log.d("AccountExpiry", "Today (formatted): " + todayStr);
+                Log.d("AccountExpiry", "Date Out: " + dateOutStr);
+
+                // Reset waktu untuk perbandingan yang akurat
+                Calendar calToday = Calendar.getInstance();
+                calToday.setTime(today);
+                calToday.set(Calendar.HOUR_OF_DAY, 0);
+                calToday.set(Calendar.MINUTE, 0);
+                calToday.set(Calendar.SECOND, 0);
+                calToday.set(Calendar.MILLISECOND, 0);
+                today = calToday.getTime();
+
+                Calendar calDateOut = Calendar.getInstance();
+                calDateOut.setTime(dateOut);
+                calDateOut.set(Calendar.HOUR_OF_DAY, 0);
+                calDateOut.set(Calendar.MINUTE, 0);
+                calDateOut.set(Calendar.SECOND, 0);
+                calDateOut.set(Calendar.MILLISECOND, 0);
+                dateOut = calDateOut.getTime();
+
+                Log.d("AccountExpiry", "Today (millis): " + today.getTime());
+                Log.d("AccountExpiry", "DateOut (millis): " + dateOut.getTime());
+                Log.d("AccountExpiry", "Is expired: " + (today.getTime() >= dateOut.getTime()));
+
+                if (today.getTime() >= dateOut.getTime()) {
+                    Log.d("AccountExpiry", "*** ACCOUNT EXPIRED - LOGGING OUT ***");
+                    Toast.makeText(this, "Akun telah expired sejak " + dateOutStr + ". Silakan hubungi administrator.", Toast.LENGTH_LONG).show();
+                    MainActivity.logout(this);
+                } else {
+                    Log.d("AccountExpiry", "Account still valid");
+                }
+
+            } catch (ParseException e) {
+                Log.e("AccountExpiry", "Error parsing date_out: " + e.getMessage());
+                Log.e("AccountExpiry", "Date string that failed: " + dateOutStr);
+            }
+        } else {
+            Log.d("AccountExpiry", "No date_out found or empty");
+        }
     }
 
     private void initViews() {
@@ -90,12 +220,20 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         // INISIALISASI ELEMEN BARU
         cardInputNIP = findViewById(R.id.cardInputNIP);
         cardStatusAkun = findViewById(R.id.cardStatusAkun);
+        cardInputProyek = findViewById(R.id.cardInputProyek);
+        cardInputHunian = findViewById(R.id.cardInputHunian);
+        cardInputKavling = findViewById(R.id.cardInputKavling);
+
         tvMenu2 = findViewById(R.id.tvMenu2);
         tvMenu = findViewById(R.id.tvMenu);
         tvPromo = findViewById(R.id.tvPromo);
+        tvMenuData = findViewById(R.id.tvMenuData);
+        tvMenuData2 = findViewById(R.id.tvMenuData2);
+
+        icbookakun = findViewById(R.id.icbookakun);
+        icbookproyek = findViewById(R.id.icbookproyek);
 
         tvUserName = findViewById(R.id.tvUserName);
-        tvMenuData = findViewById(R.id.tvMenuData);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         drawerLayout = findViewById(R.id.drawerLayout);
         navigationView = findViewById(R.id.navigationView);
@@ -103,19 +241,14 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         recyclerPromo = findViewById(R.id.recyclerPromo);
 
         Log.d("BerandaActivity", "Init views completed");
-        Log.d("BerandaActivity", "cardInputPromoM: " + (cardInputPromoM != null));
-        Log.d("BerandaActivity", "cardInputNIP: " + (cardInputNIP != null));
-        Log.d("BerandaActivity", "cardStatusAkun: " + (cardStatusAkun != null));
-        Log.d("BerandaActivity", "tvMenu2: " + (tvMenu2 != null));
-        Log.d("BerandaActivity", "tvMenuData: " + (tvMenuData != null));
-        Log.d("BerandaActivity", "tvMenu: " + (tvMenu != null));
-        Log.d("BerandaActivity", "tvPromo: " + (tvPromo != null));
+        Log.d("BerandaActivity", "cardInputHunian: " + (cardInputHunian != null));
+        Log.d("BerandaActivity", "userLevel: " + userLevel);
     }
 
     private void setupUserInfo() {
         // Ambil data user dari SharedPreferences
         String username = sharedPreferences.getString(KEY_USERNAME, "");
-        userLevel = sharedPreferences.getString(KEY_LEVEL, "Operator");
+        userLevel = sharedPreferences.getString(KEY_LEVEL, "Admin"); // Default ke Admin untuk testing
 
         // DEBUG: Tampilkan semua data yang tersimpan
         Log.d("BerandaActivity", "=== DEBUG USER DATA ===");
@@ -139,20 +272,14 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
     private void setupAccessBasedOnLevel() {
         Log.d("BerandaActivity", "=== SETUP ACCESS FOR LEVEL: " + userLevel + " ===");
 
-        // Jika user adalah Operator, sembunyikan menu tertentu
-        if ("Operator".equals(userLevel)) {
-            Log.d("BerandaActivity", "Hiding admin features for Operator");
+        // Jika user adalah Operator, Operator Inhouse, atau Operator Freelance, sembunyikan menu tertentu
+        if ("Operator".equals(userLevel) || "Operator Inhouse".equals(userLevel) || "Operator Freelance".equals(userLevel)) {
+            Log.d("BerandaActivity", "Hiding admin features for Operator level: " + userLevel);
 
             // Sembunyikan button tambah promo
             if (cardInputPromoM != null) {
                 cardInputPromoM.setVisibility(View.GONE);
                 Log.d("BerandaActivity", "Hidden cardInputPromoM");
-            }
-
-            // tvMenuData (Menu Input Data) TETAP TAMPIL untuk semua level
-            if (tvMenuData != null) {
-                tvMenuData.setVisibility(View.VISIBLE);
-                Log.d("BerandaActivity", "tvMenuData remains visible for Operator");
             }
 
             // Sembunyikan menu pengelolaan akun
@@ -173,23 +300,51 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
                 Log.d("BerandaActivity", "Hidden cardStatusAkun");
             }
 
+            // Sembunyikan icon book akun
+            if (icbookakun != null) {
+                icbookakun.setVisibility(View.GONE);
+                Log.d("BerandaActivity", "Hidden icbookakun");
+            }
+
+            // Sembunyikan menu pengelolaan proyek (admin only)
+            if (tvMenuData != null) {
+                tvMenuData.setVisibility(View.GONE);
+                Log.d("BerandaActivity", "Hidden tvMenuData (Menu Pengelolaan Proyek)");
+            }
+
+            // Sembunyikan icon book proyek
+            if (icbookproyek != null) {
+                icbookproyek.setVisibility(View.GONE);
+                Log.d("BerandaActivity", "Hidden icbookproyek");
+            }
+
+            // Sembunyikan card input proyek, hunian, kavling
+            if (cardInputProyek != null) {
+                cardInputProyek.setVisibility(View.GONE);
+                Log.d("BerandaActivity", "Hidden cardInputProyek");
+            }
+
+            if (cardInputHunian != null) {
+                cardInputHunian.setVisibility(View.GONE);
+                Log.d("BerandaActivity", "Hidden cardInputHunian");
+            }
+
+            if (cardInputKavling != null) {
+                cardInputKavling.setVisibility(View.GONE);
+                Log.d("BerandaActivity", "Hidden cardInputKavling");
+            }
+
             // Sembunyikan menu admin di navigation drawer
             hideAdminNavigationMenus();
 
         } else {
             // Untuk Admin atau level lainnya, tampilkan semua menu
-            Log.d("BerandaActivity", "Showing all features for Admin/Other level");
+            Log.d("BerandaActivity", "Showing all features for Admin/Other level: " + userLevel);
 
             // Tampilkan button tambah promo
             if (cardInputPromoM != null) {
                 cardInputPromoM.setVisibility(View.VISIBLE);
                 Log.d("BerandaActivity", "Shown cardInputPromoM");
-            }
-
-            // tvMenuData (Menu Input Data) TETAP TAMPIL untuk semua level
-            if (tvMenuData != null) {
-                tvMenuData.setVisibility(View.VISIBLE);
-                Log.d("BerandaActivity", "Shown tvMenuData");
             }
 
             // Tampilkan menu pengelolaan akun
@@ -210,6 +365,40 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
                 Log.d("BerandaActivity", "Shown cardStatusAkun");
             }
 
+            // Tampilkan icon book akun
+            if (icbookakun != null) {
+                icbookakun.setVisibility(View.VISIBLE);
+                Log.d("BerandaActivity", "Shown icbookakun");
+            }
+
+            // Tampilkan menu pengelolaan proyek (admin only)
+            if (tvMenuData != null) {
+                tvMenuData.setVisibility(View.VISIBLE);
+                Log.d("BerandaActivity", "Shown tvMenuData (Menu Pengelolaan Proyek)");
+            }
+
+            // Tampilkan icon book proyek
+            if (icbookproyek != null) {
+                icbookproyek.setVisibility(View.VISIBLE);
+                Log.d("BerandaActivity", "Shown icbookproyek");
+            }
+
+            // Tampilkan card input proyek, hunian, kavling
+            if (cardInputProyek != null) {
+                cardInputProyek.setVisibility(View.VISIBLE);
+                Log.d("BerandaActivity", "Shown cardInputProyek");
+            }
+
+            if (cardInputHunian != null) {
+                cardInputHunian.setVisibility(View.VISIBLE);
+                Log.d("BerandaActivity", "Shown cardInputHunian");
+            }
+
+            if (cardInputKavling != null) {
+                cardInputKavling.setVisibility(View.VISIBLE);
+                Log.d("BerandaActivity", "Shown cardInputKavling");
+            }
+
             // Tampilkan menu admin di navigation drawer
             showAdminNavigationMenus();
         }
@@ -225,9 +414,25 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
             Log.d("BerandaActivity", "tvPromo remains visible for all levels");
         }
 
+        if (tvMenuData2 != null) {
+            tvMenuData2.setVisibility(View.VISIBLE); // Menu Input Data tetap tampil untuk semua level
+            Log.d("BerandaActivity", "tvMenuData2 remains visible for all levels");
+        }
+
         if (recyclerPromo != null) {
             recyclerPromo.setVisibility(View.VISIBLE);
             Log.d("BerandaActivity", "RecyclerView is visible for all levels");
+        }
+
+        // Card Prospek dan Booking tetap tampil untuk semua level
+        if (cardProspekM != null) {
+            cardProspekM.setVisibility(View.VISIBLE);
+            Log.d("BerandaActivity", "cardProspekM remains visible for all levels");
+        }
+
+        if (cardUserpM != null) {
+            cardUserpM.setVisibility(View.VISIBLE);
+            Log.d("BerandaActivity", "cardUserpM remains visible for all levels");
         }
     }
 
@@ -240,7 +445,7 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
             hideMenuByTitle("Kelola Akun");
             hideMenuByTitle("Manage Accounts");
 
-            Log.d("NavigationMenu", "Admin menus hidden for Operator");
+            Log.d("NavigationMenu", "Admin menus hidden for " + userLevel);
         }
     }
 
@@ -253,7 +458,7 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
             showMenuByTitle("Kelola Akun");
             showMenuByTitle("Manage Accounts");
 
-            Log.d("NavigationMenu", "Admin menus shown for Admin");
+            Log.d("NavigationMenu", "Admin menus shown for " + userLevel);
         }
     }
 
@@ -421,14 +626,15 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
             startActivity(intentProyek);
         });
 
+        // INTENT UNTUK TAMBAH USERP ACTIVITY - SUDAH ADA
         cardUserpM.setOnClickListener(v -> {
             Intent intentUserp = new Intent(NewBeranda.this, TambahUserpActivity.class);
             startActivity(intentUserp);
         });
 
         cardInputPromoM.setOnClickListener(v -> {
-            // Cek level user untuk akses input promo
-            if ("Operator".equals(userLevel)) {
+            // Cek level user untuk akses input promo - Operator, Operator Inhouse, dan Operator Freelance tidak bisa akses
+            if ("Operator".equals(userLevel) || "Operator Inhouse".equals(userLevel) || "Operator Freelance".equals(userLevel)) {
                 Toast.makeText(this, "Hanya Admin yang dapat menambah promo", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -439,7 +645,8 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         // TAMBAHKAN CLICK LISTENER UNTUK MENU ADMIN - DENGAN INTENT YANG BENAR
         if (cardInputNIP != null) {
             cardInputNIP.setOnClickListener(v -> {
-                if ("Operator".equals(userLevel)) {
+                // Operator, Operator Inhouse, dan Operator Freelance tidak bisa akses
+                if ("Operator".equals(userLevel) || "Operator Inhouse".equals(userLevel) || "Operator Freelance".equals(userLevel)) {
                     Toast.makeText(this, "Hanya Admin yang dapat mengakses Input NIP", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -457,7 +664,8 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
 
         if (cardStatusAkun != null) {
             cardStatusAkun.setOnClickListener(v -> {
-                if ("Operator".equals(userLevel)) {
+                // Operator, Operator Inhouse, dan Operator Freelance tidak bisa akses
+                if ("Operator".equals(userLevel) || "Operator Inhouse".equals(userLevel) || "Operator Freelance".equals(userLevel)) {
                     Toast.makeText(this, "Hanya Admin yang dapat mengakses Aktivasi Akun", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -469,6 +677,64 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
                 } catch (Exception e) {
                     Log.e("BerandaActivity", "Error opening StatusAkunActivity: " + e.getMessage());
                     Toast.makeText(NewBeranda.this, "Gagal membuka Aktivasi Akun", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        // TAMBAHKAN CLICK LISTENER UNTUK CARD INPUT PROYEK, HUNIAN, KAVLING
+        if (cardInputProyek != null) {
+            cardInputProyek.setOnClickListener(v -> {
+                // Operator, Operator Inhouse, dan Operator Freelance tidak bisa akses
+                if ("Operator".equals(userLevel) || "Operator Inhouse".equals(userLevel) || "Operator Freelance".equals(userLevel)) {
+                    Toast.makeText(this, "Hanya Admin yang dapat mengakses Input Proyek", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                // Intent ke InputProyekActivity
+                try {
+                    Intent intent = new Intent(NewBeranda.this, InputDataProyekActivity.class);
+                    startActivity(intent);
+                    Log.d("BerandaActivity", "Opening InputProyekActivity");
+                } catch (Exception e) {
+                    Log.e("BerandaActivity", "Error opening InputProyekActivity: " + e.getMessage());
+                    Toast.makeText(NewBeranda.this, "Gagal membuka Input Proyek", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        if (cardInputHunian != null) {
+            cardInputHunian.setOnClickListener(v -> {
+                // PERBAIKAN: Tambahkan pengecekan level user
+                if ("Operator".equals(userLevel) || "Operator Inhouse".equals(userLevel) || "Operator Freelance".equals(userLevel)) {
+                    Toast.makeText(this, "Hanya Admin yang dapat mengakses Input Hunian", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                // Intent ke InputHunianActivity
+                try {
+                    Intent intent = new Intent(NewBeranda.this, InputHunianActivity.class);
+                    startActivity(intent);
+                    Log.d("BerandaActivity", "Opening InputHunianActivity");
+                } catch (Exception e) {
+                    Log.e("BerandaActivity", "Error opening InputHunianActivity: " + e.getMessage());
+                    Toast.makeText(NewBeranda.this, "Gagal membuka Input Hunian: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
+        if (cardInputKavling != null) {
+            cardInputKavling.setOnClickListener(v -> {
+                // Operator, Operator Inhouse, dan Operator Freelance tidak bisa akses
+                if ("Operator".equals(userLevel) || "Operator Inhouse".equals(userLevel) || "Operator Freelance".equals(userLevel)) {
+                    Toast.makeText(this, "Hanya Admin yang dapat mengakses Input Kavling", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                // Intent ke InputKavlingActivity
+                try {
+                    Intent intent = new Intent(NewBeranda.this, InputKavlingActivity.class);
+                    startActivity(intent);
+                    Log.d("BerandaActivity", "Opening InputKavlingActivity");
+                } catch (Exception e) {
+                    Log.e("BerandaActivity", "Error opening InputKavlingActivity: " + e.getMessage());
+                    Toast.makeText(NewBeranda.this, "Gagal membuka Input Kavling", Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -505,8 +771,8 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
             } else if (title.equalsIgnoreCase("Input NIP") ||
                     title.equalsIgnoreCase("Aktivasi Akun") ||
                     title.contains("Pengelolaan Akun")) {
-                // Menu admin - cek level user
-                if ("Operator".equals(userLevel)) {
+                // Menu admin - cek level user (Operator, Operator Inhouse, dan Operator Freelance tidak bisa akses)
+                if ("Operator".equals(userLevel) || "Operator Inhouse".equals(userLevel) || "Operator Freelance".equals(userLevel)) {
                     Toast.makeText(this, "Hanya Admin yang dapat mengakses menu ini", Toast.LENGTH_SHORT).show();
                     return false;
                 }
@@ -543,6 +809,11 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
                 startActivity(intent);
             } else if (menuTitle.equalsIgnoreCase("Aktivasi Akun")) {
                 Intent intent = new Intent(this, StatusAkunActivity.class);
+                startActivity(intent);
+            } else if (menuTitle.equalsIgnoreCase("Tambah User Prospek") ||
+                    menuTitle.contains("User Prospek")) {
+                // TAMBAHAN: Intent untuk TambahUserpActivity dari navigation drawer
+                Intent intent = new Intent(this, TambahUserpActivity.class);
                 startActivity(intent);
             } else {
                 Toast.makeText(this, "Membuka: " + menuTitle, Toast.LENGTH_SHORT).show();

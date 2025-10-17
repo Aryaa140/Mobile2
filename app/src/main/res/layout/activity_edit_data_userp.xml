@@ -46,6 +46,8 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
+
+
                 <EditText
                     android:id="@+id/editTextPenginput"
                     android:layout_width="match_parent"
@@ -57,12 +59,11 @@
                     android:background="@android:drawable/edit_text"
                     android:drawableStart="@drawable/ic_pin_person"
                     android:drawablePadding="8dp"
-                    android:hint="Nama Penginput"
-                    android:padding="12dp"
-                    android:inputType="textPersonName"/>
+                    android:hint="Masukkan Nama Penginput Prospek"
+                    android:padding="12dp" />
 
                 <EditText
-                    android:id="@+id/editTextNamaProspek"
+                    android:id="@+id/editTextNama"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="15dp"
@@ -72,7 +73,7 @@
                     android:background="@android:drawable/edit_text"
                     android:drawableStart="@drawable/ic_username"
                     android:drawablePadding="8dp"
-                    android:hint="Nama User Prospek"
+                    android:hint="Masukkan Nama Lengkap"
                     android:padding="12dp"
                     android:inputType="textPersonName"/>
 
@@ -87,7 +88,7 @@
                     android:background="@android:drawable/edit_text"
                     android:drawableStart="@drawable/ic_request"
                     android:drawablePadding="8dp"
-                    android:hint="Alamat Email"
+                    android:hint="Masukkan Alamat Email"
                     android:padding="12dp"
                     android:inputType="textEmailAddress"/>
 
@@ -102,7 +103,7 @@
                     android:background="@android:drawable/edit_text"
                     android:drawableStart="@drawable/ic_phonec"
                     android:drawablePadding="8dp"
-                    android:hint="Nomor Handphone"
+                    android:hint="Masukkan No. Handphone"
                     android:padding="12dp"
                     android:inputType="phone"/>
 
@@ -117,20 +118,100 @@
                     android:background="@android:drawable/edit_text"
                     android:drawableStart="@drawable/ic_home"
                     android:drawablePadding="8dp"
-                    android:hint="Alamat Rumah"
+                    android:hint="Masukkan Alamat Rumah"
                     android:padding="12dp"/>
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:text="Status NPWP"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="4dp"/>
+
+                <Spinner
+                    android:id="@+id/spinnerNPWP"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:entries="@array/opsi_spinnerNPWP"
+                    android:layout_marginBottom="12dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:text="Status BPJS"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="4dp"/>
+
+                <Spinner
+                    android:id="@+id/spinnerBPJS"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:layout_marginBottom="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:entries="@array/opsi_spinnerBPJS"/>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
                     android:layout_marginLeft="16dp"
-                    android:text="Pilih Referensi Proyek"
+                    android:text="Pilih Proyek"
                     android:textColor="@android:color/black"
                     android:textSize="15sp" />
 
                 <Spinner
-                    android:id="@+id/spinnerRoleRefrensiProyek"
+                    android:id="@+id/spinnerProyek"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:textColor="@android:color/black"
+                    android:background="@android:drawable/edit_text"
+                    android:drawablePadding="8dp" />
+                <!-- Spinner Hunian -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="16dp"
+                    android:text="Pilih Hunian"
+                    android:textColor="@android:color/black"
+                    android:textSize="15sp" />
+
+                <Spinner
+                    android:id="@+id/hunian"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:textColor="@android:color/black"
+                    android:background="@android:drawable/edit_text"
+                    android:drawablePadding="8dp" />
+
+                <!-- Spinner Tipe Unit Hunian (BARU) -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="16dp"
+                    android:text="Pilih Tipe Unit Hunian"
+                    android:textColor="@android:color/black"
+                    android:textSize="15sp" />
+
+                <Spinner
+                    android:id="@+id/spinnerTipeUnit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="15dp"
@@ -147,12 +228,12 @@
                     android:layout_marginBottom="15dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
+                    android:textColor="@android:color/black"
                     android:background="@android:drawable/edit_text"
                     android:drawableStart="@drawable/ic_money"
                     android:drawablePadding="8dp"
-                    android:hint="Jumlah Uang Tanda Jadi"
-                    android:padding="12dp"
-                    android:inputType="numberDecimal"/>
+                    android:hint="Masukkan Jumlah Uang Tanda Jadi"
+                    android:padding="12dp"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"

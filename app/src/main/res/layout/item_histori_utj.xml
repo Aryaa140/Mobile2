@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    android:backgroundTint="@android:color/white"
+    android:background="@android:color/white"
+    app:cardBackgroundColor="@android:color/white"
     app:cardCornerRadius="12dp"
     app:cardElevation="4dp">
 
@@ -12,8 +13,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:background="@android:color/white">
 
+        <!-- SISANYA TETAP SAMA TANPA DIUBAH -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -44,6 +47,7 @@
 
         </LinearLayout>
 
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -68,6 +72,9 @@
                     android:ellipsize="end"
                     android:singleLine="true" />
 
+
+
+                <!-- ========== KODE YANG SUDAH ADA TETAP ========== -->
                 <TextView
                     android:id="@+id/tvStatusNPWP"
                     android:layout_width="wrap_content"
@@ -107,8 +114,16 @@
                     android:textSize="14sp"
                     android:ellipsize="end"
                     android:singleLine="true" />
-
-                <!-- TAMBAHAN: Hunian -->
+                <!-- ========== TAMBAHAN: TEXTVIEW PROYEK BARU ========== -->
+                <TextView
+                    android:id="@+id/tvProyek"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Proyek: -"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="14sp"
+                    android:ellipsize="end"
+                    android:singleLine="true" />
                 <TextView
                     android:id="@+id/tvHunian"
                     android:layout_width="wrap_content"
@@ -119,7 +134,6 @@
                     android:ellipsize="end"
                     android:singleLine="true" />
 
-                <!-- TAMBAHAN: Tipe Hunian -->
                 <TextView
                     android:id="@+id/tvTipeHunian"
                     android:layout_width="wrap_content"

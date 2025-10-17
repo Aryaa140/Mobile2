@@ -20,16 +20,9 @@ import androidx.core.view.WindowInsetsCompat;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
-import android.widget.AdapterView;
-import android.view.View;
+
 public class SignUpActivity extends AppCompatActivity {
     private EditText editTextUsername, editTextNoNip, editTextPassword, editTextPassword2;
     private Spinner spinnerDivision;
@@ -61,8 +54,11 @@ public class SignUpActivity extends AppCompatActivity {
         buttonBuatAkun = findViewById(R.id.btnBuatAkun);
         buttonKembali = findViewById(R.id.btnKembali);
 
-        // Setup spinner dengan divisi dari database helper
+        // Setup spinner dengan divisi Marketing
         setupDivisionSpinner();
+
+        // Pastikan EditText NIP bisa diketik
+        setupEditTextNip();
 
         // Menangani klik tombol buat akun
         buttonBuatAkun.setOnClickListener(new View.OnClickListener() {
@@ -93,18 +89,13 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
-    // Method untuk setup spinner dengan divisi
+    // Method untuk setup spinner dengan divisi Marketing
     private void setupDivisionSpinner() {
-        // Ambil divisi dari database helper (yang mengembalikan String[])
-        String[] divisionsArray = databaseHelper.getAllDivisions();
-
-        // Convert array ke List
-        List<String> divisionsList = Arrays.asList(divisionsArray);
-
-        // Buat List dengan tambahan "Pilih Divisi" di awal
+        // Buat List dengan opsi Marketing
         List<String> spinnerItems = new ArrayList<>();
         spinnerItems.add("Pilih Divisi");
-        spinnerItems.addAll(divisionsList);
+        spinnerItems.add("Marketing Inhouse");
+        spinnerItems.add("Marketing Freelance");
 
         // Create an ArrayAdapter menggunakan List<String>
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
@@ -122,16 +113,49 @@ public class SignUpActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position > 0) {
                     selectedDivision = parent.getItemAtPosition(position).toString();
+                    // Update hint berdasarkan divisi yang dipilih
+                    updateNipHint();
                 } else {
                     selectedDivision = "";
+                    editTextNoNip.setHint("Masukkan No. NIP");
                 }
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
                 selectedDivision = "";
+                editTextNoNip.setHint("Masukkan No. NIP");
             }
         });
+    }
+
+    // Method untuk setup EditText NIP agar bisa diketik
+    private void setupEditTextNip() {
+        // Pastikan EditText NIP enabled dan focusable
+        editTextNoNip.setEnabled(true);
+        editTextNoNip.setFocusable(true);
+        editTextNoNip.setFocusableInTouchMode(true);
+        editTextNoNip.setClickable(true);
+
+        // Set hint default
+        editTextNoNip.setHint("Masukkan No. NIP");
+
+        // Hapus semua text filter atau input type yang mungkin memblokir input
+        editTextNoNip.setInputType(android.text.InputType.TYPE_CLASS_TEXT);
+
+        // Clear any existing text
+        editTextNoNip.setText("");
+    }
+
+    // Method untuk update hint NIP berdasarkan divisi
+    private void updateNipHint() {
+        if (selectedDivision.equals("Marketing Inhouse")) {
+            editTextNoNip.setHint("Contoh: MI4123 (harus diawali MI)");
+        } else if (selectedDivision.equals("Marketing Freelance")) {
+            editTextNoNip.setHint("Contoh: MF4123 (harus diawali MF)");
+        } else {
+            editTextNoNip.setHint("Masukkan No. NIP");
+        }
     }
 
     // Method untuk validasi input
@@ -193,8 +217,15 @@ public class SignUpActivity extends AppCompatActivity {
                     CheckNIPResponse checkResponse = response.body();
 
                     if (checkResponse.isExists()) {
-                        // NIP valid, lanjutkan registrasi
-                        registerUserToMySQL(username, nip, division, password);
+                        // NIP valid, cek kecocokan divisi dengan kode NIP
+                        if (validateDivisionWithNIP(division, nip)) {
+                            // Kecocokan valid, lanjutkan registrasi
+                            registerUserToMySQL(username, nip, division, password);
+                        } else {
+                            showLoading(false);
+                            Toast.makeText(SignUpActivity.this,
+                                    "Divisi tidak sesuai dengan kode NIP", Toast.LENGTH_LONG).show();
+                        }
                     } else {
                         showLoading(false);
                         Toast.makeText(SignUpActivity.this, "NIP tidak terdaftar dalam sistem", Toast.LENGTH_SHORT).show();
@@ -213,9 +244,28 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
+    // METHOD BARU: Validasi kecocokan divisi dengan kode NIP
+    private boolean validateDivisionWithNIP(String division, String nip) {
+        // Ambil 2 karakter pertama dari NIP (kode divisi)
+        String nipCode = nip.length() >= 2 ? nip.substring(0, 2).toUpperCase() : "";
+
+        // Validasi berdasarkan divisi yang dipilih
+        if (division.equals("Marketing Inhouse")) {
+            // Untuk Marketing Inhouse, kode NIP harus "MI"
+            return nipCode.equals("MI");
+        } else if (division.equals("Marketing Freelance")) {
+            // Untuk Marketing Freelance, kode NIP harus "MF"
+            return nipCode.equals("MF");
+        }
+
+        return false;
+    }
+
     // METHOD UNTUK REGISTRASI KE MYSQL MELALUI API PHP
     private void registerUserToMySQL(String username, String nip, String division, String password) {
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+
+        // Gunakan method yang sudah ada di ApiService (4 parameter)
         Call<RegisterResponse> call = apiService.registerUser(username, nip, division, password);
 
         call.enqueue(new Callback<RegisterResponse>() {
@@ -253,10 +303,26 @@ public class SignUpActivity extends AppCompatActivity {
 
     // Method untuk menampilkan/menyembunyikan loading
     private void showLoading(boolean isLoading) {
-        // Implementasi progress dialog atau progress bar
         if (isLoading) {
-            // Tampilkan loading
-            Toast.makeText(this, "Memproses...", Toast.LENGTH_SHORT).show();
+            // Tampilkan loading dan disable sementara
+            buttonBuatAkun.setText("Memproses...");
+            buttonBuatAkun.setEnabled(false);
+            buttonKembali.setEnabled(false);
+            spinnerDivision.setEnabled(false);
+            editTextUsername.setEnabled(false);
+            editTextNoNip.setEnabled(false);
+            editTextPassword.setEnabled(false);
+            editTextPassword2.setEnabled(false);
+        } else {
+            // Enable kembali semua input
+            buttonBuatAkun.setText("Buat Akun");
+            buttonBuatAkun.setEnabled(true);
+            buttonKembali.setEnabled(true);
+            spinnerDivision.setEnabled(true);
+            editTextUsername.setEnabled(true);
+            editTextNoNip.setEnabled(true);
+            editTextPassword.setEnabled(true);
+            editTextPassword2.setEnabled(true);
         }
     }
 }
