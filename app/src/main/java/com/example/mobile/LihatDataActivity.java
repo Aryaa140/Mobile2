@@ -24,7 +24,7 @@ import java.util.Locale;
 public class LihatDataActivity extends AppCompatActivity {
 
     MaterialToolbar TopAppBar;
-    MaterialCardView cardProspek, cardBooking;
+    MaterialCardView cardProspek, cardBooking, cardProyek, cardHunian, cardKavling;
     BottomNavigationView bottomNavigationView;
     private SharedPreferences sharedPreferences;
     @Override
@@ -38,7 +38,9 @@ public class LihatDataActivity extends AppCompatActivity {
 
         cardProspek = findViewById(R.id.cardProspek);
         cardBooking = findViewById(R.id.cardBooking);
-
+        cardProyek = findViewById(R.id.cardProyek);
+        cardHunian = findViewById(R.id.cardHunian);
+        cardKavling = findViewById(R.id.cardKavling);
 
         TopAppBar.setNavigationOnClickListener(v -> {
             Intent intent = new Intent(LihatDataActivity.this, NewBeranda.class);
@@ -53,6 +55,21 @@ public class LihatDataActivity extends AppCompatActivity {
 
         cardBooking.setOnClickListener(v -> {
             Intent intent = new Intent(LihatDataActivity.this, LihatDataUserpActivity.class);
+            startActivity(intent);
+        });
+
+        cardProyek.setOnClickListener(v -> {
+            Intent intent = new Intent(LihatDataActivity.this, LihatDataProyekActivity.class);
+            startActivity(intent);
+        });
+
+        cardHunian.setOnClickListener(v -> {
+            Intent intent = new Intent(LihatDataActivity.this, LihatDataHunianActivity.class);
+            startActivity(intent);
+        });
+
+        cardKavling.setOnClickListener(v -> {
+            Intent intent = new Intent(LihatDataActivity.this, LihatDataKavlingActivity.class);
             startActivity(intent);
         });
 

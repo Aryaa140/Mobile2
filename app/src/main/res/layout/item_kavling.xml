@@ -28,10 +28,10 @@
                 android:paddingEnd="12dp">
 
                 <TextView
-                    android:id="@+id/tvNamaProyek"
+                    android:id="@+id/tvNamaTipeHunian"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Nama Proyek : -"
+                    android:text="Nama Tipe Hunian : -"
                     android:textStyle="bold"
                     android:textColor="@android:color/black"
                     android:textSize="16sp"
@@ -39,24 +39,46 @@
                     android:singleLine="true" />
 
                 <TextView
-                    android:id="@+id/tvJumlahHunian"
+                    android:id="@+id/tvRefrensiProyek"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Jumlahh Hunian : -"
+                    android:text="Refrensi Proyek : -"
                     android:textColor="@android:color/darker_gray"
                     android:textSize="14sp"
                     android:ellipsize="end"
                     android:maxLines="2" />
 
                 <TextView
-                    android:id="@+id/tvStatusStok"
+                    android:id="@+id/tvJumlahTipeHunian"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Status Stok Proyek : -"
+                    android:text="Nama Hunian : -"
                     android:textColor="@android:color/darker_gray"
                     android:textSize="14sp"
                     android:ellipsize="end"
                     android:singleLine="true" />
+
+                <TextView
+                    android:id="@+id/tvStatusPenjualan"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Status Penjualan : -"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="14sp"
+                    android:ellipsize="end"
+                    android:singleLine="true" />
+
+
+                <TextView
+                    android:id="@+id/tvStatusStok"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Jumlah Stok Hunian : -"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="14sp"
+                    android:ellipsize="end"
+                    android:singleLine="true" />
+
 
             </LinearLayout>
 
