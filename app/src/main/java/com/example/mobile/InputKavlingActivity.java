@@ -101,6 +101,9 @@ public class InputKavlingActivity extends AppCompatActivity {
                 startActivity(new Intent(this, LihatDataActivity.class));
                 finish();
                 return true;
+            } else if (id == R.id.nav_news) {
+                startActivity(new Intent(this, NewsActivity.class));
+                return true;
             } else if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
                 finish();

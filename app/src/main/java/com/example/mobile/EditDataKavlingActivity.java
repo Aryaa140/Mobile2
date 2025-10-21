@@ -1,3 +1,4 @@
+
 package com.example.mobile;
 
 import android.content.Intent;
@@ -13,7 +14,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class EditDataProyekActivity extends AppCompatActivity {
+public class EditDataKavlingActivity extends AppCompatActivity {
     private Button btnUbah, btnBatal;
     private MaterialToolbar topAppBar;
     private BottomNavigationView bottomNavigationView;
@@ -21,9 +22,9 @@ public class EditDataProyekActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_edit_data_proyek);
+        setContentView(R.layout.activity_edit_data_kavling);
 
-        initViews();
+        initializeViews();
         setupNavigation();
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -33,15 +34,16 @@ public class EditDataProyekActivity extends AppCompatActivity {
         });
     }
 
-    private void initViews() {
+    private void initializeViews() {
         btnUbah = findViewById(R.id.btnUbah);
         btnBatal = findViewById(R.id.btnBatal);
         topAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
     }
 
+    // TAMBAHKAN METHOD SETUP NAVIGASI
     private void setupNavigation() {
-        // Navigasi toolbar
+        // Navigasi toolbar - back button
         topAppBar.setNavigationOnClickListener(v -> {
             navigateToHome();
         });
@@ -59,7 +61,7 @@ public class EditDataProyekActivity extends AppCompatActivity {
                 startActivity(new Intent(this, LihatDataActivity.class));
                 finish();
                 return true;
-            }  else if (id == R.id.nav_news) {
+            } else if (id == R.id.nav_news) {
                 startActivity(new Intent(this, NewsActivity.class));
                 return true;
             } else if (id == R.id.nav_profile) {
@@ -72,9 +74,10 @@ public class EditDataProyekActivity extends AppCompatActivity {
     }
 
     private void navigateToHome() {
-        Intent intent = new Intent(EditDataProyekActivity.this, LihatDataProyekActivity.class);
+        Intent intent = new Intent(EditDataKavlingActivity.this, LihatDataKavlingActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         finish();
     }
+
 }

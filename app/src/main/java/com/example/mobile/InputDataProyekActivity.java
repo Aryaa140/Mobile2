@@ -29,7 +29,7 @@ public class InputDataProyekActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_input_proyek);
+        setContentView(R.layout.activity_input_data_proyek);
 
         // Inisialisasi API Service
         apiService = RetrofitClient.getClient().create(ApiService.class);

@@ -1,7 +1,9 @@
+
 package com.example.mobile;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
@@ -13,15 +15,16 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class EditDataProyekActivity extends AppCompatActivity {
+public class EditDataHunianActivity extends AppCompatActivity {
     private Button btnUbah, btnBatal;
     private MaterialToolbar topAppBar;
     private BottomNavigationView bottomNavigationView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_edit_data_proyek);
+        setContentView(R.layout.activity_edit_data_hunian);
 
         initViews();
         setupNavigation();
@@ -38,6 +41,7 @@ public class EditDataProyekActivity extends AppCompatActivity {
         btnBatal = findViewById(R.id.btnBatal);
         topAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+
     }
 
     private void setupNavigation() {
@@ -47,7 +51,7 @@ public class EditDataProyekActivity extends AppCompatActivity {
         });
 
         // Bottom navigation
-        bottomNavigationView.setSelectedItemId(R.id.nav_home);
+        bottomNavigationView.setSelectedItemId(R.id.nav_folder);
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
 
@@ -59,7 +63,7 @@ public class EditDataProyekActivity extends AppCompatActivity {
                 startActivity(new Intent(this, LihatDataActivity.class));
                 finish();
                 return true;
-            }  else if (id == R.id.nav_news) {
+            } else if (id == R.id.nav_news) {
                 startActivity(new Intent(this, NewsActivity.class));
                 return true;
             } else if (id == R.id.nav_profile) {
@@ -72,7 +76,7 @@ public class EditDataProyekActivity extends AppCompatActivity {
     }
 
     private void navigateToHome() {
-        Intent intent = new Intent(EditDataProyekActivity.this, LihatDataProyekActivity.class);
+        Intent intent = new Intent(EditDataHunianActivity.this, LihatDataHunianActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         finish();
