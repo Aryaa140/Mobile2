@@ -170,6 +170,19 @@
                     app:cornerRadius="8dp"
                     app:backgroundTint="@android:color/holo_blue_dark" />
 
+                <!-- TAMBAHAN: Button Cetak -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCetak"
+                    android:layout_width="96dp"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Cetak"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
+                    app:cornerRadius="8dp"
+                    />
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnHistori"
                     android:layout_width="wrap_content"

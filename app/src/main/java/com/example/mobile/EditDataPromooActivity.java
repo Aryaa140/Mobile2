@@ -41,7 +41,6 @@ public class EditDataPromooActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private static final String PREFS_NAME = "LoginPrefs";
     private static final String KEY_USERNAME = "username";
-
     private int promoId;
     private String currentImageBase64;
     private String originalImageBase64;

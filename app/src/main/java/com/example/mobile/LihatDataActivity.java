@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -27,11 +28,27 @@ public class LihatDataActivity extends AppCompatActivity {
     MaterialCardView cardProspek, cardBooking, cardProyek, cardHunian, cardKavling;
     BottomNavigationView bottomNavigationView;
     private SharedPreferences sharedPreferences;
+
+    // Variabel untuk menyimpan level user
+    private String userLevel = "";
+    private static final String PREFS_NAME = "LoginPrefs";
+    private static final String KEY_LEVEL = "level";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_lihat_data);
+
+        // Inisialisasi SharedPreferences
+        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+
+        // Ambil level user dari SharedPreferences
+        userLevel = sharedPreferences.getString(KEY_LEVEL, "");
+
+        Log.d("LihatDataActivity", "=== DEBUG USER DATA ===");
+        Log.d("LihatDataActivity", "User Level: " + userLevel);
+        Log.d("LihatDataActivity", "All keys in SharedPreferences: " + sharedPreferences.getAll().toString());
 
         TopAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
@@ -59,20 +76,37 @@ public class LihatDataActivity extends AppCompatActivity {
         });
 
         cardProyek.setOnClickListener(v -> {
+            // Cek level user untuk akses lihat data proyek
+            if (!"Admin".equals(userLevel)) {
+                Toast.makeText(this, "Hanya Admin yang dapat mengakses Data Proyek", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent intent = new Intent(LihatDataActivity.this, LihatDataProyekActivity.class);
             startActivity(intent);
         });
 
         cardHunian.setOnClickListener(v -> {
+            // Cek level user untuk akses lihat data hunian
+            if (!"Admin".equals(userLevel)) {
+                Toast.makeText(this, "Hanya Admin yang dapat mengakses Data Hunian", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent intent = new Intent(LihatDataActivity.this, LihatDataHunianActivity.class);
             startActivity(intent);
         });
 
         cardKavling.setOnClickListener(v -> {
+            // Cek level user untuk akses lihat data kavling
+            if (!"Admin".equals(userLevel)) {
+                Toast.makeText(this, "Hanya Admin yang dapat mengakses Data Kavling", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent intent = new Intent(LihatDataActivity.this, LihatDataKavlingActivity.class);
             startActivity(intent);
         });
 
+        // Setup visibility berdasarkan level user
+        setupAccessBasedOnLevel();
 
         bottomNavigationView.setSelectedItemId(R.id.nav_folder);
 
@@ -105,6 +139,67 @@ public class LihatDataActivity extends AppCompatActivity {
             return insets;
         });
     }
+
+    private void setupAccessBasedOnLevel() {
+        Log.d("LihatDataActivity", "=== SETUP ACCESS FOR LEVEL: " + userLevel + " ===");
+
+        // Jika user BUKAN Admin, sembunyikan menu proyek, hunian, dan kavling
+        if (!"Admin".equals(userLevel)) {
+            Log.d("LihatDataActivity", "Hiding admin features for level: " + userLevel);
+
+            // Sembunyikan card proyek
+            if (cardProyek != null) {
+                cardProyek.setVisibility(View.GONE);
+                Log.d("LihatDataActivity", "Hidden cardProyek");
+            }
+
+            // Sembunyikan card hunian
+            if (cardHunian != null) {
+                cardHunian.setVisibility(View.GONE);
+                Log.d("LihatDataActivity", "Hidden cardHunian");
+            }
+
+            // Sembunyikan card kavling
+            if (cardKavling != null) {
+                cardKavling.setVisibility(View.GONE);
+                Log.d("LihatDataActivity", "Hidden cardKavling");
+            }
+
+        } else {
+            // Untuk Admin, tampilkan semua menu
+            Log.d("LihatDataActivity", "Showing all features for Admin level: " + userLevel);
+
+            // Tampilkan card proyek
+            if (cardProyek != null) {
+                cardProyek.setVisibility(View.VISIBLE);
+                Log.d("LihatDataActivity", "Shown cardProyek");
+            }
+
+            // Tampilkan card hunian
+            if (cardHunian != null) {
+                cardHunian.setVisibility(View.VISIBLE);
+                Log.d("LihatDataActivity", "Shown cardHunian");
+            }
+
+            // Tampilkan card kavling
+            if (cardKavling != null) {
+                cardKavling.setVisibility(View.VISIBLE);
+                Log.d("LihatDataActivity", "Shown cardKavling");
+            }
+        }
+
+        // PASTIKAN SEMUA CARD LAIN TETAP TAMPIL UNTUK SEMUA LEVEL
+        if (cardProspek != null) {
+            cardProspek.setVisibility(View.VISIBLE);
+            Log.d("LihatDataActivity", "cardProspek remains visible for all levels");
+        }
+
+        if (cardBooking != null) {
+            cardBooking.setVisibility(View.VISIBLE);
+            Log.d("LihatDataActivity", "cardBooking remains visible for all levels");
+        }
+    }
+
     private void checkAccountExpiry() {
         String dateOutStr = sharedPreferences.getString("date_out", null);
 
@@ -119,8 +214,19 @@ public class LihatDataActivity extends AppCompatActivity {
                     MainActivity.logout(this);
                 }
             } catch (ParseException e) {
-                Log.e("NewBeranda", "Error parsing date_out: " + e.getMessage());
+                Log.e("LihatDataActivity", "Error parsing date_out: " + e.getMessage());
             }
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Refresh user level setiap resume
+        userLevel = sharedPreferences.getString(KEY_LEVEL, "");
+        setupAccessBasedOnLevel();
+
+        Log.d("LihatDataActivity", "onResume completed - Level: " + userLevel);
     }
 }

@@ -1,130 +1,124 @@
 package com.example.mobile;
 
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProyekAdapter extends RecyclerView.Adapter<ProyekAdapter.ProyekViewHolder> implements Filterable {
+public class ProyekAdapter extends RecyclerView.Adapter<ProyekAdapter.ProyekViewHolder> {
 
-    private Context context;
-    private List<DatabaseHelper.Proyek> proyekList;
-    private List<DatabaseHelper.Proyek> proyekListFiltered;
-    private DatabaseHelper databaseHelper;
+    private static final String TAG = "ProyekAdapter";
+    private List<ProyekWithInfo> proyekList;
+    private OnItemClickListener onItemClickListener;
 
-    public ProyekAdapter(Context context, List<DatabaseHelper.Proyek> proyekList) {
-        this.context = context;
-        this.proyekList = proyekList;
-        this.proyekListFiltered = proyekList;
-        this.databaseHelper = new DatabaseHelper(context);
+    // Interface untuk callback
+    public interface OnItemClickListener {
+        void onEditClick(ProyekWithInfo proyek);
+        void onDeleteClick(ProyekWithInfo proyek);
+    }
+
+    // Setter untuk listener
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.onItemClickListener = listener;
+    }
+
+    public ProyekAdapter(List<ProyekWithInfo> proyekList) {
+        this.proyekList = proyekList != null ? new ArrayList<>(proyekList) : new ArrayList<>();
+        Log.d(TAG, "Adapter created with " + this.proyekList.size() + " items");
     }
 
     @NonNull
     @Override
     public ProyekViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_proyek, parent, false);
-        return new ProyekViewHolder(view);
+        Log.d(TAG, "Creating view holder");
+        try {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_proyek, parent, false);
+            return new ProyekViewHolder(view);
+        } catch (Exception e) {
+            Log.e(TAG, "Error inflating layout: " + e.getMessage());
+            throw new RuntimeException("Could not inflate layout", e);
+        }
     }
 
     @Override
     public void onBindViewHolder(@NonNull ProyekViewHolder holder, int position) {
-        DatabaseHelper.Proyek proyek = proyekListFiltered.get(position);
+        if (position < proyekList.size()) {
+            ProyekWithInfo proyek = proyekList.get(position);
+            Log.d(TAG, "Binding position " + position + ": " + proyek.getNamaProyek());
 
-        holder.tvNamaProyek.setText("Nama Proyek: " + proyek.getNamaProyek());
-        holder.tvLokasiProyek.setText("Lokasi Proyek: " + proyek.getLokasiProyek());
-        holder.tvStatusProyek.setText("Status Proyek: " + proyek.getStatusProyek());
+            holder.tvNamaProyek.setText("Nama Proyek: " + proyek.getNamaProyek());
+            holder.tvJumlahHunian.setText("Jumlah Hunian: " + proyek.getJumlahHunian());
 
-        holder.btnEdit.setOnClickListener(v -> {
-            // Intent ke activity edit proyek
-            Intent intent = new Intent(context, EditDataProyekActivity.class);
-            intent.putExtra("PROYEK_ID", proyek.getProyekId());
-            context.startActivity(intent);
-        });
+            String statusStok = proyek.getJumlahStok() > 0 ?
+                    "Stok Tersedia (" + proyek.getJumlahStok() + " kavling)" : "Stok Habis";
+            holder.tvStatusStok.setText("Status Stok: " + statusStok);
 
-        holder.btnDelete.setOnClickListener(v -> {
-            // Tampilkan dialog konfirmasi hapus
-            new AlertDialog.Builder(context)
-                    .setTitle("Hapus Proyek")
-                    .setMessage("Apakah Anda yakin ingin menghapus proyek " + proyek.getNamaProyek() + "?")
-                    .setPositiveButton("Ya", (dialog, which) -> {
-                        int result = databaseHelper.deleteProyek(proyek.getProyekId());
-                        if (result > 0) {
-                            Toast.makeText(context, "Proyek berhasil dihapus", Toast.LENGTH_SHORT).show();
-                            // Refresh data
-                            proyekList.remove(proyek);
-                            proyekListFiltered.remove(proyek);
-                            notifyDataSetChanged();
-                        } else {
-                            Toast.makeText(context, "Gagal menghapus proyek", Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .setNegativeButton("Tidak", null)
-                    .show();
-        });
+            // TAMPILKAN tombol Edit dan Delete
+            holder.btnEdit.setVisibility(View.VISIBLE);
+            holder.btnDelete.setVisibility(View.VISIBLE);
+
+            // Setup click listener untuk tombol Edit dengan callback
+            holder.btnEdit.setOnClickListener(v -> {
+                Log.d(TAG, "Edit button clicked for: " + proyek.getNamaProyek());
+                if (onItemClickListener != null) {
+                    onItemClickListener.onEditClick(proyek);
+                }
+            });
+
+            // Setup click listener untuk tombol Delete dengan callback
+            holder.btnDelete.setOnClickListener(v -> {
+                Log.d(TAG, "Delete button clicked for: " + proyek.getNamaProyek());
+                if (onItemClickListener != null) {
+                    onItemClickListener.onDeleteClick(proyek);
+                }
+            });
+        }
     }
 
     @Override
     public int getItemCount() {
-        return proyekListFiltered.size();
+        int count = proyekList.size();
+        Log.d(TAG, "Item count: " + count);
+        return count;
     }
 
-    @Override
-    public Filter getFilter() {
-        return new Filter() {
-            @Override
-            protected FilterResults performFiltering(CharSequence constraint) {
-                String charString = constraint.toString();
-                if (charString.isEmpty()) {
-                    proyekListFiltered = proyekList;
-                } else {
-                    List<DatabaseHelper.Proyek> filteredList = new ArrayList<>();
-                    for (DatabaseHelper.Proyek row : proyekList) {
-                        if (row.getNamaProyek().toLowerCase().contains(charString.toLowerCase())) {
-                            filteredList.add(row);
-                        }
-                    }
-                    proyekListFiltered = filteredList;
-                }
-
-                FilterResults filterResults = new FilterResults();
-                filterResults.values = proyekListFiltered;
-                return filterResults;
-            }
-
-            @Override
-            protected void publishResults(CharSequence constraint, FilterResults results) {
-                proyekListFiltered = (ArrayList<DatabaseHelper.Proyek>) results.values;
-                notifyDataSetChanged();
-            }
-        };
+    public void updateData(List<ProyekWithInfo> newData) {
+        Log.d(TAG, "Updating data with " + (newData != null ? newData.size() : "null") + " items");
+        this.proyekList.clear();
+        if (newData != null) {
+            this.proyekList.addAll(newData);
+        }
+        Log.d(TAG, "Data updated, now has " + this.proyekList.size() + " items");
+        notifyDataSetChanged();
     }
 
     public static class ProyekViewHolder extends RecyclerView.ViewHolder {
-        TextView tvNamaProyek, tvLokasiProyek, tvStatusProyek;
-        MaterialButton btnEdit, btnDelete;
+        TextView tvNamaProyek, tvJumlahHunian, tvStatusStok;
+        com.google.android.material.button.MaterialButton btnEdit, btnDelete;
 
         public ProyekViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvNamaProyek = itemView.findViewById(R.id.tvNamaProyek);
-            tvLokasiProyek = itemView.findViewById(R.id.tvLokasiProyek);
-            tvStatusProyek = itemView.findViewById(R.id.tvStatusProyek);
-            btnEdit = itemView.findViewById(R.id.btnEdit);
-            btnDelete = itemView.findViewById(R.id.btnDelete);
+
+            // Find views dengan try-catch
+            try {
+                tvNamaProyek = itemView.findViewById(R.id.tvNamaProyek);
+                tvJumlahHunian = itemView.findViewById(R.id.tvJumlahHunian);
+                tvStatusStok = itemView.findViewById(R.id.tvStatusStok);
+                btnEdit = itemView.findViewById(R.id.btnEdit);
+                btnDelete = itemView.findViewById(R.id.btnDelete);
+
+                Log.d("ProyekViewHolder", "All views found successfully");
+            } catch (Exception e) {
+                Log.e("ProyekViewHolder", "Error finding views: " + e.getMessage());
+            }
         }
     }
 }

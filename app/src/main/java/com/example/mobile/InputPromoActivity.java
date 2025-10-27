@@ -27,6 +27,8 @@ import com.google.android.material.appbar.MaterialToolbar;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -36,7 +38,7 @@ public class InputPromoActivity extends AppCompatActivity {
 
     private static final int PICK_IMAGE_REQUEST = 1;
     private static final String TAG = "InputPromoActivity";
-    private static final int MAX_IMAGE_SIZE = 1024; // Max width/height untuk resize
+    private static final int MAX_IMAGE_SIZE = 1024;
 
     private MaterialToolbar topAppBar;
     private EditText editTextNamaPromo, editTextPenginput;
@@ -46,31 +48,24 @@ public class InputPromoActivity extends AppCompatActivity {
     private Uri imageUri;
     private String imageBase64;
 
+    // List untuk menyimpan data proyek dari API
+    private List<Proyek> proyekList = new ArrayList<>();
+    private ArrayAdapter<String> spinnerAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // PERBAIKAN: Set content view dulu sebelum init views
         setContentView(R.layout.activity_input_promo);
 
-        // PERBAIKAN: EdgeToEdge setelah setContentView
         EdgeToEdge.enable(this);
 
         // Inisialisasi SharedPreferences
         sharedPreferences = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
 
-        // Inisialisasi views dengan try-catch
-        try {
-            initViews();
-            setupToolbar();
-            setupForm();
-            setupButtons();
-        } catch (Exception e) {
-            Log.e(TAG, "Error during initialization: " + e.getMessage());
-            Toast.makeText(this, "Error inisialisasi: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            finish();
-            return;
-        }
+        initViews();
+        setupToolbar();
+        setupForm();
+        setupButtons();
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -82,103 +77,194 @@ public class InputPromoActivity extends AppCompatActivity {
     private void initViews() {
         try {
             topAppBar = findViewById(R.id.topAppBar);
-            if (topAppBar == null) {
-                throw new RuntimeException("topAppBar not found");
-            }
-
             editTextNamaPromo = findViewById(R.id.editTextNama);
-            if (editTextNamaPromo == null) {
-                throw new RuntimeException("editTextNama not found");
-            }
-
             editTextPenginput = findViewById(R.id.editTextProspek);
-            if (editTextPenginput == null) {
-                throw new RuntimeException("editTextProspek not found");
-            }
-
             spinnerReferensi = findViewById(R.id.spinnerRole);
-            if (spinnerReferensi == null) {
-                throw new RuntimeException("spinnerRole not found");
-            }
-
             btnPilihGambar = findViewById(R.id.btnInputPromo);
-            if (btnPilihGambar == null) {
-                throw new RuntimeException("btnInputPromo not found");
-            }
-
             btnSimpan = findViewById(R.id.btnSimpan);
-            if (btnSimpan == null) {
-                throw new RuntimeException("btnSimpan not found");
-            }
-
             btnBatal = findViewById(R.id.btnBatal);
-            if (btnBatal == null) {
-                throw new RuntimeException("btnBatal not found");
-            }
 
             Log.d(TAG, "All views initialized successfully");
 
         } catch (Exception e) {
             Log.e(TAG, "Error initializing views: " + e.getMessage());
-            throw e; // Re-throw untuk ditangkap di caller
+            Toast.makeText(this, "Error inisialisasi komponen", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void setupToolbar() {
-        topAppBar.setNavigationOnClickListener(v -> {
-            // PERBAIKAN: Tambahkan konfirmasi sebelum keluar
-            if (isDataChanged()) {
-                showUnsavedChangesDialog();
-            } else {
-                onBackPressed();
+        try {
+            if (topAppBar != null) {
+                topAppBar.setNavigationOnClickListener(v -> {
+                    if (isDataChanged()) {
+                        showUnsavedChangesDialog();
+                    } else {
+                        onBackPressed();
+                    }
+                });
             }
-        });
+        } catch (Exception e) {
+            Log.e(TAG, "Error setting up toolbar: " + e.getMessage());
+        }
     }
 
     private void setupForm() {
         try {
             // Auto-isi nama penginput dari SharedPreferences
             String username = sharedPreferences.getString("username", "");
-            editTextPenginput.setText(username);
-            editTextPenginput.setEnabled(false);
+            if (editTextPenginput != null) {
+                editTextPenginput.setText(username);
+                editTextPenginput.setEnabled(false);
+            }
 
-            // Load data referensi proyek
-            loadReferensiData();
+            // Setup spinner dengan data default terlebih dahulu
+            setupSpinnerWithDefaultData();
+
+            // Load data proyek dari API
+            loadProyekDataFromAPI();
+
         } catch (Exception e) {
             Log.e(TAG, "Error setting up form: " + e.getMessage());
-            Toast.makeText(this, "Error setup form", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void loadReferensiData() {
+    private void setupSpinnerWithDefaultData() {
         try {
+            // Setup adapter dengan data default
+            List<String> defaultOptions = new ArrayList<>();
+            defaultOptions.add("Pilih Referensi Proyek");
+
+            spinnerAdapter = new ArrayAdapter<>(
+                    this,
+                    android.R.layout.simple_spinner_item,
+                    defaultOptions
+            );
+            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+            if (spinnerReferensi != null) {
+                spinnerReferensi.setAdapter(spinnerAdapter);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error setting up default spinner: " + e.getMessage());
+        }
+    }
+
+    private void loadProyekDataFromAPI() {
+        try {
+            ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+            Call<ProyekResponse> call = apiService.getProyek();
+
+            call.enqueue(new Callback<ProyekResponse>() {
+                @Override
+                public void onResponse(Call<ProyekResponse> call, Response<ProyekResponse> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        ProyekResponse proyekResponse = response.body();
+                        if (proyekResponse.isSuccess()) {
+                            updateSpinnerWithProyekData(proyekResponse.getData());
+                        } else {
+                            handleProyekDataError("Gagal mengambil data proyek: " + proyekResponse.getMessage());
+                        }
+                    } else {
+                        handleProyekDataError("Error response dari server: " + response.code());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ProyekResponse> call, Throwable t) {
+                    handleProyekDataError("Koneksi gagal: " + t.getMessage());
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading proyek data from API: " + e.getMessage());
+            handleProyekDataError("Error sistem: " + e.getMessage());
+        }
+    }
+
+    private void updateSpinnerWithProyekData(List<Proyek> proyekData) {
+        try {
+            if (proyekData != null && !proyekData.isEmpty()) {
+                proyekList.clear();
+                proyekList.addAll(proyekData);
+
+                // Update spinner adapter dengan data proyek
+                List<String> proyekNames = new ArrayList<>();
+                proyekNames.add("Pilih Referensi Proyek");
+
+                for (Proyek proyek : proyekData) {
+                    proyekNames.add(proyek.getNamaProyek());
+                }
+
+                runOnUiThread(() -> {
+                    if (spinnerAdapter != null && spinnerReferensi != null) {
+                        spinnerAdapter.clear();
+                        spinnerAdapter.addAll(proyekNames);
+                        spinnerAdapter.notifyDataSetChanged();
+
+                        Log.d(TAG, "Spinner updated with " + proyekData.size() + " proyek items");
+                    }
+                });
+            } else {
+                handleProyekDataError("Tidak ada data proyek tersedia");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating spinner with proyek data: " + e.getMessage());
+            handleProyekDataError("Error memproses data proyek");
+        }
+    }
+
+    private void handleProyekDataError(String errorMessage) {
+        Log.e(TAG, "Proyek data error: " + errorMessage);
+        runOnUiThread(() -> {
+            // Tetap gunakan data default yang sudah ada
+            Toast.makeText(InputPromoActivity.this,
+                    errorMessage + ", menggunakan data default", Toast.LENGTH_LONG).show();
+
+            // Fallback ke data lokal jika API gagal
+            loadFallbackProyekData();
+        });
+    }
+
+    private void loadFallbackProyekData() {
+        try {
+            // Fallback ke data dari resource jika API gagal
             ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                     this,
                     R.array.opsi_spinnerRefrensiProyek,
                     android.R.layout.simple_spinner_item
             );
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinnerReferensi.setAdapter(adapter);
+
+            if (spinnerReferensi != null) {
+                spinnerReferensi.setAdapter(adapter);
+            }
+            Log.d(TAG, "Using fallback proyek data from resources");
         } catch (Exception e) {
-            Log.e(TAG, "Error loading spinner data: " + e.getMessage());
-            // Fallback: buat adapter dengan data default
-            String[] defaultData = {"Pilih Referensi Proyek", "Proyek A", "Proyek B", "Proyek C"};
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, defaultData);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinnerReferensi.setAdapter(adapter);
+            Log.e(TAG, "Error loading fallback proyek data: " + e.getMessage());
         }
     }
 
     private void setupButtons() {
-        btnPilihGambar.setOnClickListener(v -> pilihGambar());
-        btnSimpan.setOnClickListener(v -> simpanPromo());
-        btnBatal.setOnClickListener(v -> {
-            if (isDataChanged()) {
-                showUnsavedChangesDialog();
-            } else {
-                finish();
+        try {
+            if (btnPilihGambar != null) {
+                btnPilihGambar.setOnClickListener(v -> pilihGambar());
             }
-        });
+
+            if (btnSimpan != null) {
+                btnSimpan.setOnClickListener(v -> simpanPromo());
+            }
+
+            if (btnBatal != null) {
+                btnBatal.setOnClickListener(v -> {
+                    if (isDataChanged()) {
+                        showUnsavedChangesDialog();
+                    } else {
+                        finish();
+                    }
+                });
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error setting up buttons: " + e.getMessage());
+        }
     }
 
     private void pilihGambar() {
@@ -200,14 +286,18 @@ public class InputPromoActivity extends AppCompatActivity {
             imageUri = data.getData();
 
             try {
-                btnPilihGambar.setText("Gambar Terpilih");
+                if (btnPilihGambar != null) {
+                    btnPilihGambar.setText("Gambar Terpilih");
+                }
                 imageBase64 = convertImageToBase64(imageUri);
                 Toast.makeText(this, "Gambar berhasil dipilih", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "Gambar Base64 length: " + (imageBase64 != null ? imageBase64.length() : 0));
             } catch (Exception e) {
                 Log.e(TAG, "Error processing image: " + e.getMessage());
-                Toast.makeText(this, "Gagal memproses gambar: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                btnPilihGambar.setText("Pilih Gambar");
+                Toast.makeText(this, "Gagal memproses gambar", Toast.LENGTH_LONG).show();
+                if (btnPilihGambar != null) {
+                    btnPilihGambar.setText("Pilih Gambar");
+                }
                 imageBase64 = null;
             }
         }
@@ -221,16 +311,13 @@ public class InputPromoActivity extends AppCompatActivity {
                 throw new IOException("Cannot open input stream from URI");
             }
 
-            // Decode dengan options untuk mengurangi memory usage
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeStream(inputStream, null, options);
 
-            // Hitung sample size untuk resize
             options.inSampleSize = calculateInSampleSize(options, MAX_IMAGE_SIZE, MAX_IMAGE_SIZE);
             options.inJustDecodeBounds = false;
 
-            // Tutup stream dan buka lagi
             inputStream.close();
             inputStream = getContentResolver().openInputStream(uri);
 
@@ -239,17 +326,19 @@ public class InputPromoActivity extends AppCompatActivity {
                 throw new IOException("Failed to decode bitmap");
             }
 
-            // Compress image
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream); // Kurangi kualitas jadi 70%
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream);
 
             byte[] imageBytes = outputStream.toByteArray();
 
-            // Bersihkan memory
             bitmap.recycle();
+            outputStream.close();
 
             return Base64.encodeToString(imageBytes, Base64.DEFAULT);
 
+        } catch (Exception e) {
+            Log.e(TAG, "Error in convertImageToBase64: " + e.getMessage());
+            throw e;
         } finally {
             if (inputStream != null) {
                 try {
@@ -262,29 +351,38 @@ public class InputPromoActivity extends AppCompatActivity {
     }
 
     private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
+        try {
+            final int height = options.outHeight;
+            final int width = options.outWidth;
+            int inSampleSize = 1;
 
-        if (height > reqHeight || width > reqWidth) {
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
+            if (height > reqHeight || width > reqWidth) {
+                final int halfHeight = height / 2;
+                final int halfWidth = width / 2;
 
-            while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth) {
-                inSampleSize *= 2;
+                while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth) {
+                    inSampleSize *= 2;
+                }
             }
+            return inSampleSize;
+        } catch (Exception e) {
+            Log.e(TAG, "Error calculating inSampleSize: " + e.getMessage());
+            return 1;
         }
-        return inSampleSize;
     }
 
     private void simpanPromo() {
         try {
+            if (editTextNamaPromo == null || spinnerReferensi == null || btnSimpan == null) {
+                Toast.makeText(this, "Error: Komponen tidak terinisialisasi", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             String namaPromo = editTextNamaPromo.getText().toString().trim();
-            String namaPenginput = editTextPenginput.getText().toString().trim();
+            String namaPenginput = editTextPenginput != null ? editTextPenginput.getText().toString().trim() : "";
             String referensiProyek = spinnerReferensi.getSelectedItem() != null ?
                     spinnerReferensi.getSelectedItem().toString() : "";
 
-            // Validasi input
             if (namaPromo.isEmpty()) {
                 editTextNamaPromo.setError("Nama promo harus diisi");
                 editTextNamaPromo.requestFocus();
@@ -301,165 +399,171 @@ public class InputPromoActivity extends AppCompatActivity {
                 return;
             }
 
-            // Tampilkan loading
             btnSimpan.setEnabled(false);
             btnSimpan.setText("Menyimpan...");
 
-            // Panggil API
             callApiSimpanPromo(namaPromo, namaPenginput, referensiProyek, imageBase64);
 
         } catch (Exception e) {
             Log.e(TAG, "Error in simpanPromo: " + e.getMessage());
-            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Error saat menyimpan promo", Toast.LENGTH_LONG).show();
             resetButtonState();
         }
     }
 
     private void callApiSimpanPromo(String namaPromo, String namaPenginput, String referensiProyek, String imageBase64) {
-        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-        Call<BasicResponse> call = apiService.tambahPromo(
-                namaPromo,
-                namaPenginput,
-                referensiProyek,
-                imageBase64
-        );
-
-        call.enqueue(new Callback<BasicResponse>() {
-            @Override
-            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
-                resetButtonState();
-
-                if (response.isSuccessful() && response.body() != null) {
-                    BasicResponse basicResponse = response.body();
-                    if (basicResponse.isSuccess()) {
-                        // ✅ FIX: SIMPAN HISTORI DENGAN PROMO_ID YANG BENAR
-                        // Kita perlu tahu ID promo yang baru dibuat
-                        // Untuk sementara, kita akan reload data dari server
-
-                        SharedPreferences loginPrefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
-                        String username = loginPrefs.getString("username", "User");
-
-                        // Notifikasi
-                        String message = "Promo \"" + namaPromo + "\" telah ditambahkan oleh " + username;
-                        NotificationUtils.showInfoNotification(InputPromoActivity.this, "Promo Ditambahkan", message);
-
-                        // ✅ FIX: RELOAD DATA DARI SERVER UNTUK DAPATKAN PROMO_ID
-                        loadLatestPromoAndSaveHistori(namaPromo, username, imageBase64);
-
-                    } else {
-                        Toast.makeText(InputPromoActivity.this, "Gagal: " + basicResponse.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(InputPromoActivity.this, "Error dari server: " + response.code(), Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<BasicResponse> call, Throwable t) {
-                resetButtonState();
-                Toast.makeText(InputPromoActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    // ✅ METHOD BARU: LOAD PROMO TERBARU UNTUK DAPATKAN ID
-    // ✅ PERBAIKAN: FIX METHOD CALL
-    private void loadLatestPromoAndSaveHistori(String promoName, String username, String imageBase64) {
-        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-        Call<PromoResponse> call = apiService.getSemuaPromo();
-
-        call.enqueue(new Callback<PromoResponse>() {
-            @Override
-            public void onResponse(Call<PromoResponse> call, Response<PromoResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    PromoResponse promoResponse = response.body();
-                    if (promoResponse.isSuccess() && !promoResponse.getData().isEmpty()) {
-                        // Cari promo yang baru dibuat (berdasarkan nama)
-                        for (Promo promo : promoResponse.getData()) {
-                            if (promo.getNamaPromo().equals(promoName)) {
-                                // ✅ FIX: PANGGIL METHOD DENGAN PARAMETER YANG BENAR
-                                savePromoToHistori(
-                                        promo.getIdPromo(), // ✅ promoId
-                                        promoName,          // ✅ title
-                                        username,           // ✅ penginput
-                                        "Ditambahkan",      // ✅ status
-                                        imageBase64         // ✅ imageData
-                                );
-                                Log.d(TAG, "✅ Histori saved for promo ID: " + promo.getIdPromo());
-                                break;
-                            }
-                        }
-                        finish();
-                    } else {
-                        Log.e(TAG, "No promo data found");
-                        finish();
-                    }
-                } else {
-                    Log.e(TAG, "Failed to load promo data");
-                    finish();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<PromoResponse> call, Throwable t) {
-                Log.e(TAG, "Error loading promo data: " + t.getMessage());
-                finish(); // Tetap tutup activity meski gagal load
-            }
-        });
-    }
-         private void savePromoToHistori(int promoId, String title, String penginput, String status, String imageData) {
+        try {
             ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-            Call<BasicResponse> call = apiService.addPromoHistori(
-                    "add_promo_histori",
-                    promoId, // ✅ GUNAKAN promoId YANG BENAR, bukan -1
-                    title,
-                    penginput,
-                    status,
-                    imageData
+            Call<BasicResponse> call = apiService.tambahPromo(
+                    namaPromo,
+                    namaPenginput,
+                    referensiProyek,
+                    imageBase64
             );
 
             call.enqueue(new Callback<BasicResponse>() {
                 @Override
                 public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        Log.d(TAG, "Histori promo berhasil disimpan untuk promo ID: " + promoId);
-                    } else {
-                        Log.e(TAG, "Gagal menyimpan histori promo");
+                    resetButtonState();
+
+                    try {
+                        if (response.isSuccessful() && response.body() != null) {
+                            BasicResponse basicResponse = response.body();
+                            if (basicResponse.isSuccess()) {
+                                runOnUiThread(() -> {
+                                    Toast.makeText(InputPromoActivity.this, "Promo berhasil ditambahkan!", Toast.LENGTH_SHORT).show();
+                                });
+
+                                Log.d(TAG, "Promo berhasil disimpan: " + namaPromo);
+
+                                // ✅ Tampilkan local notification saja
+                                showLocalSuccessNotification(namaPromo, namaPenginput);
+
+                                // ✅ FCM NOTIFICATION AKAN DIKIRIM OTOMATIS OLEH PHP
+                                // TIDAK PERLU POLLING LAGI
+
+                                new android.os.Handler().postDelayed(() -> {
+                                    runOnUiThread(() -> {
+                                        if (!isFinishing() && !isDestroyed()) {
+                                            finish();
+                                        }
+                                    });
+                                }, 1500);
+
+                            } else {
+                                runOnUiThread(() -> {
+                                    Toast.makeText(InputPromoActivity.this, "Gagal: " + basicResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
+                            }
+                        } else {
+                            runOnUiThread(() -> {
+                                String errorMsg = "Error dari server: " + response.code();
+                                Toast.makeText(InputPromoActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                            });
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error in API response handling: " + e.getMessage());
+                        runOnUiThread(() -> {
+                            Toast.makeText(InputPromoActivity.this, "Error memproses response", Toast.LENGTH_SHORT).show();
+                        });
                     }
                 }
 
                 @Override
                 public void onFailure(Call<BasicResponse> call, Throwable t) {
-                    Log.e(TAG, "Error menyimpan histori promo: " + t.getMessage());
+                    resetButtonState();
+                    Log.e(TAG, "Network error: " + t.getMessage());
+                    runOnUiThread(() -> {
+                        Toast.makeText(InputPromoActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
                 }
             });
+        } catch (Exception e) {
+            resetButtonState();
+            Log.e(TAG, "Error calling API: " + e.getMessage());
+            runOnUiThread(() -> {
+                Toast.makeText(this, "Error sistem", Toast.LENGTH_SHORT).show();
+            });
         }
+    }
+
+    private void showLocalSuccessNotification(String promoName, String addedBy) {
+        try {
+            String title = "Promo Ditambahkan ✅";
+            String body = "Promo \"" + promoName + "\" berhasil ditambahkan";
+
+            if (this != null && !isFinishing() && !isDestroyed()) {
+                NotificationHelper.showPromoNotification(
+                        this,
+                        title,
+                        body,
+                        null
+                );
+                Log.d(TAG, "Local notification shown: " + body);
+            } else {
+                Log.w(TAG, "Activity not available for showing notification");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error showing local notification: " + e.getMessage());
+        }
+    }
 
     private void resetButtonState() {
-        btnSimpan.setEnabled(true);
-        btnSimpan.setText("Simpan");
+        try {
+            if (btnSimpan != null) {
+                btnSimpan.setEnabled(true);
+                btnSimpan.setText("Simpan");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error resetting button state: " + e.getMessage());
+        }
     }
 
     private boolean isDataChanged() {
-        String namaPromo = editTextNamaPromo.getText().toString().trim();
-        return !namaPromo.isEmpty() || (imageBase64 != null && !imageBase64.isEmpty());
+        try {
+            if (editTextNamaPromo != null) {
+                String namaPromo = editTextNamaPromo.getText().toString().trim();
+                return !namaPromo.isEmpty() || (imageBase64 != null && !imageBase64.isEmpty());
+            }
+            return imageBase64 != null && !imageBase64.isEmpty();
+        } catch (Exception e) {
+            Log.e(TAG, "Error checking data changes: " + e.getMessage());
+            return false;
+        }
     }
 
     private void showUnsavedChangesDialog() {
-        new androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("Perubahan Belum Disimpan")
-                .setMessage("Anda memiliki perubahan yang belum disimpan. Yakin ingin keluar?")
-                .setPositiveButton("Ya", (dialog, which) -> finish())
-                .setNegativeButton("Tidak", null)
-                .show();
+        try {
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("Perubahan Belum Disimpan")
+                    .setMessage("Anda memiliki perubahan yang belum disimpan. Yakin ingin keluar?")
+                    .setPositiveButton("Ya", (dialog, which) -> finish())
+                    .setNegativeButton("Tidak", null)
+                    .show();
+        } catch (Exception e) {
+            Log.e(TAG, "Error showing dialog: " + e.getMessage());
+            finish();
+        }
     }
 
     @Override
     public void onBackPressed() {
-        if (isDataChanged()) {
-            showUnsavedChangesDialog();
-        } else {
+        try {
+            if (isDataChanged()) {
+                showUnsavedChangesDialog();
+            } else {
+                super.onBackPressed();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error in onBackPressed: " + e.getMessage());
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        imageBase64 = null;
+        imageUri = null;
     }
 }

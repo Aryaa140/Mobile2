@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class RetrofitClient {
-    private static final String BASE_URL = "http://192.168.43.56/quality_mobile_api/";
+    private static final String BASE_URL = "http://192.168.2.107/quality_mobile_api/";
     private static final String ONE_SIGNAL_BASE_URL = "https://onesignal.com/api/v1/";
 
     private static Retrofit retrofit = null;

@@ -251,6 +251,56 @@ public interface ApiService {
             @Field("action") String action,
             @Field("id_userprospek") int idUserProspek
     );
-
+    @GET("get_proyek_with_info.php")
+    Call<ProyekWithInfoResponse> getProyekWithInfo();
+    @FormUrlEncoded
+    @POST("delete_proyek.php")
+    Call<BasicResponse> deleteProyek(
+            @Field("id_proyek") int idProyek,
+            @Field("nama_proyek") String namaProyek
+    );
+    @FormUrlEncoded
+    @POST("update_proyek.php")
+    Call<BasicResponse> updateProyek(
+            @Field("id_proyek") int idProyek,
+            @Field("old_nama_proyek") String oldNamaProyek,
+            @Field("new_nama_proyek") String newNamaProyek
+    );
+    @GET("get_hunian_with_info.php")
+    Call<HunianWithInfoResponse> getHunianWithInfo();
+    @FormUrlEncoded
+    @POST("delete_hunian.php")
+    Call<BasicResponse> deleteHunian(
+            @Field("id_hunian") int idHunian,
+            @Field("nama_hunian") String namaHunian,
+            @Field("nama_proyek") String namaProyek
+    );
+    @FormUrlEncoded
+    @POST("update_hunian.php")
+    Call<BasicResponse> updateHunian(
+            @Field("id_hunian") int idHunian,
+            @Field("old_nama_hunian") String oldNamaHunian,
+            @Field("new_nama_hunian") String newNamaHunian,
+            @Field("nama_proyek") String namaProyek
+    );
+    @GET("get_kavling_with_info.php")
+    Call<KavlingWithInfoResponse> getKavlingWithInfo();
+    @FormUrlEncoded
+    @POST("delete_kavling.php")
+    Call<BasicResponse> deleteKavling(
+            @Field("id_kavling") int idKavling
+    );
+    @FormUrlEncoded
+    @POST("update_kavling.php")
+    Call<BasicResponse> updateKavling(
+            @Field("id_kavling") int idKavling,
+            @Field("old_tipe_hunian") String oldTipeHunian,
+            @Field("new_tipe_hunian") String newTipeHunian,
+            @Field("old_hunian") String oldHunian,
+            @Field("new_hunian") String newHunian,
+            @Field("old_proyek") String oldProyek,
+            @Field("new_proyek") String newProyek
+            // Status penjualan dihapus dari parameter
+    );
 }
 
