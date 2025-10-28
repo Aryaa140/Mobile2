@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    android:fitsSystemWindows="true">
+
+    <!-- Status Bar Background -->
+    <View
+        android:id="@+id/statusBarBackground"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/colorPrimaryDark" />
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_below="@id/statusBarBackground"
+        android:background="@color/colorPrimaryDark"
+        app:navigationIcon="@drawable/ic_back"
+        app:navigationIconTint="@android:color/white"
+        app:title="Site Plan The Quality Harmony"
+        app:titleCentered="true"
+        app:titleTextColor="@android:color/white" />
+
+    <!-- ZOOMABLE IMAGE VIEW -->
+    <com.example.mobile.ZoomableImageView
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar"
+        android:src="@drawable/site_plan_riverside"
+        android:scaleType="matrix"
+        android:background="@color/colorPrimary"
+        android:contentDescription="Site Plan Riverside" />
+
+    <!-- FLOATING RESET BUTTON -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabReset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_refresh"
+        app:tint="@android:color/white"
+        app:backgroundTint="@color/colorPrimaryDark" />
+
+</RelativeLayout>

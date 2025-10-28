@@ -290,6 +290,91 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardSitePlanGardenResidence"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/black"
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="2dp"
+                android:layout_marginTop="15dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp"
+                android:background="@android:color/white">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Siteplan The Quality Garden Residence"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:textColor="@color/black"
+                        android:gravity="center"
+                        android:paddingBottom="16dp"/>
+
+                    <!-- Image Container -->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="2dp"
+                        android:layout_marginBottom="12dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <ImageView
+                                android:id="@+id/imgSitePlan"
+                                android:layout_width="match_parent"
+                                android:layout_height="200dp"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/site_plan_riverside"
+                                android:contentDescription="Site Plan The Quality Garden Residence" />
+
+                            <!-- Overlay untuk efek gelap -->
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="200dp"
+                                android:background="@drawable/image_overlay" />
+
+                            <!-- Button Lihat Full -->
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnViewFull"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:text="Lihat Full"
+                                android:textColor="@android:color/white"
+                                android:backgroundTint="#80000000"
+                                app:icon="@drawable/ic_fullscreen"
+                                app:iconGravity="textStart"
+                                app:cornerRadius="20dp"
+                                android:paddingStart="16dp"
+                                android:paddingEnd="16dp" />
+
+                        </RelativeLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Deskripsi Site Plan -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Siteplan lengkap The Quality Garden Residence yang menunjukkan layout perumahan yang terencana dengan baik, dilengkapi dengan berbagai fasilitas dan area hijau."
+                        android:textSize="14sp"
+                        android:textColor="@android:color/black"
+                        android:lineSpacingExtra="4dp"
+                        android:paddingTop="8dp"/>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
         </LinearLayout>
     </ScrollView>
 

@@ -1,0 +1,4 @@
+<resources>
+    <!-- News item spacing -->
+    <dimen name="news_item_spacing">8dp</dimen>
+</resources>
