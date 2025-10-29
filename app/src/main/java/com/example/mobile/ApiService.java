@@ -1,5 +1,7 @@
 package com.example.mobile;
 
+import java.util.Map;
+
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -302,5 +304,65 @@ public interface ApiService {
             @Field("new_proyek") String newProyek
             // Status penjualan dihapus dari parameter
     );
+    // news
+    @GET("get_news_histori.php")
+    Call<NewsHistoriResponse> getNewsHistori(
+            @Query("limit") int limit,
+            @Query("offset") int offset
+    );
+
+    // ✅ METHOD UNTUK MENDAPATKAN DATA HISTORI TERBARU
+    @FormUrlEncoded
+    @POST("get_latest_news_histori.php")
+    Call<NewsHistoriResponse> getLatestNewsHistori(
+            @Field("last_sync_time") String lastSyncTime
+    );
+
+    @FormUrlEncoded
+    @POST("promo_histori_handler.php")
+    Call<BasicResponse> addPromoHistori(
+            @Field("action") String action,
+            @Field("promo_id") int promoId,
+            @Field("title") String title,
+            @Field("penginput") String penginput,
+            @Field("status") String status,
+            @Field("image_data") String imageData
+    );
+
+    @FormUrlEncoded
+    @POST("promo_histori_handler.php")
+    Call<BasicResponse> updatePromoHistori(
+            @Field("action") String action,
+            @Field("promo_id") int promoId,
+            @Field("title") String title,
+            @Field("penginput") String penginput,
+            @Field("status") String status,
+            @Field("image_data") String imageData
+    );
+
+    @FormUrlEncoded
+    @POST("promo_histori_handler.php")
+    Call<BasicResponse> deletePromoHistori(
+            @Field("action") String action,
+            @Field("promo_id") int promoId,      // ✅ Parameter ke-2
+            @Field("title") String title,         // ✅ Parameter ke-3
+            @Field("penginput") String penginput, // ✅ Parameter ke-4
+            @Field("image_data") String imageData // ✅ Parameter ke-5
+    );
+
+    // ✅ METHOD BARU: UNTUK HISTORI DENGAN @Body (LEBIH AMAN UNTUK DATA BESAR)
+    @POST("promo_histori_handler.php")
+    Call<BasicResponse> addPromoHistoriWithBody(@Body Map<String, Object> body);
+
+    // ✅ METHOD BARU: UNTUK UPDATE DAN DELETE JUGA
+    @POST("promo_histori_handler.php")
+    Call<BasicResponse> updatePromoHistoriWithBody(@Body Map<String, Object> body);
+
+    @POST("promo_histori_handler.php")
+    Call<BasicResponse> deletePromoHistoriWithBody(@Body Map<String, Object> body);
+
+    // ✅ METHOD UNTUK GET PROMO BY ID (jika perlu)
+    @GET("get_promo_by_id.php")
+    Call<PromoResponse> getPromoById(@Query("id_promo") int idPromo);
 }
 

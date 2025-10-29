@@ -27,6 +27,8 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -278,6 +280,7 @@ public class EditDataPromooActivity extends AppCompatActivity {
                     BasicResponse basicResponse = response.body();
 
                     if (basicResponse.isSuccess()) {
+                        savePromoUpdateToHistori(promoId, namaPromo, penginput, currentImageBase64);
                         // DAPATKAN USERNAME YANG SEDANG LOGIN
                         String currentUser = editTextPenginput.getText().toString().trim();
 
@@ -342,6 +345,260 @@ public class EditDataPromooActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e("EditPromo", "Error showing local update notification: " + e.getMessage());
         }
+    }
+    private void savePromoUpdateToHistori(int promoId, String title, String penginput, String imageData) {
+        Log.d("EditPromo", "=== SAVE UPDATE HISTORI WITH IMAGE ===");
+
+        // Dapatkan gambar yang valid dari promo yang sudah diupdate
+        loadValidImageFromUpdatedPromo(promoId, title, penginput);
+    }
+
+    // ✅ METHOD BARU: Ambil gambar valid dari promo yang sudah diupdate
+    private void loadValidImageFromUpdatedPromo(int promoId, String title, String penginput) {
+        Log.d("EditPromo", "🔄 Loading valid image from updated promo ID: " + promoId);
+
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<PromoResponse> call = apiService.getSemuaPromo();
+
+        call.enqueue(new Callback<PromoResponse>() {
+            @Override
+            public void onResponse(Call<PromoResponse> call, Response<PromoResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    PromoResponse promoResponse = response.body();
+                    if (promoResponse.isSuccess() && promoResponse.getData() != null) {
+
+                        // Cari promo yang baru diupdate
+                        Promo updatedPromo = null;
+                        for (Promo promo : promoResponse.getData()) {
+                            if (promo.getIdPromo() == promoId) {
+                                updatedPromo = promo;
+                                break;
+                            }
+                        }
+
+                        if (updatedPromo != null) {
+                            String serverImage = updatedPromo.getGambarBase64();
+                            Log.d("EditPromo", "✅ Found updated promo: " + updatedPromo.getNamaPromo());
+                            Log.d("EditPromo", "📷 Server image length: " + (serverImage != null ? serverImage.length() : 0));
+
+                            // Gunakan gambar dari server yang sudah terupdate
+                            saveUpdateHistoriWithValidImage(promoId, title, penginput, serverImage);
+                        } else {
+                            Log.e("EditPromo", "❌ Updated promo not found in server response");
+                            // Fallback: gunakan gambar lokal
+                            saveUpdateHistoriWithValidImage(promoId, title, penginput, currentImageBase64);
+                        }
+                    } else {
+                        Log.e("EditPromo", "❌ Failed to load promo data from server");
+                        saveUpdateHistoriWithValidImage(promoId, title, penginput, currentImageBase64);
+                    }
+                } else {
+                    Log.e("EditPromo", "❌ Error loading promo data: " + response.code());
+                    saveUpdateHistoriWithValidImage(promoId, title, penginput, currentImageBase64);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PromoResponse> call, Throwable t) {
+                Log.e("EditPromo", "❌ Network error loading promo: " + t.getMessage());
+                saveUpdateHistoriWithValidImage(promoId, title, penginput, currentImageBase64);
+            }
+        });
+    }
+
+    // ✅ METHOD BARU: Simpan histori dengan gambar yang sudah divalidasi
+    private void saveUpdateHistoriWithValidImage(int promoId, String title, String penginput, String imageData) {
+        Log.d("EditPromo", "💾 Saving update histori with validated image");
+
+        // Validasi dan bersihkan data gambar
+        String finalImageData = validateAndPrepareImageForNews(imageData);
+
+        Log.d("EditPromo", "📊 Final image data for News: " +
+                (finalImageData != null ? "Length=" + finalImageData.length() : "NULL"));
+
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+
+        // Gunakan @Body request untuk menghindari pemotongan data
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("action", "update_promo_histori");
+        requestBody.put("promo_id", promoId);
+        requestBody.put("title", title);
+        requestBody.put("penginput", penginput);
+        requestBody.put("status", "Diubah");
+        requestBody.put("image_data", finalImageData != null ? finalImageData : "");
+
+        Log.d("EditPromo", "📤 Sending update histori request with body");
+
+        Call<BasicResponse> call = apiService.updatePromoHistoriWithBody(requestBody);
+
+        call.enqueue(new Callback<BasicResponse>() {
+            @Override
+            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    BasicResponse basicResponse = response.body();
+                    if (basicResponse.isSuccess()) {
+                        Log.d("EditPromo", "✅ Update histori berhasil disimpan dengan gambar");
+
+                        // Simpan juga ke SharedPreferences untuk backup
+                        saveUpdateInfoToPrefs(promoId, title, penginput, finalImageData);
+
+                        // Kirim broadcast untuk refresh NewsActivity
+                        sendRefreshBroadcastToNews();
+
+                    } else {
+                        Log.e("EditPromo", "❌ Gagal menyimpan update histori: " + basicResponse.getMessage());
+                        // Coba method alternatif
+                        tryAlternativeUpdateHistori(promoId, title, penginput, finalImageData);
+                    }
+                } else {
+                    Log.e("EditPromo", "❌ Error response update histori: " + response.code());
+                    tryAlternativeUpdateHistori(promoId, title, penginput, finalImageData);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BasicResponse> call, Throwable t) {
+                Log.e("EditPromo", "❌ Network error update histori: " + t.getMessage());
+                tryAlternativeUpdateHistori(promoId, title, penginput, finalImageData);
+            }
+        });
+    }
+
+    // ✅ METHOD BARU: Validasi dan persiapan gambar untuk News
+    private String validateAndPrepareImageForNews(String imageData) {
+        if (imageData == null || imageData.trim().isEmpty()) {
+            Log.w("EditPromo", "⚠️ No image data to prepare for News");
+            return null;
+        }
+
+        String cleanData = imageData.trim();
+
+        // Cek kriteria validitas gambar
+        if (cleanData.length() < 500) {
+            Log.w("EditPromo", "⚠️ Image data too short for News: " + cleanData.length());
+            return null;
+        }
+
+        if (cleanData.equals("null") || cleanData.equals("NULL")) {
+            Log.w("EditPromo", "⚠️ Image data is string 'null'");
+            return null;
+        }
+
+        if (cleanData.endsWith("..") || cleanData.endsWith("...")) {
+            Log.w("EditPromo", "⚠️ Image data appears truncated");
+            return null;
+        }
+
+        // Cek format base64
+        if (!cleanData.matches("^[a-zA-Z0-9+/]*={0,2}$")) {
+            Log.w("EditPromo", "⚠️ Invalid base64 format");
+            return null;
+        }
+
+        // Test decode untuk memastikan valid
+        try {
+            byte[] decoded = Base64.decode(cleanData, Base64.DEFAULT);
+            if (decoded == null || decoded.length == 0) {
+                Log.w("EditPromo", "⚠️ Base64 decode returned empty");
+                return null;
+            }
+
+            // Cek signature gambar
+            if (decoded.length >= 4) {
+                // JPEG signature: FF D8 FF
+                if ((decoded[0] & 0xFF) == 0xFF && (decoded[1] & 0xFF) == 0xD8 && (decoded[2] & 0xFF) == 0xFF) {
+                    Log.d("EditPromo", "✅ Valid JPEG image for News");
+                }
+                // PNG signature: 89 50 4E 47
+                else if ((decoded[0] & 0xFF) == 0x89 && decoded[1] == 0x50 && decoded[2] == 0x4E && decoded[3] == 0x47) {
+                    Log.d("EditPromo", "✅ Valid PNG image for News");
+                }
+                else {
+                    Log.w("EditPromo", "⚠️ Unknown image format, but base64 is valid");
+                }
+            }
+
+            Log.d("EditPromo", "✅ Image prepared for News - Original: " + cleanData.length() +
+                    " chars, Decoded: " + decoded.length + " bytes");
+
+            return cleanData;
+
+        } catch (IllegalArgumentException e) {
+            Log.e("EditPromo", "❌ Invalid base64 data: " + e.getMessage());
+            return null;
+        }
+    }
+
+    // ✅ METHOD BARU: Simpan info update ke SharedPreferences
+    private void saveUpdateInfoToPrefs(int promoId, String title, String penginput, String imageData) {
+        SharedPreferences prefs = getSharedPreferences("NewsUpdates", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        editor.putInt("last_updated_promo_id", promoId);
+        editor.putString("last_updated_title", title);
+        editor.putString("last_updated_inputter", penginput);
+        editor.putString("last_updated_status", "Diubah");
+
+        // Simpan image data hanya jika tidak terlalu besar
+        if (imageData != null && imageData.length() < 10000) {
+            editor.putString("last_updated_image", imageData);
+        } else {
+            editor.putString("last_updated_image", "");
+        }
+
+        editor.putLong("last_update_time", System.currentTimeMillis());
+        editor.apply();
+
+        Log.d("EditPromo", "💾 Update info saved to prefs - ID: " + promoId);
+    }
+
+    // ✅ METHOD BARU: Coba method alternatif untuk update histori
+    private void tryAlternativeUpdateHistori(int promoId, String title, String penginput, String imageData) {
+        Log.d("EditPromo", "🔄 Trying alternative method for update histori");
+
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+
+        // Coba dengan @FormUrlEncoded sebagai fallback
+        Call<BasicResponse> call = apiService.updatePromoHistori(
+                "update_promo_histori",
+                promoId,
+                title,
+                penginput,
+                "Diubah",
+                imageData != null ? imageData : ""
+        );
+
+        call.enqueue(new Callback<BasicResponse>() {
+            @Override
+            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    BasicResponse basicResponse = response.body();
+                    if (basicResponse.isSuccess()) {
+                        Log.d("EditPromo", "✅ Alternative update histori berhasil");
+                        sendRefreshBroadcastToNews();
+                    } else {
+                        Log.e("EditPromo", "❌ Alternative juga gagal: " + basicResponse.getMessage());
+                        // Tetap kirim broadcast meski gagal simpan histori
+                        sendRefreshBroadcastToNews();
+                    }
+                } else {
+                    Log.e("EditPromo", "❌ Alternative response error: " + response.code());
+                    // Tetap kirim broadcast
+                    sendRefreshBroadcastToNews();
+                }
+            }
+            @Override
+            public void onFailure(Call<BasicResponse> call, Throwable t) {
+                Log.e("EditPromo", "❌ Alternative network error: " + t.getMessage());
+                // Tetap kirim broadcast
+                sendRefreshBroadcastToNews();
+            }
+        });
+    }
+    private void sendRefreshBroadcastToNews() {
+        Intent refreshIntent = new Intent("REFRESH_NEWS_DATA");
+        sendBroadcast(refreshIntent);
+        Log.d("EditPromo", "📢 Refresh broadcast sent to NewsActivity");
     }
 
     // Method untuk cek perubahan gambar

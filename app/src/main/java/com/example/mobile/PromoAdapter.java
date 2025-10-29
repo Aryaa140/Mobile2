@@ -231,6 +231,7 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
     }
 
     private void handleDeleteSuccess(Promo promo, int position) {
+
         // Validasi ulang position sebelum remove
         if (position >= 0 && position < promoList.size()) {
             String promoName = getSafePromoName(promo);
@@ -253,11 +254,60 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
             }
 
             Log.d("PromoAdapter", "✅ Promo deleted successfully: " + promoName);
+            savePromoDeleteToHistori(promo.getIdPromo(), promoName, penginput, promo.getGambarBase64());
         } else {
             Log.e("PromoAdapter", "Invalid position after delete: " + position);
         }
-    }
 
+    }
+    private void savePromoDeleteToHistori(int promoId, String title, String penginput, String imageData) {
+        Log.d("PromoAdapter", "=== SAVE DELETE HISTORI ===");
+        Log.d("PromoAdapter", "Promo ID: " + promoId);
+        Log.d("PromoAdapter", "Title: " + title);
+        Log.d("PromoAdapter", "Penginput: " + penginput);
+        Log.d("PromoAdapter", "Image Data: " + (imageData != null ? imageData.length() + " chars" : "null"));
+
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<BasicResponse> call = apiService.deletePromoHistori(
+                "delete_promo_histori",
+                promoId,
+                title,
+                penginput,
+                imageData
+        );
+
+        call.enqueue(new Callback<BasicResponse>() {
+            @Override
+            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    BasicResponse basicResponse = response.body();
+                    if (basicResponse.isSuccess()) {
+                        Log.d("PromoAdapter", "✅ Histori delete berhasil disimpan");
+                    } else {
+                        Log.e("PromoAdapter", "❌ Gagal menyimpan histori delete: " + basicResponse.getMessage());
+                        // Tampilkan error detail untuk debugging
+                        Toast.makeText(context, "Error histori: " + basicResponse.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Log.e("PromoAdapter", "❌ Error response histori delete: " + response.code());
+                    try {
+                        if (response.errorBody() != null) {
+                            String errorBody = response.errorBody().string();
+                            Log.e("PromoAdapter", "Error body: " + errorBody);
+                        }
+                    } catch (Exception e) {
+                        Log.e("PromoAdapter", "Error reading error body", e);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BasicResponse> call, Throwable t) {
+                Log.e("PromoAdapter", "❌ Error menyimpan histori delete: " + t.getMessage());
+                t.printStackTrace();
+            }
+        });
+    }
     private void handleDeleteError(String errorMessage) {
         Log.e("PromoAdapter", "Delete failed: " + errorMessage);
         showErrorNotification(errorMessage);
