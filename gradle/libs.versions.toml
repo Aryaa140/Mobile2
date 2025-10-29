@@ -18,6 +18,7 @@ okhttp = "4.9.3"
 gson = "2.10.1"
 androidx-core = "1.12.0"
 androidx-multidex = "2.0.1"
+firebaseMessagingVersion = "25.0.1"
 
 [libraries]
 # Android libraries
@@ -42,6 +43,7 @@ firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging
 androidx-core = { group = "androidx.core", name = "core", version.ref = "androidx-core" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
 androidx-multidex = { group = "androidx.multidex", name = "multidex", version.ref = "androidx-multidex" }
+google-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessagingVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

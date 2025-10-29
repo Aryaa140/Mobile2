@@ -2,47 +2,30 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- PERMISSIONS UTAMA -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-    <!-- PERMISSIONS UNTUK NOTIFIKASI ONE SIGNAL -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
-    <!-- HAPUS PERMISSIONS YANG TIDAK DIPERLUKAN UNTUK ONE SIGNAL -->
-    <!--
-    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
-    <uses-permission android:name="android.permission.BROADCAST_PACKAGE_ADDED" />
-    <uses-permission android:name="android.permission.BROADCAST_PACKAGE_CHANGED" />
-    <uses-permission android:name="android.permission.BROADCAST_PACKAGE_INSTALL" />
-    <uses-permission android:name="android.permission.BROADCAST_PACKAGE_REPLACED" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
-    -->
 
     <application
-        android:name=".MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
+        android:hardwareAccelerated="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Mobile"
         android:usesCleartextTraffic="true"
-        tools:targetApi="31"
-        android:requestLegacyExternalStorage="true">
+        tools:targetApi="31">
+
         <service
             android:name=".MyFirebaseMessagingService"
             android:exported="false">
@@ -60,31 +43,46 @@
             </intent-filter>
         </service>
 
-        <meta-data
-            android:name="com.onesignal.messaging.default_notification_channel_id"
-            android:value="high_importance_channel" />
+        <activity
+            android:name=".SiteplanHarmonyActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
+        <!-- ✅ PERBAIKAN: Tambahkan theme untuk SiteplanGardenActivity -->
+        <activity
+            android:name=".SiteplanGardenActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
+        <activity
+            android:name=".SiteplanRiversideActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
+        <activity
+            android:name=".EditDataKavlingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditDataHunianActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditDataProyekActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LihatDataKavlingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LihatDataHunianActivity"
+            android:exported="false" />
         <activity
             android:name=".StatusAkunActivity"
             android:exported="false" />
-        <activity
-            android:name=".InputHunianActivity"
-            android:exported="true">
-        </activity>
-        <activity
-            android:name=".InputKavlingActivity"
-            android:exported="true">
-        </activity>
         <activity
             android:name=".InputNipActivity"
             android:exported="false" />
         <activity
             android:name=".EditDataPromooActivity"
             android:exported="false" />
-        <activity
-            android:name=".LihatDataHistoriUserProspek"
-            android:exported="false"
-            android:parentActivityName=".LihatDataUserpActivity" />
         <activity
             android:name=".TampilPromoActivity"
             android:exported="false" />
@@ -158,16 +156,7 @@
             android:name=".EditDataUnitHunianActivity"
             android:exported="false" />
         <activity
-            android:name=".LihatDataHunianActivity"
-            android:exported="false" />
-        <activity
-            android:name=".EditDataProyekActivity"
-            android:exported="false" />
-        <activity
             android:name=".DetailProyekHarmonyActivity"
-            android:exported="false" />
-        <activity
-            android:name=".LihatDataPemohonActivity"
             android:exported="false" />
         <activity
             android:name=".EditDataUserpActivity"
@@ -176,19 +165,7 @@
             android:name=".LihatDataProyekActivity"
             android:exported="false" />
         <activity
-            android:name=".InputDataHunianActivity"
-            android:exported="false" />
-        <activity
             android:name=".LihatDataUserpActivity"
-            android:exported="false" />
-        <activity
-            android:name=".LihatDataKavlingActivity"
-            android:exported="false" />
-        <activity
-            android:name=".EditDataHunianActivity"
-            android:exported="false" />
-        <activity
-            android:name=".EditDataKavlingActivity"
             android:exported="false" />
         <activity
             android:name=".TambahPemohonActivity"
@@ -224,10 +201,7 @@
             android:name=".InputDataProyekActivity"
             android:exported="false" />
         <activity
-            android:name=".InputDataFasilitasActivity"
-            android:exported="false" />
-        <activity
-            android:name=".InputActivity"
+            android:name=".LihatDataHistoriUserProspek"
             android:exported="false" />
         <activity
             android:name=".ProyekActivity"
@@ -247,23 +221,20 @@
         <activity
             android:name=".NewBeranda"
             android:exported="false" />
-
-        <!-- ✅ MAIN ACTIVITY -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- OPSIONAL: JIKA MASIH DIPERLUKAN -->
         <receiver
             android:name=".NewsCleanupReceiver"
             android:enabled="true"
             android:exported="false" />
-
     </application>
 
 </manifest>

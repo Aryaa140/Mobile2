@@ -120,7 +120,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -152,23 +151,48 @@
                         android:shadowDy="2"
                         android:shadowRadius="6"/>
 
+                    <!-- Card dengan icon dan text -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/cardInputPromoM"
-                        android:layout_width="36dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="36dp"
                         android:layout_marginStart="8dp"
-                        app:cardCornerRadius="50dp"
-                        app:cardElevation="4dp"
-                        app:cardBackgroundColor="@android:color/white">
+                        app:cardCornerRadius="18dp"
+                        app:cardElevation="2dp"
+                        app:cardBackgroundColor="@android:color/white"
+                        app:rippleColor="@color/light_blue_200"
+                        android:clickable="true"
+                        android:focusable="true">
 
-                        <ImageView
-                            android:layout_width="match_parent"
+                        <LinearLayout
+                            android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:padding="6dp"
-                            android:src="@drawable/ic_add"
-                            android:tint="@color/light_blue_500"
-                            android:contentDescription="Tambah Promo"/>
+                            android:orientation="horizontal"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:gravity="center_vertical"
+                            android:background="?attr/selectableItemBackgroundBorderless">
+
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:layout_marginEnd="6dp"
+                                android:src="@drawable/ic_add"
+                                android:tint="@color/light_blue_500"
+                                android:contentDescription="Tambah Promo"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Tambah Promo"
+                                android:textStyle="bold"
+                                android:textSize="10sp"
+                                android:textColor="@color/light_blue_500"/>
+
+                        </LinearLayout>
+
                     </com.google.android.material.card.MaterialCardView>
+
                 </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView

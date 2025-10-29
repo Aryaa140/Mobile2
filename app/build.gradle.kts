@@ -15,7 +15,6 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
-
     }
 
     buildTypes {
@@ -44,16 +43,19 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.storage)
     implementation(libs.firebase.auth)
-    implementation(libs.firebase.messaging)
 
+    // Retrofit & Gson
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
     implementation(libs.gson)
+    implementation(libs.google.firebase.messaging)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
+    implementation ("com.google.firebase:firebase-messaging:23.4.0")
+    implementation ("com.google.firebase:firebase-analytics:21.5.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("com.airbnb.android:lottie:6.1.0")
     implementation("com.squareup.picasso:picasso:2.71828")
@@ -62,6 +64,4 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
 
     implementation ("com.itextpdf:itext7-core:7.1.15")
-    implementation ("androidx.core:core-ktx:1.12.0")
-
 }
