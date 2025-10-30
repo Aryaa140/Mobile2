@@ -12,6 +12,9 @@
     <color name="red">#F44336</color>
     <color name="green">#4CAF50</color>
 
+    <color name="colorSuccess">#4CAF50</color>
+    <color name="colorDanger">#F44336</color>
+    <color name="gray_light">#F5F5F5</color>
     <color name="light_blue_500">#03A9F4</color>
     <color name="light_blue_200">#81D4FA</color>
     <color name="light_blue_400">#29B6F6</color>

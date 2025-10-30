@@ -197,11 +197,17 @@ public interface ApiService {
             @Query("hunian") String hunian,
             @Query("tipe_hunian") String tipeHunian
     );
+    // Di ApiService.java
     @FormUrlEncoded
-    @POST("api_proyek.php") // Sesuaikan dengan path file PHP Anda
+    @POST("api_proyek.php")
     Call<BasicResponse> addProyek(
             @Field("action") String action,
-            @Field("nama_proyek") String namaProyek
+            @Field("nama_proyek") String namaProyek,
+            @Field("lokasi_proyek") String lokasiProyek,
+            @Field("deskripsi_proyek") String deskripsiProyek,
+            @Field("logo") String logo,
+            @Field("siteplan") String siteplan,
+            @Field("fasilitas") String fasilitasJson
     );
 
 
