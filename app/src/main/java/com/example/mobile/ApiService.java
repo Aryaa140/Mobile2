@@ -1,5 +1,6 @@
 package com.example.mobile;
 
+import java.util.List;
 import java.util.Map;
 
 import okhttp3.ResponseBody;
@@ -210,7 +211,15 @@ public interface ApiService {
             @Field("fasilitas") String fasilitasJson
     );
 
-
+    @GET("api_proyek.php")
+    Call<List<Proyek>> getAllProyek(
+            @Query("action") String action
+    );
+    @GET("api_proyek.php")
+    Call<List<FasilitasItem>> getFasilitasByProyek(
+            @Query("action") String action,
+            @Query("nama_proyek") String namaProyek
+    );
     // Method untuk menambah hunian (tambahkan ini)
     @FormUrlEncoded
     @POST("api_hunian.php")
