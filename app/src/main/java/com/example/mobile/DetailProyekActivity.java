@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
@@ -553,6 +554,8 @@ public class DetailProyekActivity extends AppCompatActivity {
         }
     }
     // Method untuk update fasilitas
+    // Method untuk update fasilitas
+    // Method untuk update fasilitas - PERBAIKAN UTAMA
     private void updateFasilitas(int idFasilitas, String namaFasilitas, Bitmap gambarBitmap) {
         Log.d(TAG, "=== UPDATE FASILITAS ===");
         Log.d(TAG, "ID Fasilitas: " + idFasilitas);
@@ -565,13 +568,31 @@ public class DetailProyekActivity extends AppCompatActivity {
             return;
         }
 
-        String gambarBase64 = "";
+        String gambarBase64 = "no_change"; // Default: tidak mengubah gambar
+
+        // PERBAIKAN: Handle konversi bitmap ke base64 dengan lebih baik
         if (gambarBitmap != null) {
-            gambarBase64 = bitmapToBase64(gambarBitmap);
-            Log.d(TAG, "Gambar Base64 length: " + gambarBase64.length());
+            try {
+                gambarBase64 = bitmapToBase64(gambarBitmap);
+                Log.d(TAG, "Gambar Base64 length: " + gambarBase64.length());
+
+                // Validasi base64 string
+                if (gambarBase64.length() < 100) {
+                    Log.e(TAG, "Base64 string terlalu pendek, mungkin konversi gagal");
+                    Toast.makeText(this, "Gagal memproses gambar", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error converting bitmap to base64: " + e.getMessage());
+                Toast.makeText(this, "Gagal memproses gambar", Toast.LENGTH_SHORT).show();
+                return;
+            }
         } else {
-            Log.d(TAG, "Tidak ada gambar baru, menggunakan gambar existing");
+            Log.d(TAG, "Tidak ada gambar baru, menggunakan gambar existing (no_change)");
         }
+
+        // Tampilkan loading
+        Toast.makeText(this, "Mengupdate fasilitas...", Toast.LENGTH_SHORT).show();
 
         Call<BasicResponse> call = apiService.updateFasilitas(
                 "updateFasilitas",
@@ -583,6 +604,12 @@ public class DetailProyekActivity extends AppCompatActivity {
         call.enqueue(new Callback<BasicResponse>() {
             @Override
             public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                // PERBAIKAN: Cek jika activity sudah destroyed
+                if (isFinishing() || isDestroyed()) {
+                    Log.w(TAG, "Activity sudah destroyed, mengabaikan response update fasilitas");
+                    return;
+                }
+
                 Log.d(TAG, "Update fasilitas response code: " + response.code());
 
                 if (response.isSuccessful() && response.body() != null) {
@@ -592,14 +619,24 @@ public class DetailProyekActivity extends AppCompatActivity {
 
                     if (updateResponse.isSuccess()) {
                         Toast.makeText(DetailProyekActivity.this, "Fasilitas berhasil diupdate", Toast.LENGTH_SHORT).show();
+
                         // Tutup dialog
-                        if (currentFasilitasDialog != null) {
+                        if (currentFasilitasDialog != null && currentFasilitasDialog.isShowing()) {
                             currentFasilitasDialog.dismiss();
-                            currentFasilitasDialog = null;
-                            currentFasilitasDialogImageView = null;
                         }
-                        // Reload fasilitas
-                        loadFasilitasData(currentProyek.getNamaProyek());
+                        currentFasilitasDialog = null;
+                        currentFasilitasDialogImageView = null;
+
+                        // PERBAIKAN: Keluar dari mode edit setelah update berhasil
+                        exitEditMode();
+
+                        // Reload fasilitas dengan delay kecil untuk memastikan data terupdate
+                        new Handler().postDelayed(() -> {
+                            if (currentProyek != null) {
+                                loadFasilitasData(currentProyek.getNamaProyek());
+                            }
+                        }, 1000);
+
                     } else {
                         String errorMsg = "Gagal update fasilitas: " + updateResponse.getMessage();
                         Toast.makeText(DetailProyekActivity.this, errorMsg, Toast.LENGTH_LONG).show();
@@ -621,6 +658,12 @@ public class DetailProyekActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
+                // PERBAIKAN: Cek jika activity sudah destroyed
+                if (isFinishing() || isDestroyed()) {
+                    Log.w(TAG, "Activity sudah destroyed, mengabaikan failure update fasilitas");
+                    return;
+                }
+
                 String errorMsg = "Error: " + t.getMessage();
                 Toast.makeText(DetailProyekActivity.this, errorMsg, Toast.LENGTH_LONG).show();
                 Log.e(TAG, errorMsg, t);
@@ -628,7 +671,6 @@ public class DetailProyekActivity extends AppCompatActivity {
         });
     }
 
-    // Method untuk hapus fasilitas
     private void deleteFasilitas(int idFasilitas) {
         Log.d(TAG, "=== DELETE FASILITAS ===");
         Log.d(TAG, "ID Fasilitas: " + idFasilitas);
@@ -647,6 +689,12 @@ public class DetailProyekActivity extends AppCompatActivity {
         call.enqueue(new Callback<BasicResponse>() {
             @Override
             public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                // PERBAIKAN: Cek jika activity sudah destroyed
+                if (isFinishing() || isDestroyed()) {
+                    Log.w(TAG, "Activity sudah destroyed, mengabaikan response delete fasilitas");
+                    return;
+                }
+
                 Log.d(TAG, "Delete fasilitas response code: " + response.code());
 
                 if (response.isSuccessful() && response.body() != null) {
@@ -656,6 +704,8 @@ public class DetailProyekActivity extends AppCompatActivity {
 
                     if (deleteResponse.isSuccess()) {
                         Toast.makeText(DetailProyekActivity.this, "Fasilitas berhasil dihapus", Toast.LENGTH_SHORT).show();
+                        // PERBAIKAN: Keluar dari mode edit setelah hapus berhasil
+                        exitEditMode();
                         // Reload fasilitas
                         loadFasilitasData(currentProyek.getNamaProyek());
                     } else {
@@ -679,13 +729,18 @@ public class DetailProyekActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
+                // PERBAIKAN: Cek jika activity sudah destroyed
+                if (isFinishing() || isDestroyed()) {
+                    Log.w(TAG, "Activity sudah destroyed, mengabaikan failure delete fasilitas");
+                    return;
+                }
+
                 String errorMsg = "Error: " + t.getMessage();
                 Toast.makeText(DetailProyekActivity.this, errorMsg, Toast.LENGTH_LONG).show();
                 Log.e(TAG, errorMsg, t);
             }
         });
     }
-
     private void saveProyekData() {
         if (currentProyek == null) {
             Toast.makeText(this, "Data proyek tidak tersedia", Toast.LENGTH_SHORT).show();
@@ -800,20 +855,35 @@ public class DetailProyekActivity extends AppCompatActivity {
     }
 
     private String bitmapToBase64(Bitmap bitmap) {
+        if (bitmap == null) {
+            Log.e(TAG, "Bitmap is null in bitmapToBase64");
+            return "";
+        }
+
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-            // Kompres gambar dengan kualitas yang wajar
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream);
+            // Kompres gambar dengan kualitas optimal
+            // PERBAIKAN: Gunakan JPEG untuk kompresi yang lebih baik
+            boolean compressSuccess = bitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream);
+
+            if (!compressSuccess) {
+                Log.e(TAG, "Bitmap compress failed");
+                return "";
+            }
 
             byte[] byteArray = byteArrayOutputStream.toByteArray();
             String base64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
 
-            Log.d(TAG, "Bitmap converted to base64, size: " + base64.length() + " chars");
+            Log.d(TAG, "Bitmap converted to base64, original size: " + bitmap.getByteCount() +
+                    " bytes, compressed size: " + byteArray.length + " bytes, base64 length: " + base64.length() + " chars");
+
+            // Clean up
+            byteArrayOutputStream.close();
 
             return base64;
         } catch (Exception e) {
-            Log.e(TAG, "Error converting bitmap to base64: " + e.getMessage());
+            Log.e(TAG, "Error converting bitmap to base64: " + e.getMessage(), e);
             return "";
         }
     }
