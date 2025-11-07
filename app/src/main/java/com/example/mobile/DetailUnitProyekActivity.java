@@ -7,6 +7,8 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
@@ -14,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -79,7 +82,7 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
     private List<FasilitasOperation> pendingOperations = new ArrayList<>();
     private boolean hasUnsavedChanges = false;
     private int tempIdCounter = -1; // Untuk generate ID sementara
-
+    private GridLayout gridLayoutRead, gridLayoutEdit;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,7 +116,18 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
         loadHunianData();
         loadFasilitasData();
     }
+    private TextWatcher textWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            checkForChanges();
+        }
+    };
     private void initViews() {
         topAppBar = findViewById(R.id.topAppBar);
 
@@ -136,13 +150,21 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
         editLuasTanah = findViewById(R.id.editLuasTanah);
         editLuasBangunan = findViewById(R.id.editLuasBangunan);
         editDeskripsi = findViewById(R.id.editDeskripsi);
-
+        setupTextWatchers();
         // Setup click listeners untuk gambar dan tombol
         setupImageClickListeners();
         setupButtonListeners();
-
+        // TAMBAHKAN INISIALISASI GRID LAYOUT
+        gridLayoutRead = findViewById(R.id.gridLayoutRead);
+        gridLayoutEdit = findViewById(R.id.gridLayoutEdit);
         // Pastikan mode baca aktif saat inisialisasi
         setEditMode(false);
+    }
+    private void setupTextWatchers() {
+        editNamaHunian.addTextChangedListener(textWatcher);
+        editLuasTanah.addTextChangedListener(textWatcher);
+        editLuasBangunan.addTextChangedListener(textWatcher);
+        editDeskripsi.addTextChangedListener(textWatcher);
     }
 
     private void setupButtonListeners() {
@@ -163,6 +185,10 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
             txtNamaHunian.setVisibility(View.GONE);
             txtDeskripsi.setVisibility(View.GONE);
 
+            // PERBAIKAN: Atur visibilitas GridLayout
+            gridLayoutRead.setVisibility(View.GONE);
+            gridLayoutEdit.setVisibility(View.VISIBLE);
+
             editNamaHunian.setVisibility(View.VISIBLE);
             editDeskripsi.setVisibility(View.VISIBLE);
 
@@ -174,6 +200,10 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
             txtNamaHunian.setVisibility(View.VISIBLE);
             txtDeskripsi.setVisibility(View.VISIBLE);
 
+            // PERBAIKAN: Atur visibilitas GridLayout
+            gridLayoutRead.setVisibility(View.VISIBLE);
+            gridLayoutEdit.setVisibility(View.GONE);
+
             editNamaHunian.setVisibility(View.GONE);
             editDeskripsi.setVisibility(View.GONE);
 
@@ -183,6 +213,23 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
 
         // Refresh tampilan fasilitas
         displayFasilitasData(tempFasilitasList);
+    }
+
+
+    private void checkForChanges() {
+        if (!isEditMode) return;
+
+        boolean hasTextChanges = !editNamaHunian.getText().toString().equals(currentHunian.getNamaHunian()) ||
+                !editLuasTanah.getText().toString().equals(String.valueOf(currentHunian.getLuasTanah())) ||
+                !editLuasBangunan.getText().toString().equals(String.valueOf(currentHunian.getLuasBangunan())) ||
+                !editDeskripsi.getText().toString().equals(currentHunian.getDeskripsiHunian() != null ? currentHunian.getDeskripsiHunian() : "");
+
+        boolean hasImageChanges = selectedUnitBitmap != null || selectedDenahBitmap != null;
+        boolean hasFacilityChanges = !pendingOperations.isEmpty();
+
+        if (hasTextChanges || hasImageChanges || hasFacilityChanges) {
+            markHasUnsavedChanges();
+        }
     }
 
     private void setupTopAppBar() {
@@ -267,12 +314,9 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
         // Populate edit fields with current data
         editNamaHunian.setText(currentHunian.getNamaHunian());
 
-        // Extract hanya angka dari luas tanah dan bangunan
-        String luasTanahValue = String.valueOf(currentHunian.getLuasTanah());
-        String luasBangunanValue = String.valueOf(currentHunian.getLuasBangunan());
-
-        editLuasTanah.setText(luasTanahValue);
-        editLuasBangunan.setText(luasBangunanValue);
+        // PERBAIKAN: Set nilai langsung tanpa ekstraksi
+        editLuasTanah.setText(String.valueOf(currentHunian.getLuasTanah()));
+        editLuasBangunan.setText(String.valueOf(currentHunian.getLuasBangunan()));
 
         if (currentHunian.getDeskripsiHunian() != null && !currentHunian.getDeskripsiHunian().isEmpty()) {
             editDeskripsi.setText(currentHunian.getDeskripsiHunian());
@@ -280,7 +324,8 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
             editDeskripsi.setText("");
         }
 
-        // Update menu visibility
+        // Reset status perubahan
+        hasUnsavedChanges = false;
         updateMenuVisibility();
 
         // Enable image interaction
@@ -293,7 +338,6 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
 
         Toast.makeText(this, "Mode Edit: Klik gambar untuk mengubah", Toast.LENGTH_LONG).show();
     }
-
     private void exitEditMode() {
         Log.d(TAG, "Exiting edit mode and ensuring UI is updated");
 
@@ -362,6 +406,8 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
                 // Tampilkan data hunian
                 txtNamaHunian.setText(currentHunian.getNamaHunian());
                 txtNamaProyek.setText(currentHunian.getNamaProyek());
+
+                // PERBAIKAN: Format yang benar untuk TextView
                 txtLuasTanah.setText("Luas Tanah: " + currentHunian.getLuasTanah() + " m²");
                 txtLuasBangunan.setText("Luas Bangunan: " + currentHunian.getLuasBangunan() + " m²");
 
@@ -726,65 +772,98 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
         String newLuasBangunanStr = editLuasBangunan.getText().toString().trim();
         String newDeskripsi = editDeskripsi.getText().toString().trim();
 
-        // Validation
+        // Validation lebih ketat
         if (newNamaHunian.isEmpty()) {
             Toast.makeText(this, "Nama hunian tidak boleh kosong", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (newLuasTanahStr.isEmpty() || !newLuasTanahStr.matches("\\d+")) {
-            Toast.makeText(this, "Luas tanah harus berupa angka", Toast.LENGTH_SHORT).show();
+        if (newLuasTanahStr.isEmpty()) {
+            Toast.makeText(this, "Luas tanah tidak boleh kosong", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (newLuasBangunanStr.isEmpty() || !newLuasBangunanStr.matches("\\d+")) {
-            Toast.makeText(this, "Luas bangunan harus berupa angka", Toast.LENGTH_SHORT).show();
+        if (newLuasBangunanStr.isEmpty()) {
+            Toast.makeText(this, "Luas bangunan tidak boleh kosong", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        int newLuasTanah = Integer.parseInt(newLuasTanahStr);
-        int newLuasBangunan = Integer.parseInt(newLuasBangunanStr);
+        // Validasi numeric
+        int newLuasTanah;
+        int newLuasBangunan;
+        try {
+            newLuasTanah = Integer.parseInt(newLuasTanahStr);
+            newLuasBangunan = Integer.parseInt(newLuasBangunanStr);
 
-        // Prepare base64 strings for images
-        final String[] gambarUnitBase64Holder = new String[1];
-        final String[] gambarDenahBase64Holder = new String[1];
-
-        if (selectedUnitBitmap != null) {
-            gambarUnitBase64Holder[0] = bitmapToBase64(selectedUnitBitmap);
-        } else {
-            gambarUnitBase64Holder[0] = "";
-        }
-
-        if (selectedDenahBitmap != null) {
-            gambarDenahBase64Holder[0] = bitmapToBase64(selectedDenahBitmap);
-        } else {
-            gambarDenahBase64Holder[0] = "";
+            if (newLuasTanah <= 0 || newLuasBangunan <= 0) {
+                Toast.makeText(this, "Luas tanah dan bangunan harus lebih dari 0", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Luas tanah dan bangunan harus berupa angka", Toast.LENGTH_SHORT).show();
+            return;
         }
 
         // Show loading
-        Toast.makeText(this, "Menyimpan perubahan...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Menyimpan perubahan hunian...", Toast.LENGTH_SHORT).show();
+
+        // Prepare base64 strings for images
+        final String gambarUnitBase64;
+        final String gambarDenahBase64;
+
+        if (selectedUnitBitmap != null) {
+            gambarUnitBase64 = bitmapToBase64(selectedUnitBitmap);
+            Log.d(TAG, "Gambar unit akan diupdate, size: " + gambarUnitBase64.length());
+        } else {
+            gambarUnitBase64 = "";
+            Log.d(TAG, "Gambar unit tidak diubah");
+        }
+
+        if (selectedDenahBitmap != null) {
+            gambarDenahBase64 = bitmapToBase64(selectedDenahBitmap);
+            Log.d(TAG, "Gambar denah akan diupdate, size: " + gambarDenahBase64.length());
+        } else {
+            gambarDenahBase64 = "";
+            Log.d(TAG, "Gambar denah tidak diubah");
+        }
+
+        Log.d(TAG, "Mengupdate hunian - ID: " + currentHunian.getIdHunian() +
+                ", Nama Lama: " + currentHunian.getNamaHunian() +
+                ", Nama Baru: " + newNamaHunian);
 
         Call<BasicResponse> call = apiService.updateHunianComprehensive(
                 "updateHunian",
                 currentHunian.getIdHunian(),
-                currentHunian.getNamaHunian(),
+                currentHunian.getNamaHunian(), // old name
                 newNamaHunian,
                 newLuasTanah,
                 newLuasBangunan,
                 newDeskripsi,
-                gambarUnitBase64Holder[0],
-                gambarDenahBase64Holder[0]
+                gambarUnitBase64,
+                gambarDenahBase64
         );
 
         call.enqueue(new Callback<BasicResponse>() {
             @Override
             public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                Log.d(TAG, "Update hunian response code: " + response.code());
+
                 if (response.isSuccessful() && response.body() != null) {
                     BasicResponse updateResponse = response.body();
+                    Log.d(TAG, "Update success: " + updateResponse.isSuccess());
+                    Log.d(TAG, "Update message: " + updateResponse.getMessage());
+
                     if (updateResponse.isSuccess()) {
-                        // Jika hunian berhasil disimpan, lanjut simpan fasilitas
+                        Toast.makeText(DetailUnitProyekActivity.this, "Data hunian berhasil disimpan", Toast.LENGTH_SHORT).show();
+
+                        // Update current hunian data
                         updateCurrentHunianData(newNamaHunian, newLuasTanah, newLuasBangunan, newDeskripsi,
-                                gambarUnitBase64Holder[0], gambarDenahBase64Holder[0]);
+                                gambarUnitBase64, gambarDenahBase64);
+
+                        // Update toolbar title
+                        if (topAppBar != null) {
+                            topAppBar.setTitle("Detail " + newNamaHunian);
+                        }
 
                         // Simpan perubahan fasilitas jika ada
                         if (!pendingOperations.isEmpty()) {
@@ -796,18 +875,30 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
 
                     } else {
                         Toast.makeText(DetailUnitProyekActivity.this, "Gagal menyimpan: " + updateResponse.getMessage(), Toast.LENGTH_LONG).show();
+                        Log.e(TAG, "Update hunian gagal: " + updateResponse.getMessage());
                     }
                 } else {
-                    Toast.makeText(DetailUnitProyekActivity.this, "Error response: " + response.code(), Toast.LENGTH_SHORT).show();
+                    String errorMsg = "Error response: " + response.code();
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMsg += " - " + response.errorBody().string();
+                        } catch (IOException e) {
+                            Log.e(TAG, "Error reading error body", e);
+                        }
+                    }
+                    Toast.makeText(DetailUnitProyekActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, errorMsg);
                 }
             }
 
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
+                Log.e(TAG, "Network error updating hunian: " + t.getMessage(), t);
                 Toast.makeText(DetailUnitProyekActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
+
 
     // TAMBAHKAN METHOD UNTUK SAVE FASILITAS CHANGES
     private void saveAllFasilitasChanges() {
