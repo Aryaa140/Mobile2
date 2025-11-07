@@ -1,16 +1,24 @@
 package com.example.mobile;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.Manifest;
+
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
@@ -78,6 +86,8 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         setupClickListeners();
         setupNavigation();
         setupAccessBasedOnLevel();
+        checkAndRequestPermissions();
+
 
         checkAccountExpiry();
         checkAccountExpiryRealTime();
@@ -526,6 +536,94 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
                 Log.e("BerandaActivity", "Load promo error: " + t.getMessage());
             }
         });
+    }
+
+    private void checkAndRequestPermissions() {
+        if (!PermissionUtils.areAllPermissionsGranted(this)) {
+            if (shouldShowRequestPermissionRationale()) {
+                showPermissionExplanationDialog();
+            } else {
+                PermissionUtils.requestAllPermissions(this);
+            }
+        } else {
+            setupAfterPermissions();
+        }
+    }
+
+    private boolean shouldShowRequestPermissionRationale() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+
+            return ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.POST_NOTIFICATIONS) ||
+                    ActivityCompat.shouldShowRequestPermissionRationale(this,
+                            Manifest.permission.READ_MEDIA_IMAGES);
+        } else {
+            // Android 12 dan bawah
+            return ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE) ||
+                    ActivityCompat.shouldShowRequestPermissionRationale(this,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+    }
+
+    private void showPermissionExplanationDialog() {
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+        builder.setTitle("Izin Diperlukan")
+                .setMessage("Aplikasi membutuhkan izin untuk:\n" +
+                        "• Notifikasi - untuk menerima update dan promosi terbaru\n" +
+                        "• Penyimpanan - untuk menyimpan dan mengunduh file\n\n" +
+                        "Izin ini diperlukan untuk pengalaman penggunaan yang optimal.")
+                .setPositiveButton("Berikan Izin", (dialog, which) -> {
+                    PermissionUtils.requestAllPermissions(NewBeranda.this);
+                })
+                .setNegativeButton("Nanti", (dialog, which) -> {
+                    setupAfterPermissions();
+                })
+                .show();
+    }
+
+    private void setupAfterPermissions() {
+        setupNotificationChannel();
+    }
+
+    private void setupNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Promo Notifications";
+            String description = "Notifications for latest promotions and updates";
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel channel = new NotificationChannel("promo_channel", name, importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == PermissionUtils.ALL_PERMISSIONS_CODE ||
+                requestCode == PermissionUtils.NOTIFICATION_PERMISSION_CODE ||
+                requestCode == PermissionUtils.STORAGE_PERMISSION_CODE) {
+
+            boolean allGranted = true;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
+                }
+            }
+
+            if (allGranted) {
+                Toast.makeText(this, "Izin berhasil diberikan", Toast.LENGTH_SHORT).show();
+                setupAfterPermissions();
+            } else {
+                Toast.makeText(this, "Beberapa fitur mungkin tidak berfungsi optimal", Toast.LENGTH_LONG).show();
+                setupAfterPermissions();
+            }
+        }
     }
 
     // IMPLEMENTASI METHOD DARI INTERFACE - YANG INI SUDAH ADA DAN TIDAK DIUBAH

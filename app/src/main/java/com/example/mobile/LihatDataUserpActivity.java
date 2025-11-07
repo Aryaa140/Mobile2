@@ -15,11 +15,15 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.Manifest;
+import androidx.core.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -35,6 +39,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -65,6 +70,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import androidx.annotation.RequiresApi;
 import java.io.OutputStream;
+
 public class LihatDataUserpActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
@@ -74,56 +80,49 @@ public class LihatDataUserpActivity extends AppCompatActivity {
     private List<UserProspekSimple> filteredList;
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
-    private String userLevel; // Simpan level (Admin, Operator, dll)
-    private String userName;  // Simpan username untuk parameter penginput
+    private String userLevel;
+    private String userName;
     private ApiService apiService;
     private static final String TAG = "LihatDataUserp";
 
-    // FIX: Gunakan KEY yang sama dengan MainActivity
     private static final String PREFS_NAME = "LoginPrefs";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_LEVEL = "level";
     private static final int STORAGE_PERMISSION_CODE = 100;
+
+    private UserProspekSimple pendingPrintProspek = null;
+    private boolean isPermissionRequested = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_lihat_data_userp);
 
-        // Inisialisasi Retrofit
         apiService = RetrofitClient.getClient().create(ApiService.class);
 
-        // FIX: Ambil data dari SharedPreferences yang benar
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        userLevel = prefs.getString(KEY_LEVEL, "");  // Level: Admin, Operator, dll
-        userName = prefs.getString(KEY_USERNAME, ""); // Username: untuk parameter penginput
+        userLevel = prefs.getString(KEY_LEVEL, "");
+        userName = prefs.getString(KEY_USERNAME, "");
 
-        // DEBUG: Cek SharedPreferences
         Log.d(TAG, "=== SHARED PREFERENCES DEBUG ===");
-        Log.d(TAG, "Prefs Name: " + PREFS_NAME);
-        Log.d(TAG, "All stored data: " + prefs.getAll().toString());
         Log.d(TAG, "User Level: '" + userLevel + "'");
         Log.d(TAG, "User Name: '" + userName + "'");
 
-        // Inisialisasi view
         TopAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.nav_folder);
         searchEditText = findViewById(R.id.searchEditText);
         recyclerView = findViewById(R.id.recyclerProspek);
 
-        // Setup RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         userProspekList = new ArrayList<>();
         filteredList = new ArrayList<>();
         adapter = new UserProspekAdapter(filteredList);
         recyclerView.setAdapter(adapter);
 
-        // Load data
         loadUserProspekData();
-        checkStoragePermission();
 
-        // Navigation
         TopAppBar.setNavigationOnClickListener(v -> {
             Intent intent = new Intent(LihatDataUserpActivity.this, LihatDataActivity.class);
             startActivity(intent);
@@ -153,7 +152,6 @@ public class LihatDataUserpActivity extends AppCompatActivity {
             return false;
         });
 
-        // Search functionality
         searchEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -175,15 +173,12 @@ public class LihatDataUserpActivity extends AppCompatActivity {
     }
 
     private void loadUserProspekData() {
-        // FIX: Logic parameter berdasarkan LEVEL bukan ROLE
         String penginputParam;
 
         if (userLevel.equals("Admin")) {
-            // Admin bisa lihat semua data
             penginputParam = "all";
         } else {
-            // Operator, Freelance, Inhouse hanya lihat data mereka sendiri
-            penginputParam = userName; // Username sebagai filter
+            penginputParam = userName;
         }
 
         Log.d(TAG, "🎯 === LOAD DATA PARAMETERS ===");
@@ -211,20 +206,8 @@ public class LihatDataUserpActivity extends AppCompatActivity {
                                     if (apiResponse.isSuccess()) {
                                         List<UserProspekSimple> data = apiResponse.getData();
 
-                                        Log.d(TAG, "🎯 Data reference: " + data);
-                                        Log.d(TAG, "🎯 Data == null: " + (data == null));
-
                                         if (data != null) {
                                             Log.d(TAG, "🎯 Data.size(): " + data.size());
-                                            Log.d(TAG, "🎯 Data.isEmpty(): " + data.isEmpty());
-
-                                            // DEBUG: Log first few items
-                                            if (data.size() > 0) {
-                                                for (int i = 0; i < Math.min(data.size(), 3); i++) {
-                                                    UserProspekSimple item = data.get(i);
-                                                    Log.d(TAG, "🎯 Item " + i + ": " + item.getNama() + " by " + item.getPenginput());
-                                                }
-                                            }
 
                                             if (!data.isEmpty()) {
                                                 userProspekList.clear();
@@ -242,7 +225,6 @@ public class LihatDataUserpActivity extends AppCompatActivity {
                                                         "✅ Data Anda: " + userProspekList.size() + " items";
 
                                                 Toast.makeText(LihatDataUserpActivity.this, message, Toast.LENGTH_SHORT).show();
-                                                Log.d(TAG, "🎯 SUCCESS: Data loaded to UI - " + userProspekList.size() + " items");
                                             } else {
                                                 Log.d(TAG, "📭 Data list is EMPTY");
                                                 userProspekList.clear();
@@ -272,19 +254,12 @@ public class LihatDataUserpActivity extends AppCompatActivity {
                                 }
                             } else {
                                 Log.e(TAG, "❌ HTTP Error: " + response.code());
-                                try {
-                                    String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
-                                    Log.e(TAG, "❌ Error body: " + errorBody);
-                                } catch (Exception e) {
-                                    Log.e(TAG, "❌ Error reading error body: " + e.getMessage());
-                                }
                                 Toast.makeText(LihatDataUserpActivity.this, "❌ HTTP Error: " + response.code(), Toast.LENGTH_SHORT).show();
                             }
                         } catch (Exception e) {
                             Log.e(TAG, "❌ Exception in onResponse", e);
                             Toast.makeText(LihatDataUserpActivity.this, "❌ Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
-                        Log.d(TAG, "🎯 === END DEBUG ===");
                     }
                 });
             }
@@ -301,64 +276,168 @@ public class LihatDataUserpActivity extends AppCompatActivity {
             }
         });
     }
-    private void checkStoragePermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
-            }
+
+
+    // PERBAIKAN: Method untuk request permission dengan explanation jika diperlukan
+    private void requestStoragePermissionWithExplanation() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+
+            // Tampilkan penjelasan mengapa permission diperlukan
+            new AlertDialog.Builder(this)
+                    .setTitle("Izin Penyimpanan Diperlukan")
+                    .setMessage("Aplikasi membutuhkan izin penyimpanan untuk menyimpan file PDF hasil cetak. Izin ini diperlukan untuk menyimpan dokumen ke folder Downloads.")
+                    .setPositiveButton("Berikan Izin", (dialog, which) -> {
+                        requestStoragePermission();
+                    })
+                    .setNegativeButton("Tolak", (dialog, which) -> {
+                        Toast.makeText(this, "Fitur cetak tidak dapat digunakan tanpa izin penyimpanan", Toast.LENGTH_LONG).show();
+                    })
+                    .show();
+        } else {
+            // Langsung minta permission
+            requestStoragePermission();
         }
     }
 
-    // Handle permission result
+    private void requestStoragePermission() {
+        String[] permissions;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            permissions = new String[]{
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+            };
+        } else {
+            permissions = new String[]{
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            };
+        }
+
+        Log.d(TAG, "Requesting permissions: " + Arrays.toString(permissions));
+        ActivityCompat.requestPermissions(this, permissions, STORAGE_PERMISSION_CODE);
+    }
+
+
+    private void showPermissionSettingsDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Izin Diperlukan")
+                .setMessage("Izin penyimpanan ditolak secara permanen. Untuk menggunakan fitur cetak, Anda perlu memberikan izin di Settings. Buka Settings sekarang?")
+                .setPositiveButton("BUKA SETTINGS", (dialog, which) -> {
+                    openAppSettings();
+                })
+                .setNegativeButton("TUTUP", (dialog, which) -> {
+                    Toast.makeText(this, "Fitur cetak tidak dapat digunakan", Toast.LENGTH_LONG).show();
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+    private void openAppSettings() {
+        Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        intent.setData(Uri.parse("package:" + getPackageName()));
+        startActivity(intent);
+    }
+    // DI LihatDataUserpActivity - HAPUS SEMUA METHOD PERMISSION YANG ADA
+// DAN GANTI DENGAN INI:
+
+    private boolean hasStoragePermission() {
+        return PermissionUtils.isStoragePermissionGranted(this);
+    }
+
+    private void handlePrintButton(UserProspekSimple userProspek) {
+        Log.d(TAG, "🎯 Handle print untuk: " + userProspek.getNama());
+
+        // SIMPAN DATA YANG AKAN DICETAK
+        pendingPrintProspek = userProspek;
+
+        // DEBUG: Cek status permission
+        Log.d(TAG, "=== BEFORE PERMISSION CHECK ===");
+        boolean hasPerm = hasStoragePermission();
+        Log.d(TAG, "Has Storage Permission: " + hasPerm);
+
+        if (hasPerm) {
+            Log.d(TAG, "Permission SUDAH diberikan, langsung generate PDF");
+            new Thread(() -> generatePDF(userProspek)).start();
+        } else {
+            Log.d(TAG, "Permission BELUM diberikan, meminta permission...");
+
+            // Gunakan PermissionUtils yang sama dengan NewBeranda
+            PermissionUtils.requestStoragePermissions(this);
+        }
+    }
+
+    // PERBAIKI onRequestPermissionsResult
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == STORAGE_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Permission granted, silakan cetak ulang", Toast.LENGTH_SHORT).show();
+
+        Log.d(TAG, "onRequestPermissionsResult - Request Code: " + requestCode);
+
+        // Handle untuk semua tipe permission request
+        if (requestCode == PermissionUtils.STORAGE_PERMISSION_CODE ||
+                requestCode == PermissionUtils.ALL_PERMISSIONS_CODE) {
+
+            boolean allGranted = true;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
+                }
+            }
+
+            if (allGranted) {
+                Toast.makeText(this, "Izin penyimpanan diberikan!", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "Storage permission granted");
+
+                // Lanjutkan dengan generate PDF
+                if (pendingPrintProspek != null) {
+                    new Thread(() -> generatePDF(pendingPrintProspek)).start();
+                    pendingPrintProspek = null;
+                }
             } else {
-                Toast.makeText(this, "Permission denied, tidak bisa menyimpan PDF", Toast.LENGTH_LONG).show();
+                // Jangan tampilkan pesan "ditolak secara permanen"
+                // Cukup arahkan ke internal storage
+                Log.d(TAG, "Some permissions denied, using internal storage");
+
+                if (pendingPrintProspek != null) {
+                    new Thread(() -> generatePDF(pendingPrintProspek)).start();
+                }
             }
         }
     }
+
+    private void showPermissionExplanationDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Izin Penyimpanan Diperlukan")
+                .setMessage("Aplikasi membutuhkan izin penyimpanan untuk:\n• Menyimpan file PDF hasil cetak\n• Menyimpan ke folder Downloads\n\nIzin ini aman dan hanya digunakan untuk fungsi cetak.")
+                .setPositiveButton("BERIKAN IZIN", (dialog, which) -> {
+                    requestStoragePermission();
+                })
+                .setNegativeButton("TOLAK", (dialog, which) -> {
+                    Toast.makeText(this, "Fitur cetak tidak dapat digunakan", Toast.LENGTH_LONG).show();
+                    pendingPrintProspek = null;
+                })
+                .setCancelable(false)
+                .show();
+    }
+
     private void generatePDF(UserProspekSimple userProspek) {
+        Log.d(TAG, "=== START GENERATE PDF ===");
+
         try {
-            // Cek permission terlebih dahulu
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    runOnUiThread(() -> {
-                        Toast.makeText(LihatDataUserpActivity.this, "Mohon berikan permission storage terlebih dahulu", Toast.LENGTH_LONG).show();
-                        checkStoragePermission();
-                    });
-                    return;
-                }
+            // GUNAKAN INTERNAL STORAGE SAJA - TIDAK PERLU PERMISSION
+            File internalDir = new File(getFilesDir(), "PDF_Documents");
+            if (!internalDir.exists()) {
+                boolean created = internalDir.mkdirs();
+                Log.d(TAG, "Internal directory created: " + created);
             }
 
-            // Buat nama file dengan timestamp
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-            String fileName = "Penerimaan_Kas_" + timeStamp + ".pdf";
+            String fileName = "Penerimaan_Kas_" + userProspek.getNama() + "_" + timeStamp + ".pdf";
+            File file = new File(internalDir, fileName);
 
-            File file;
-
-            // Untuk Android 10+ gunakan MediaStore, untuk yang lama gunakan traditional method
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                // Android 10+ - Gunakan MediaStore
-                file = createFileUsingMediaStore(fileName);
-            } else {
-                // Android 9 dan bawah - Gunakan traditional method
-                File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-                if (!downloadsDir.exists()) {
-                    downloadsDir.mkdirs();
-                }
-                file = new File(downloadsDir, fileName);
-            }
-
-            if (file == null) {
-                runOnUiThread(() -> {
-                    Toast.makeText(LihatDataUserpActivity.this, "Gagal membuat file", Toast.LENGTH_SHORT).show();
-                });
-                return;
-            }
+            Log.d(TAG, "PDF will be saved to: " + file.getAbsolutePath());
 
             // Buat PDF writer
             PdfWriter writer = new PdfWriter(new FileOutputStream(file));
@@ -369,7 +448,7 @@ public class LihatDataUserpActivity extends AppCompatActivity {
             document.setMargins(50, 50, 50, 50);
 
             // Header
-            Paragraph header1 = new Paragraph("PT. BUMI JATIKALANG SEJAHTERA")
+            Paragraph header1 = new Paragraph("THE QUALITY GROUP")
                     .setTextAlignment(TextAlignment.CENTER)
                     .setBold()
                     .setFontSize(14);
@@ -385,11 +464,9 @@ public class LihatDataUserpActivity extends AppCompatActivity {
 
             // Nomor dan Tanggal Input Prospek
             String nomorDokumen = "KM" + new SimpleDateFormat("ddMMyy", Locale.getDefault()).format(new Date()) + "/B001";
-
             Paragraph nomor = new Paragraph("Nomor : " + nomorDokumen)
                     .setFontSize(10)
                     .setMarginTop(15);
-
             document.add(nomor);
 
             // Tanggal Input Prospek
@@ -415,21 +492,20 @@ public class LihatDataUserpActivity extends AppCompatActivity {
             document.add(terimaDari);
             document.add(namaUser);
 
-            // TAMBAHAN: Tanggal Cetak di atas tabel, pojok kanan
+            // Tanggal Cetak
             String tanggalCetak = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
             Paragraph tanggalCetakParagraph = new Paragraph("Cetak: " + tanggalCetak)
                     .setFontSize(8)
                     .setTextAlignment(TextAlignment.RIGHT)
                     .setFontColor(com.itextpdf.kernel.colors.ColorConstants.GRAY)
-                    .setMarginTop(10); // Margin di atas tabel
-
+                    .setMarginTop(10);
             document.add(tanggalCetakParagraph);
 
             // Tabel utama
             float[] columnWidths = {1f, 5f, 2f};
             Table table = new Table(UnitValue.createPercentArray(columnWidths));
             table.setWidth(UnitValue.createPercentValue(100));
-            table.setMarginTop(5); // Margin kecil antara tanggal cetak dan tabel
+            table.setMarginTop(5);
 
             // Header tabel
             table.addHeaderCell(new Paragraph("No").setFontSize(8));
@@ -439,7 +515,6 @@ public class LihatDataUserpActivity extends AppCompatActivity {
             // Isi tabel
             table.addCell(new Paragraph("1").setFontSize(8));
 
-            // Format keterangan sesuai permintaan
             String keterangan = "Uang Tanda Jadi " +
                     (userProspek.getTipeHunian() != null ? "Type : " + userProspek.getTipeHunian() + ", " : "") +
                     (userProspek.getHunian() != null ? "Blok/No : " + userProspek.getHunian() + ", " : "") +
@@ -465,11 +540,9 @@ public class LihatDataUserpActivity extends AppCompatActivity {
 
             // Terbilang
             String terbilang = terbilang(userProspek.getDp()) + " rupiah";
-
             Paragraph textTerbilang = new Paragraph("terbilang :")
                     .setFontSize(8)
                     .setMarginTop(10);
-
             Paragraph isiTerbilang = new Paragraph(terbilang)
                     .setFontSize(8)
                     .setItalic();
@@ -480,23 +553,61 @@ public class LihatDataUserpActivity extends AppCompatActivity {
             document.close();
 
             runOnUiThread(() -> {
-                Toast.makeText(LihatDataUserpActivity.this, "PDF berhasil disimpan: " + fileName, Toast.LENGTH_LONG).show();
-                Log.d(TAG, "PDF saved: " + file.getAbsolutePath());
+                Toast.makeText(LihatDataUserpActivity.this,
+                        "PDF berhasil disimpan!\nFile: " + fileName,
+                        Toast.LENGTH_LONG).show();
+                Log.d(TAG, "PDF successfully saved: " + file.getAbsolutePath());
+
+                // Share PDF file
+                sharePDFFile(file);
             });
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            runOnUiThread(() -> {
-                Toast.makeText(LihatDataUserpActivity.this, "Gagal membuat PDF: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "PDF creation error: " + e.getMessage(), e);
-            });
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Error generating PDF", e);
             runOnUiThread(() -> {
-                Toast.makeText(LihatDataUserpActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(LihatDataUserpActivity.this,
+                        "Gagal membuat PDF: " + e.getMessage(),
+                        Toast.LENGTH_SHORT).show();
             });
         }
     }
+
+    private void sharePDFFile(File file) {
+        try {
+            // Gunakan FileProvider untuk mendapatkan URI yang aman
+            Uri fileUri = FileProvider.getUriForFile(this,
+                    getApplicationContext().getPackageName() + ".provider",
+                    file);
+
+            // Buat intent untuk share
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("application/pdf");
+            shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
+            shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Penerimaan Kas - " + (pendingPrintProspek != null ? pendingPrintProspek.getNama() : ""));
+            shareIntent.putExtra(Intent.EXTRA_TEXT, "Dokumen Penerimaan Kas");
+
+            // Berikan izin baca ke aplikasi yang menerima intent
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            // Tampilkan dialog share
+            startActivity(Intent.createChooser(shareIntent, "Bagikan PDF"));
+
+            Log.d(TAG, "PDF shared successfully: " + file.getAbsolutePath());
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error sharing PDF", e);
+
+            // Fallback: show file location
+            runOnUiThread(() -> {
+                Toast.makeText(this,
+                        "PDF disimpan di: " + file.getAbsolutePath() +
+                                "\nError sharing: " + e.getMessage(),
+                        Toast.LENGTH_LONG).show();
+            });
+        }
+    }
+
+
     private String formatDateForPDF(String dateString) {
         try {
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
@@ -504,18 +615,17 @@ public class LihatDataUserpActivity extends AppCompatActivity {
             Date date = inputFormat.parse(dateString);
             return outputFormat.format(date);
         } catch (Exception e) {
-            // Jika format pertama gagal, coba format tanpa jam
             try {
                 SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                 SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
                 Date date = inputFormat.parse(dateString);
                 return outputFormat.format(date);
             } catch (Exception ex) {
-                return dateString; // Kembalikan string asli jika parsing gagal
+                return dateString;
             }
         }
     }
-    // Method untuk Android 10+ menggunakan MediaStore
+
     @RequiresApi(api = Build.VERSION_CODES.Q)
     private File createFileUsingMediaStore(String fileName) {
         try {
@@ -527,36 +637,20 @@ public class LihatDataUserpActivity extends AppCompatActivity {
             Uri uri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues);
 
             if (uri != null) {
-                // Untuk MediaStore, kita tidak bisa mendapatkan File object langsung
-                // Tapi kita bisa menggunakan OutputStream dari ContentResolver
-                OutputStream outputStream = getContentResolver().openOutputStream(uri);
-                if (outputStream != null) {
-                    // Karena kita butuh File untuk iText, kita buat file temporary dulu
-                    File tempFile = new File(getCacheDir(), fileName);
-                    return tempFile;
-                }
+                // Langsung return file dari cache, nanti akan disimpan via OutputStream
+                File tempFile = new File(getCacheDir(), fileName);
+                return tempFile;
             }
         } catch (Exception e) {
             Log.e(TAG, "Error creating file with MediaStore: " + e.getMessage());
+
+            // Fallback: gunakan cache directory
+            File tempFile = new File(getCacheDir(), fileName);
+            return tempFile;
         }
         return null;
     }
 
-    // Alternatif: Gunakan internal storage jika external tidak available
-    private File getDownloadDirectory() {
-        File dir;
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "MobileApp");
-        } else {
-            dir = new File(getFilesDir(), "Downloads");
-        }
-
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        return dir;
-    }
-    // Method untuk konversi angka ke terbilang
     private String terbilang(long angka) {
         String[] bilangan = {"", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas"};
 
@@ -580,6 +674,7 @@ public class LihatDataUserpActivity extends AppCompatActivity {
             return "angka terlalu besar";
         }
     }
+
     private void filterData(String query) {
         filteredList.clear();
         if (query.isEmpty()) {
@@ -618,7 +713,6 @@ public class LihatDataUserpActivity extends AppCompatActivity {
     }
 
     private void showEditDialog(UserProspekSimple userProspek) {
-        // FIX: Cek level untuk hak akses edit
         if (!userLevel.equals("Admin")) {
             Toast.makeText(this, "Hanya Admin yang dapat mengedit data", Toast.LENGTH_SHORT).show();
             return;
@@ -641,7 +735,6 @@ public class LihatDataUserpActivity extends AppCompatActivity {
     }
 
     private void showDeleteConfirmation(UserProspekSimple userProspek) {
-        // FIX: Cek level untuk hak akses delete
         if (!userLevel.equals("Admin")) {
             Toast.makeText(this, "Hanya Admin yang dapat menghapus data", Toast.LENGTH_SHORT).show();
             return;
@@ -651,50 +744,11 @@ public class LihatDataUserpActivity extends AppCompatActivity {
                 .setTitle("Konfirmasi Hapus")
                 .setMessage("Apakah Anda yakin ingin menghapus data " + userProspek.getNama() + "?")
                 .setPositiveButton("Ya", (dialog, which) -> {
-                   // deleteUserProspek(userProspek);
+                    // deleteUserProspek(userProspek);
                 })
                 .setNegativeButton("Tidak", null)
                 .show();
     }
-
-   /* private void deleteUserProspek(UserProspekSimple userProspek) {
-        Call<BasicResponse> call = apiService.deleteProspekByData(
-                userProspek.getPenginput(),
-                userProspek.getNama()
-        );
-
-        call.enqueue(new Callback<BasicResponse>() {
-            @Override
-            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (response.isSuccessful() && response.body() != null) {
-                            if (response.body().isSuccess()) {
-                                Toast.makeText(LihatDataUserpActivity.this, "Data berhasil dihapus", Toast.LENGTH_SHORT).show();
-                                loadUserProspekData();
-                            } else {
-                                Toast.makeText(LihatDataUserpActivity.this,
-                                        "Gagal menghapus data: " + response.body().getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        } else {
-                            Toast.makeText(LihatDataUserpActivity.this, "Gagal menghapus data", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void onFailure(Call<BasicResponse> call, Throwable t) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(LihatDataUserpActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        });
-    }*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -704,7 +758,6 @@ public class LihatDataUserpActivity extends AppCompatActivity {
         }
     }
 
-    // Adapter class dengan null safety
     private class UserProspekAdapter extends RecyclerView.Adapter<UserProspekAdapter.ViewHolder> {
 
         private List<UserProspekSimple> userProspekList;
@@ -724,7 +777,6 @@ public class LihatDataUserpActivity extends AppCompatActivity {
         public void onBindViewHolder(ViewHolder holder, int position) {
             UserProspekSimple userProspek = userProspekList.get(position);
 
-            // Null safety untuk semua field
             holder.tvPenginput.setText("Penginput: " + (userProspek.getPenginput() != null ? userProspek.getPenginput() : "-"));
             holder.tvTanggal.setText("Tanggal: " + (userProspek.getTanggal() != null ? formatDate(userProspek.getTanggal()) : "-"));
             holder.tvNama.setText("Nama: " + (userProspek.getNama() != null ? userProspek.getNama() : "-"));
@@ -734,13 +786,9 @@ public class LihatDataUserpActivity extends AppCompatActivity {
 
             String formattedDP = "DP: Rp " + formatCurrency(userProspek.getDp());
             holder.tvJumlahUangTandaJadi.setText(formattedDP);
-            // TAMPILKAN HUNIAN
             holder.tvHunian.setText("Hunian: " + (userProspek.getHunian() != null ? userProspek.getHunian() : "-"));
-
-            // TAMPILKAN TIPE HUNIAN
             holder.tvTipeHunian.setText("Tipe Hunian: " + (userProspek.getTipeHunian() != null ? userProspek.getTipeHunian() : "-"));
 
-            // FIX: Tampilkan edit button hanya untuk Admin
             if (holder.btnEdit != null) {
                 if (userLevel.equals("Admin")) {
                     holder.btnEdit.setVisibility(View.VISIBLE);
@@ -749,24 +797,15 @@ public class LihatDataUserpActivity extends AppCompatActivity {
                     holder.btnEdit.setVisibility(View.GONE);
                 }
             }
+
             if (holder.btnHistori != null) {
                 holder.btnHistori.setVisibility(View.VISIBLE);
                 holder.btnHistori.setOnClickListener(v -> {
                     try {
-                        // Intent ke halaman histori - PERBAIKI NAMA ACTIVITY
                         Intent intent = new Intent(LihatDataUserpActivity.this, LihatDataHistoriUserProspek.class);
-
-                        // Kirim data yang diperlukan
                         intent.putExtra("USER_PROSPEK_ID", userProspek.getId());
                         intent.putExtra("NAMA", userProspek.getNama());
                         intent.putExtra("PENGINPUT", userProspek.getPenginput());
-
-                        // Debug log
-                        Log.d(TAG, "🎯 Button Histori diklik:");
-                        Log.d(TAG, "🎯 USER_PROSPEK_ID: " + userProspek.getId());
-                        Log.d(TAG, "🎯 NAMA: " + userProspek.getNama());
-                        Log.d(TAG, "🎯 PENGINPUT: " + userProspek.getPenginput());
-
                         startActivity(intent);
                     } catch (Exception e) {
                         Log.e(TAG, "❌ Error saat membuka histori: " + e.getMessage());
@@ -778,31 +817,20 @@ public class LihatDataUserpActivity extends AppCompatActivity {
             if (holder.btnDelete != null) {
                 holder.btnDelete.setOnClickListener(v -> showDeleteConfirmation(userProspek));
             }
-            // TAMBAHAN: Button Cetak - selalu visible
+
+            // PERBAIKAN UTAMA: Tombol cetak dengan handler yang diperbaiki
             if (holder.btnCetak != null) {
                 holder.btnCetak.setVisibility(View.VISIBLE);
                 holder.btnCetak.setOnClickListener(v -> {
                     try {
                         Log.d(TAG, "🎯 Button Cetak diklik untuk: " + userProspek.getNama());
-
-                        // Cek permission sebelum generate PDF
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
-                                Toast.makeText(LihatDataUserpActivity.this, "Silakan berikan permission storage, lalu tekan cetak lagi", Toast.LENGTH_LONG).show();
-                                return;
-                            }
-                        }
-
-                        // Jalankan generate PDF di thread terpisah
-                        new Thread(() -> {
-                            generatePDF(userProspek);
-                        }).start();
-
+                        handlePrintButton(userProspek);
                     } catch (Exception e) {
                         Log.e(TAG, "❌ Error saat mencetak PDF: " + e.getMessage());
                         runOnUiThread(() -> {
-                            Toast.makeText(LihatDataUserpActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LihatDataUserpActivity.this,
+                                    "Error: " + e.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
                         });
                     }
                 });
@@ -816,7 +844,7 @@ public class LihatDataUserpActivity extends AppCompatActivity {
 
         public class ViewHolder extends RecyclerView.ViewHolder {
             TextView tvPenginput, tvTanggal, tvNama, tvEmail, tvNoHp, tvAlamat, tvJumlahUangTandaJadi, tvHunian, tvTipeHunian;
-            MaterialButton btnEdit, btnDelete,btnHistori,btnCetak;;
+            MaterialButton btnEdit, btnDelete, btnHistori, btnCetak;
 
             public ViewHolder(View itemView) {
                 super(itemView);
@@ -826,8 +854,8 @@ public class LihatDataUserpActivity extends AppCompatActivity {
                 tvEmail = itemView.findViewById(R.id.tvEmail);
                 tvNoHp = itemView.findViewById(R.id.tvNoHp);
                 tvAlamat = itemView.findViewById(R.id.tvAlamat);
-                tvHunian = itemView.findViewById(R.id.tvHunian); // TAMBAHAN
-                tvTipeHunian = itemView.findViewById(R.id.tvTipeHunian); // TAMBAHAN
+                tvHunian = itemView.findViewById(R.id.tvHunian);
+                tvTipeHunian = itemView.findViewById(R.id.tvTipeHunian);
                 tvJumlahUangTandaJadi = itemView.findViewById(R.id.tvJumlahUangTandaJadi);
                 btnEdit = itemView.findViewById(R.id.btnEdit);
                 btnDelete = itemView.findViewById(R.id.btnDelete);

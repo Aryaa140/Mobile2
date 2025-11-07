@@ -22,7 +22,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ProyekActivity extends AppCompatActivity {
+public class ProyekActivity extends AppCompatActivity implements ProyekAdapterDetail.OnItemClickListener {
 
     private static final String TAG = "ProyekActivity";
 
@@ -45,7 +45,7 @@ public class ProyekActivity extends AppCompatActivity {
         initViews();
         setupRecyclerView();
         setupNavigation();
-        loadDataProyek(); // LANGSUNG LOAD DARI DATABASE
+        loadDataProyek();
     }
 
     private void initViews() {
@@ -62,7 +62,7 @@ public class ProyekActivity extends AppCompatActivity {
     private void setupRecyclerView() {
         GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
         recyclerViewProyek.setLayoutManager(layoutManager);
-        proyekAdapterDetail = new ProyekAdapterDetail(proyekList, this::onProyekItemClick);
+        proyekAdapterDetail = new ProyekAdapterDetail(proyekList, this, this);
         recyclerViewProyek.setAdapter(proyekAdapterDetail);
     }
 
@@ -99,7 +99,6 @@ public class ProyekActivity extends AppCompatActivity {
 
         Log.d(TAG, "Mengambil data proyek dari database...");
 
-        // LANGSUNG AMBIL DARI DATABASE - TIDAK PAKAI HARDCODE
         Call<List<Proyek>> call = apiService.getAllProyek("getProyek");
         call.enqueue(new Callback<List<Proyek>>() {
             @Override
@@ -112,11 +111,6 @@ public class ProyekActivity extends AppCompatActivity {
                     proyekAdapterDetail.notifyDataSetChanged();
 
                     Log.d(TAG, "Data dari database: " + proyekList.size() + " proyek");
-
-                    for (Proyek proyek : proyekList) {
-                        Log.d(TAG, "Proyek: " + proyek.getNamaProyek() +
-                                ", Logo ada: " + (proyek.getLogoBase64() != null && !proyek.getLogoBase64().isEmpty()));
-                    }
 
                     if (proyekList.isEmpty()) {
                         textEmpty.setVisibility(View.VISIBLE);
@@ -150,12 +144,19 @@ public class ProyekActivity extends AppCompatActivity {
         });
     }
 
-    private void onProyekItemClick(Proyek proyek) {
+    @Override
+    public void onItemClick(Proyek proyek) {
         Intent intent = new Intent(ProyekActivity.this, DetailProyekActivity.class);
-        // HANYA KIRIM ID, jangan kirim gambar base64
         intent.putExtra("ID_PROYEK", proyek.getIdProyek());
         startActivity(intent);
     }
+
+    @Override
+    public void onProyekDeleted() {
+        // Refresh data setelah proyek dihapus
+        loadDataProyek();
+    }
+
     private void navigateToHome() {
         Intent intent = new Intent(ProyekActivity.this, NewBeranda.class);
         startActivity(intent);

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_scroll_gradient"
+    tools:context=".TambahFasilitasProyekActivity">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/topAppBar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@android:color/transparent"
+        android:theme="@style/ToolbarWhiteIcons"
+        app:navigationIcon="@drawable/ic_back"
+        app:navigationIconTint="@android:color/white"
+        app:title="Tambah Fasilitas Proyek"
+        app:titleCentered="true"
+        app:titleTextColor="@android:color/white" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Card Input Fasilitas -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Data Fasilitas"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/black"
+                        android:layout_marginBottom="16dp" />
+
+                    <EditText
+                        android:id="@+id/editNamaFasilitas"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:textColor="@android:color/black"
+                        android:background="@drawable/edit_text_background"
+                        android:drawableStart="@drawable/ic_facility"
+                        android:drawablePadding="8dp"
+                        android:hint="Masukkan Nama Fasilitas"
+                        android:padding="12dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Gambar Fasilitas"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginBottom="8dp" />
+
+                    <!-- PERUBAHAN: Button dan ImageView sekarang vertikal -->
+                    <Button
+                        android:id="@+id/btnPilihGambarFasilitas"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:text="Pilih Gambar Fasilitas"
+                        android:textColor="@android:color/white"
+                        android:backgroundTint="#2196F3" />
+
+                    <!-- ImageView sekarang di bawah button dengan ukuran lebih besar -->
+                    <ImageView
+                        android:id="@+id/imagePreviewFasilitas"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:background="#F5F5F5"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_placeholder"
+                        android:contentDescription="Preview Gambar Fasilitas"
+                        android:layout_gravity="center_horizontal" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Button Simpan dan Batal -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="80dp">
+
+                <Button
+                    android:id="@+id/btnSimpan"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="12dp"
+                    android:paddingLeft="32dp"
+                    android:paddingRight="32dp"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:text="Simpan"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="#4CAF50" />
+
+                <Button
+                    android:id="@+id/btnBatal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="32dp"
+                    android:paddingRight="32dp"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:text="Batal"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="#F44336" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

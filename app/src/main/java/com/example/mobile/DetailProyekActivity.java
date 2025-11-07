@@ -1,16 +1,26 @@
 package com.example.mobile;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.SharedPreferences;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -20,6 +30,8 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +42,9 @@ import retrofit2.Response;
 public class DetailProyekActivity extends AppCompatActivity {
 
     private static final String TAG = "DetailProyekActivity";
+    private static final int PICK_LOGO_REQUEST = 1;
+    private static final int PICK_SITEPLAN_REQUEST = 2;
+    private static final int PICK_FASILITAS_REQUEST = 3;
 
     private MaterialToolbar topAppBar;
     private BottomNavigationView bottomNavigationView;
@@ -41,19 +56,39 @@ public class DetailProyekActivity extends AppCompatActivity {
     private TextView txtNamaProyek;
     private TextView txtLokasiProyek;
     private TextView txtDeskripsiProyek;
+    private EditText editNama;
+    private EditText editLokasi;
+    private EditText editDeskripsi;
 
     // Views untuk Card 2 - Fasilitas
     private RecyclerView recyclerViewFasilitas;
     private FasilitasAdapter fasilitasAdapter;
     private List<FasilitasItem> fasilitasList;
+    private Button btnTambahFasilitas;
 
     // Views untuk Card 3 - Siteplan
     private ImageView imgSitePlan;
     private CardView cardSitePlan;
+    private Proyek currentProyek;
 
     // Data
     private int idProyek;
     private ApiService apiService;
+
+    // Edit mode variables
+    private boolean isEditMode = false;
+    private MenuItem menuEdit, menuSave, menuCancel;
+    private Bitmap selectedLogoBitmap = null;
+    private Bitmap selectedSiteplanBitmap = null;
+    private Bitmap selectedFasilitasBitmap = null;
+
+    // Variabel untuk dialog fasilitas
+    private AlertDialog currentFasilitasDialog;
+    private ImageView currentFasilitasDialogImageView;
+
+    // User level
+    private String userLevel;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,12 +99,25 @@ public class DetailProyekActivity extends AppCompatActivity {
             setContentView(R.layout.activity_detail_proyek);
             Log.d(TAG, "Layout inflated successfully");
 
+            // Ambil user level dari SharedPreferences
+            sharedPreferences = getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
+            userLevel = sharedPreferences.getString("level", "Operator");
+            Log.d(TAG, "User Level: " + userLevel);
+
             // HANYA ambil ID dari intent
             idProyek = getIntent().getIntExtra("ID_PROYEK", -1);
             Log.d(TAG, "Received ID: " + idProyek);
 
             apiService = RetrofitClient.getClient().create(ApiService.class);
             initViews();
+
+            // Set toolbar sebagai action bar
+            setSupportActionBar(topAppBar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
+
+            setupClickListeners();
             setupNavigation();
 
             // Load semua data dari API berdasarkan ID
@@ -82,6 +130,58 @@ public class DetailProyekActivity extends AppCompatActivity {
             Toast.makeText(this, "Error loading page", Toast.LENGTH_SHORT).show();
             finish();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_detail_proyek, menu);
+        menuEdit = menu.findItem(R.id.action_edit);
+        menuSave = menu.findItem(R.id.action_save);
+        menuCancel = menu.findItem(R.id.action_cancel);
+
+        // Sembunyikan menu edit jika user bukan Admin
+        if (!"Admin".equals(userLevel)) {
+            menuEdit.setVisible(false);
+        }
+
+        // Initially hide save and cancel buttons
+        updateMenuVisibility();
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_edit) {
+            // Tambahkan pengecekan level user sebelum masuk mode edit
+            if (!"Admin".equals(userLevel)) {
+                Toast.makeText(this, "Hanya Admin yang dapat mengedit proyek", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            enterEditMode();
+            return true;
+        } else if (id == R.id.action_save) {
+            saveProyekData();
+            return true;
+        } else if (id == R.id.action_cancel) {
+            exitEditMode();
+            return true;
+        } else if (id == android.R.id.home) {
+            // Handle back button click
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void updateMenuVisibility() {
+        if (menuEdit != null) {
+            // Hanya tampilkan menu edit untuk Admin
+            menuEdit.setVisible(!isEditMode && "Admin".equals(userLevel));
+        }
+        if (menuSave != null) menuSave.setVisible(isEditMode);
+        if (menuCancel != null) menuCancel.setVisible(isEditMode);
     }
 
     private void initViews() {
@@ -97,12 +197,44 @@ public class DetailProyekActivity extends AppCompatActivity {
             txtLokasiProyek = findViewById(R.id.txtLokasi);
             txtDeskripsiProyek = findViewById(R.id.txtDeskripsi);
 
+            // Edit views
+            editNama = findViewById(R.id.editNama);
+            editLokasi = findViewById(R.id.editLokasi);
+            editDeskripsi = findViewById(R.id.editDeskripsi);
+
             // Card 2 - Fasilitas
             recyclerViewFasilitas = findViewById(R.id.recyclerViewFasilitas);
             fasilitasList = new ArrayList<>();
-            fasilitasAdapter = new FasilitasAdapter(fasilitasList);
-            recyclerViewFasilitas.setLayoutManager(new GridLayoutManager(this, 1));
+
+            // Inisialisasi adapter dengan listener untuk edit dan hapus
+            fasilitasAdapter = new FasilitasAdapter(fasilitasList, new FasilitasAdapter.OnFasilitasActionListener() {
+                @Override
+                public void onEditFasilitas(FasilitasItem fasilitas) {
+                    showEditFasilitasDialog(fasilitas);
+                }
+
+                @Override
+                public void onDeleteFasilitas(FasilitasItem fasilitas) {
+                    showDeleteFasilitasDialog(fasilitas);
+                }
+
+                @Override
+                public void onViewFasilitas(FasilitasItem fasilitas) {
+                    openFullScreenFasilitas(fasilitas);
+                }
+            });
+
+            // GridLayoutManager dengan 2 kolom
+            recyclerViewFasilitas.setLayoutManager(new GridLayoutManager(this, 2));
+
+            // Spacing yang lebih kecil untuk hasil yang lebih rapi
+            int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.grid_spacing);
+            recyclerViewFasilitas.addItemDecoration(new GridSpacingItemDecoration(2, spacingInPixels));
+
             recyclerViewFasilitas.setAdapter(fasilitasAdapter);
+
+            // Inisialisasi btnTambahFasilitas
+            btnTambahFasilitas = findViewById(R.id.btnTambahFasilitas);
 
             // Card 3 - Siteplan
             imgSitePlan = findViewById(R.id.imgSitePlan);
@@ -116,6 +248,573 @@ public class DetailProyekActivity extends AppCompatActivity {
 
         } catch (Exception e) {
             Log.e(TAG, "Error initializing views: " + e.getMessage(), e);
+        }
+    }
+
+    // Method untuk menampilkan dialog tambah fasilitas
+    private void showTambahFasilitasDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_fasilitas, null);
+
+        EditText editNamaFasilitas = dialogView.findViewById(R.id.editNamaFasilitas);
+        ImageView imageFasilitas = dialogView.findViewById(R.id.imageFasilitasDialog);
+        Button btnPilihGambar = dialogView.findViewById(R.id.btnPilihGambarFasilitas);
+
+        selectedFasilitasBitmap = null;
+        currentFasilitasDialogImageView = imageFasilitas;
+
+        btnPilihGambar.setOnClickListener(v -> {
+            openImagePicker(PICK_FASILITAS_REQUEST);
+        });
+
+        builder.setView(dialogView)
+                .setTitle("Tambah Fasilitas")
+                .setPositiveButton("Simpan", (dialog, which) -> {
+                    String namaFasilitas = editNamaFasilitas.getText().toString().trim();
+                    if (namaFasilitas.isEmpty()) {
+                        Toast.makeText(this, "Nama fasilitas tidak boleh kosong", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    tambahFasilitas(namaFasilitas, selectedFasilitasBitmap);
+                })
+                .setNegativeButton("Batal", (dialog, which) -> {
+                    currentFasilitasDialog = null;
+                    currentFasilitasDialogImageView = null;
+                });
+
+        currentFasilitasDialog = builder.create();
+        currentFasilitasDialog.show();
+    }
+
+    // Method untuk menampilkan dialog edit fasilitas
+    private void showEditFasilitasDialog(FasilitasItem fasilitas) {
+        // DEBUG: Validasi data fasilitas
+        Log.d(TAG, "showEditFasilitasDialog - ID: " + fasilitas.getIdFasilitas() +
+                ", Name: " + fasilitas.getNamaFasilitas());
+
+        if (fasilitas.getIdFasilitas() <= 0) {
+            Toast.makeText(this, "ERROR: ID Fasilitas tidak valid: " + fasilitas.getIdFasilitas(), Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Invalid fasilitas ID in dialog: " + fasilitas.getIdFasilitas());
+            return;
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_fasilitas, null);
+
+        EditText editNamaFasilitas = dialogView.findViewById(R.id.editNamaFasilitas);
+        ImageView imageFasilitas = dialogView.findViewById(R.id.imageFasilitasDialog);
+        Button btnPilihGambar = dialogView.findViewById(R.id.btnPilihGambarFasilitas);
+
+        // Set data existing
+        editNamaFasilitas.setText(fasilitas.getNamaFasilitas());
+        selectedFasilitasBitmap = null;
+        currentFasilitasDialogImageView = imageFasilitas;
+
+        // Tampilkan gambar existing jika ada
+        if (fasilitas.getGambarBase64() != null && !fasilitas.getGambarBase64().isEmpty()) {
+            try {
+                byte[] decodedString = Base64.decode(fasilitas.getGambarBase64(), Base64.DEFAULT);
+                Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                imageFasilitas.setImageBitmap(decodedByte);
+            } catch (Exception e) {
+                Log.e(TAG, "Error loading existing fasilitas image: " + e.getMessage());
+                imageFasilitas.setImageResource(R.drawable.ic_placeholder);
+            }
+        } else {
+            imageFasilitas.setImageResource(R.drawable.ic_placeholder);
+        }
+
+        btnPilihGambar.setOnClickListener(v -> {
+            openImagePicker(PICK_FASILITAS_REQUEST);
+        });
+
+        builder.setView(dialogView)
+                .setTitle("Edit Fasilitas - ID: " + fasilitas.getIdFasilitas())
+                .setPositiveButton("Simpan", (dialog, which) -> {
+                    String namaFasilitas = editNamaFasilitas.getText().toString().trim();
+                    if (namaFasilitas.isEmpty()) {
+                        Toast.makeText(this, "Nama fasilitas tidak boleh kosong", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // Validasi sekali lagi sebelum update
+                    if (fasilitas.getIdFasilitas() <= 0) {
+                        Toast.makeText(this, "ERROR: ID Fasilitas masih tidak valid", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    updateFasilitas(fasilitas.getIdFasilitas(), namaFasilitas, selectedFasilitasBitmap);
+                })
+                .setNegativeButton("Batal", (dialog, which) -> {
+                    currentFasilitasDialog = null;
+                    currentFasilitasDialogImageView = null;
+                });
+
+        currentFasilitasDialog = builder.create();
+        currentFasilitasDialog.show();
+    }
+    // Method untuk menampilkan dialog konfirmasi hapus fasilitas
+    private void showDeleteFasilitasDialog(FasilitasItem fasilitas) {
+        new AlertDialog.Builder(this)
+                .setTitle("Hapus Fasilitas")
+                .setMessage("Apakah Anda yakin ingin menghapus fasilitas \"" + fasilitas.getNamaFasilitas() + "\"?")
+                .setPositiveButton("Hapus", (dialog, which) -> {
+                    deleteFasilitas(fasilitas.getIdFasilitas());
+                })
+                .setNegativeButton("Batal", null)
+                .show();
+    }
+
+    private void enterEditMode() {
+        // Tambahkan pengecekan keamanan tambahan
+        if (!"Admin".equals(userLevel)) {
+            Toast.makeText(this, "Akses ditolak: Hanya Admin yang dapat mengedit", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        isEditMode = true;
+
+        // Show edit views, hide read-only views
+        txtNamaProyek.setVisibility(View.GONE);
+        txtLokasiProyek.setVisibility(View.GONE);
+        txtDeskripsiProyek.setVisibility(View.GONE);
+
+        editNama.setVisibility(View.VISIBLE);
+        editLokasi.setVisibility(View.VISIBLE);
+        editDeskripsi.setVisibility(View.VISIBLE);
+
+        // Populate edit fields with current data
+        if (currentProyek != null) {
+            editNama.setText(currentProyek.getNamaProyek());
+            editLokasi.setText(currentProyek.getLokasiProyek());
+            editDeskripsi.setText(currentProyek.getDeskripsiProyek());
+        }
+
+        // Tampilkan tombol tambah fasilitas dan set mode edit di adapter
+        if (btnTambahFasilitas != null) {
+            btnTambahFasilitas.setVisibility(View.VISIBLE);
+            btnTambahFasilitas.setOnClickListener(v -> {
+                // PERBAIKAN: Keluar dari mode edit sebelum buka activity tambah fasilitas
+                exitEditMode();
+
+                // Buka activity tambah fasilitas proyek
+                Intent intent = new Intent(DetailProyekActivity.this, TambahFasilitasProyekActivity.class);
+                intent.putExtra("NAMA_PROYEK", currentProyek.getNamaProyek());
+                startActivityForResult(intent, 200); // Request code baru
+            });
+        }
+
+        // Set adapter ke mode edit
+        fasilitasAdapter.setEditMode(true);
+
+        // Update button text
+        updateButtonText();
+
+        // Update menu visibility
+        updateMenuVisibility();
+
+        // Enable image interaction
+        imgProyek.setClickable(true);
+        imgSitePlan.setClickable(true);
+
+        // Add edit indicator to images
+        imgProyek.setAlpha(0.8f);
+        imgSitePlan.setAlpha(0.8f);
+
+        Toast.makeText(this, "Mode Edit: Klik gambar untuk mengubah", Toast.LENGTH_LONG).show();
+    }
+    private void updateButtonText() {
+        if (btnViewFull != null) {
+            if (isEditMode) {
+                btnViewFull.setText("Ubah Gambar");
+                try {
+                    btnViewFull.setIconResource(R.drawable.ic_edit);
+                } catch (Exception e) {
+                    Log.e(TAG, "Edit icon not found");
+                    btnViewFull.setIcon(null);
+                }
+            } else {
+                btnViewFull.setText("Lihat Full");
+                try {
+                    btnViewFull.setIconResource(R.drawable.ic_fullscreen);
+                } catch (Exception e) {
+                    Log.e(TAG, "Fullscreen icon not found");
+                    btnViewFull.setIcon(null);
+                }
+            }
+        }
+    }
+
+    private void exitEditMode() {
+        isEditMode = false;
+
+        // Show read-only views, hide edit views
+        txtNamaProyek.setVisibility(View.VISIBLE);
+        txtLokasiProyek.setVisibility(View.VISIBLE);
+        txtDeskripsiProyek.setVisibility(View.VISIBLE);
+
+        editNama.setVisibility(View.GONE);
+        editLokasi.setVisibility(View.GONE);
+        editDeskripsi.setVisibility(View.GONE);
+
+        // Sembunyikan tombol tambah fasilitas dan set adapter ke mode normal
+        if (btnTambahFasilitas != null) {
+            btnTambahFasilitas.setVisibility(View.GONE);
+        }
+        fasilitasAdapter.setEditMode(false);
+
+        // Update button text
+        updateButtonText();
+
+        // Update menu visibility
+        updateMenuVisibility();
+
+        // Reset selected images
+        selectedLogoBitmap = null;
+        selectedSiteplanBitmap = null;
+        selectedFasilitasBitmap = null;
+
+        // Disable image interaction
+        imgProyek.setClickable(false);
+        imgSitePlan.setClickable(false);
+
+        // Remove edit indicator from images
+        imgProyek.setAlpha(1.0f);
+        imgSitePlan.setAlpha(1.0f);
+
+        // Reload original data
+        if (currentProyek != null) {
+            setupData(currentProyek);
+        }
+    }
+
+    private void openImagePicker(int requestCode) {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        startActivityForResult(intent, requestCode);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK && data != null) {
+            Uri imageUri = data.getData();
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+
+                if (requestCode == PICK_LOGO_REQUEST) {
+                    selectedLogoBitmap = bitmap;
+                    imgProyek.setImageBitmap(bitmap);
+                    Toast.makeText(this, "Logo berhasil diubah", Toast.LENGTH_SHORT).show();
+                } else if (requestCode == PICK_SITEPLAN_REQUEST) {
+                    selectedSiteplanBitmap = bitmap;
+                    imgSitePlan.setImageBitmap(bitmap);
+                    Toast.makeText(this, "Siteplan berhasil diubah", Toast.LENGTH_SHORT).show();
+                } else if (requestCode == PICK_FASILITAS_REQUEST) {
+                    // Handle gambar fasilitas
+                    selectedFasilitasBitmap = bitmap;
+                    if (currentFasilitasDialogImageView != null) {
+                        currentFasilitasDialogImageView.setImageBitmap(bitmap);
+                    }
+                    Toast.makeText(this, "Gambar fasilitas dipilih", Toast.LENGTH_SHORT).show();
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Error loading image: " + e.getMessage());
+                Toast.makeText(this, "Gagal memuat gambar", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        // PERBAIKAN: Handle hasil dari TambahFasilitasProyekActivity - TANPA kondisi data != null
+        if (requestCode == 200) {
+            Log.d(TAG, "onActivityResult: Request code 200 diterima, resultCode: " + resultCode);
+
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(this, "Fasilitas berhasil ditambahkan", Toast.LENGTH_SHORT).show();
+
+                // Pastikan sudah keluar dari mode edit
+                if (isEditMode) {
+                    Log.d(TAG, "Masih dalam mode edit, keluar dari mode edit");
+                    exitEditMode();
+                }
+
+                // Reload data fasilitas
+                if (currentProyek != null) {
+                    Log.d(TAG, "Memuat ulang data fasilitas untuk proyek: " + currentProyek.getNamaProyek());
+                    loadFasilitasData(currentProyek.getNamaProyek());
+                } else {
+                    Log.e(TAG, "currentProyek adalah null, tidak dapat memuat data fasilitas");
+                }
+            } else {
+                Log.d(TAG, "TambahFasilitasProyekActivity dibatalkan atau gagal");
+            }
+        }
+    }
+    // Method untuk update fasilitas
+    private void updateFasilitas(int idFasilitas, String namaFasilitas, Bitmap gambarBitmap) {
+        Log.d(TAG, "=== UPDATE FASILITAS ===");
+        Log.d(TAG, "ID Fasilitas: " + idFasilitas);
+        Log.d(TAG, "Nama Fasilitas: " + namaFasilitas);
+        Log.d(TAG, "Gambar Bitmap: " + (gambarBitmap != null ? "Ada" : "Tidak ada"));
+
+        if (idFasilitas <= 0) {
+            Toast.makeText(this, "ID Fasilitas tidak valid: " + idFasilitas, Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Invalid fasilitas ID: " + idFasilitas);
+            return;
+        }
+
+        String gambarBase64 = "";
+        if (gambarBitmap != null) {
+            gambarBase64 = bitmapToBase64(gambarBitmap);
+            Log.d(TAG, "Gambar Base64 length: " + gambarBase64.length());
+        } else {
+            Log.d(TAG, "Tidak ada gambar baru, menggunakan gambar existing");
+        }
+
+        Call<BasicResponse> call = apiService.updateFasilitas(
+                "updateFasilitas",
+                idFasilitas,
+                namaFasilitas,
+                gambarBase64
+        );
+
+        call.enqueue(new Callback<BasicResponse>() {
+            @Override
+            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                Log.d(TAG, "Update fasilitas response code: " + response.code());
+
+                if (response.isSuccessful() && response.body() != null) {
+                    BasicResponse updateResponse = response.body();
+                    Log.d(TAG, "Update success: " + updateResponse.isSuccess());
+                    Log.d(TAG, "Update message: " + updateResponse.getMessage());
+
+                    if (updateResponse.isSuccess()) {
+                        Toast.makeText(DetailProyekActivity.this, "Fasilitas berhasil diupdate", Toast.LENGTH_SHORT).show();
+                        // Tutup dialog
+                        if (currentFasilitasDialog != null) {
+                            currentFasilitasDialog.dismiss();
+                            currentFasilitasDialog = null;
+                            currentFasilitasDialogImageView = null;
+                        }
+                        // Reload fasilitas
+                        loadFasilitasData(currentProyek.getNamaProyek());
+                    } else {
+                        String errorMsg = "Gagal update fasilitas: " + updateResponse.getMessage();
+                        Toast.makeText(DetailProyekActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                        Log.e(TAG, errorMsg);
+                    }
+                } else {
+                    String errorMsg = "Error response dari server: " + response.code();
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMsg += " - " + response.errorBody().string();
+                        } catch (IOException e) {
+                            Log.e(TAG, "Error reading error body", e);
+                        }
+                    }
+                    Toast.makeText(DetailProyekActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                    Log.e(TAG, errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BasicResponse> call, Throwable t) {
+                String errorMsg = "Error: " + t.getMessage();
+                Toast.makeText(DetailProyekActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                Log.e(TAG, errorMsg, t);
+            }
+        });
+    }
+
+    // Method untuk hapus fasilitas
+    private void deleteFasilitas(int idFasilitas) {
+        Log.d(TAG, "=== DELETE FASILITAS ===");
+        Log.d(TAG, "ID Fasilitas: " + idFasilitas);
+
+        if (idFasilitas <= 0) {
+            Toast.makeText(this, "ID Fasilitas tidak valid: " + idFasilitas, Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Invalid fasilitas ID for deletion: " + idFasilitas);
+            return;
+        }
+
+        Call<BasicResponse> call = apiService.deleteFasilitas(
+                "deleteFasilitas",
+                idFasilitas
+        );
+
+        call.enqueue(new Callback<BasicResponse>() {
+            @Override
+            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                Log.d(TAG, "Delete fasilitas response code: " + response.code());
+
+                if (response.isSuccessful() && response.body() != null) {
+                    BasicResponse deleteResponse = response.body();
+                    Log.d(TAG, "Delete success: " + deleteResponse.isSuccess());
+                    Log.d(TAG, "Delete message: " + deleteResponse.getMessage());
+
+                    if (deleteResponse.isSuccess()) {
+                        Toast.makeText(DetailProyekActivity.this, "Fasilitas berhasil dihapus", Toast.LENGTH_SHORT).show();
+                        // Reload fasilitas
+                        loadFasilitasData(currentProyek.getNamaProyek());
+                    } else {
+                        String errorMsg = "Gagal hapus fasilitas: " + deleteResponse.getMessage();
+                        Toast.makeText(DetailProyekActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                        Log.e(TAG, errorMsg);
+                    }
+                } else {
+                    String errorMsg = "Error response dari server: " + response.code();
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMsg += " - " + response.errorBody().string();
+                        } catch (IOException e) {
+                            Log.e(TAG, "Error reading error body", e);
+                        }
+                    }
+                    Toast.makeText(DetailProyekActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                    Log.e(TAG, errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BasicResponse> call, Throwable t) {
+                String errorMsg = "Error: " + t.getMessage();
+                Toast.makeText(DetailProyekActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                Log.e(TAG, errorMsg, t);
+            }
+        });
+    }
+
+    private void saveProyekData() {
+        if (currentProyek == null) {
+            Toast.makeText(this, "Data proyek tidak tersedia", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String newNama = editNama.getText().toString().trim();
+        String newLokasi = editLokasi.getText().toString().trim();
+        String newDeskripsi = editDeskripsi.getText().toString().trim();
+
+        // Validation
+        if (newNama.isEmpty() || newLokasi.isEmpty() || newDeskripsi.isEmpty()) {
+            Toast.makeText(this, "Semua field harus diisi", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // SOLUSI: Gunakan array untuk menghindari masalah inner class
+        final String[] logoBase64Holder = new String[1];
+        final String[] siteplanBase64Holder = new String[1];
+
+        // Prepare base64 strings for images
+        if (selectedLogoBitmap != null) {
+            logoBase64Holder[0] = bitmapToBase64(selectedLogoBitmap);
+            Log.d(TAG, "New logo base64 prepared, length: " + logoBase64Holder[0].length());
+        } else {
+            // Jika tidak memilih gambar baru, kirim string kosong
+            logoBase64Holder[0] = "";
+            Log.d(TAG, "No new logo selected, sending empty string");
+        }
+
+        if (selectedSiteplanBitmap != null) {
+            siteplanBase64Holder[0] = bitmapToBase64(selectedSiteplanBitmap);
+            Log.d(TAG, "New siteplan base64 prepared, length: " + siteplanBase64Holder[0].length());
+        } else {
+            // Jika tidak memilih gambar baru, kirim string kosong
+            siteplanBase64Holder[0] = "";
+            Log.d(TAG, "No new siteplan selected, sending empty string");
+        }
+
+        // Show loading
+        Toast.makeText(this, "Menyimpan perubahan...", Toast.LENGTH_SHORT).show();
+
+        Log.d(TAG, "Sending update request - ID: " + currentProyek.getIdProyek() +
+                ", Old Name: " + currentProyek.getNamaProyek() +
+                ", New Name: " + newNama);
+
+        Call<BasicResponse> call = apiService.updateProyekComprehensive(
+                currentProyek.getIdProyek(),
+                currentProyek.getNamaProyek(), // old name
+                newNama,
+                newLokasi,
+                newDeskripsi,
+                logoBase64Holder[0],    // Gunakan dari array
+                siteplanBase64Holder[0] // Gunakan dari array
+        );
+
+        call.enqueue(new Callback<BasicResponse>() {
+            @Override
+            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    BasicResponse updateResponse = response.body();
+                    if (updateResponse.isSuccess()) {
+                        Toast.makeText(DetailProyekActivity.this, "Proyek berhasil diupdate", Toast.LENGTH_SHORT).show();
+
+                        // Update current project data
+                        currentProyek.setNamaProyek(newNama);
+                        currentProyek.setLokasiProyek(newLokasi);
+                        currentProyek.setDeskripsiProyek(newDeskripsi);
+
+                        // Update gambar jika ada perubahan
+                        if (!logoBase64Holder[0].isEmpty()) {
+                            currentProyek.setLogoBase64(logoBase64Holder[0]);
+                        }
+                        if (!siteplanBase64Holder[0].isEmpty()) {
+                            currentProyek.setSiteplanBase64(siteplanBase64Holder[0]);
+                        }
+
+                        // Update toolbar title
+                        if (topAppBar != null) {
+                            topAppBar.setTitle("Detail " + newNama);
+                        }
+
+                        exitEditMode();
+
+                        // Reload facilities with new project name
+                        loadFasilitasData(newNama);
+
+                    } else {
+                        Toast.makeText(DetailProyekActivity.this, "Gagal update: " + updateResponse.getMessage(), Toast.LENGTH_LONG).show();
+                        Log.e(TAG, "Update failed: " + updateResponse.getMessage());
+                    }
+                } else {
+                    String errorMsg = "Error response dari server: " + response.code();
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMsg += " - " + response.errorBody().string();
+                        } catch (IOException e) {
+                            Log.e(TAG, "Error reading error body", e);
+                        }
+                    }
+                    Toast.makeText(DetailProyekActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BasicResponse> call, Throwable t) {
+                Log.e(TAG, "Network error updating project: " + t.getMessage(), t);
+                Toast.makeText(DetailProyekActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private String bitmapToBase64(Bitmap bitmap) {
+        try {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+            // Kompres gambar dengan kualitas yang wajar
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream);
+
+            byte[] byteArray = byteArrayOutputStream.toByteArray();
+            String base64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
+
+            Log.d(TAG, "Bitmap converted to base64, size: " + base64.length() + " chars");
+
+            return base64;
+        } catch (Exception e) {
+            Log.e(TAG, "Error converting bitmap to base64: " + e.getMessage());
+            return "";
         }
     }
 
@@ -134,11 +833,31 @@ public class DetailProyekActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<List<Proyek>> call, Response<List<Proyek>> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    List<Proyek> proyekList = response.body();
+                    Log.d(TAG, "Received " + proyekList.size() + " projects from API");
+
                     // Cari proyek dengan ID yang sesuai
                     Proyek selectedProyek = null;
-                    for (Proyek proyek : response.body()) {
+                    for (Proyek proyek : proyekList) {
+                        Log.d(TAG, "Checking project - ID: " + proyek.getIdProyek() + ", Name: " + proyek.getNamaProyek());
+
                         if (proyek.getIdProyek() == idProyek) {
                             selectedProyek = proyek;
+
+                            // Debug detailed information about the found project
+                            Log.d(TAG, "=== FOUND PROJECT DETAILS ===");
+                            Log.d(TAG, "ID: " + proyek.getIdProyek());
+                            Log.d(TAG, "Name: " + proyek.getNamaProyek());
+                            Log.d(TAG, "Location: " + proyek.getLokasiProyek());
+                            Log.d(TAG, "Logo Base64 exists: " + (proyek.getLogoBase64() != null));
+                            Log.d(TAG, "Logo Base64 length: " + (proyek.getLogoBase64() != null ? proyek.getLogoBase64().length() : 0));
+                            Log.d(TAG, "Siteplan Base64 exists: " + (proyek.getSiteplanBase64() != null));
+                            Log.d(TAG, "Siteplan Base64 length: " + (proyek.getSiteplanBase64() != null ? proyek.getSiteplanBase64().length() : 0));
+
+                            if (proyek.getLogoBase64() != null && proyek.getLogoBase64().length() > 100) {
+                                Log.d(TAG, "Logo Base64 preview: " + proyek.getLogoBase64().substring(0, 100) + "...");
+                            }
+
                             break;
                         }
                     }
@@ -147,10 +866,12 @@ public class DetailProyekActivity extends AppCompatActivity {
                         setupData(selectedProyek);
                         loadFasilitasData(selectedProyek.getNamaProyek());
                     } else {
+                        Log.e(TAG, "No project found with ID: " + idProyek);
                         Toast.makeText(DetailProyekActivity.this, "Proyek tidak ditemukan", Toast.LENGTH_SHORT).show();
                         finish();
                     }
                 } else {
+                    Log.e(TAG, "Failed to load project data. Response code: " + response.code());
                     Toast.makeText(DetailProyekActivity.this, "Gagal memuat data proyek", Toast.LENGTH_SHORT).show();
                     finish();
                 }
@@ -167,20 +888,22 @@ public class DetailProyekActivity extends AppCompatActivity {
 
     private void setupData(Proyek proyek) {
         try {
+            this.currentProyek = proyek;
+
             // Set data untuk Card 1
             if (txtNamaProyek != null) txtNamaProyek.setText(proyek.getNamaProyek());
             if (txtLokasiProyek != null) txtLokasiProyek.setText(proyek.getLokasiProyek());
             if (txtDeskripsiProyek != null) txtDeskripsiProyek.setText(proyek.getDeskripsiProyek());
 
-            // Set logo proyek
+            // Debug informasi proyek
+            Log.d(TAG, "Setting up data for project: " + proyek.getNamaProyek());
+            Log.d(TAG, "Logo base64 available: " + (proyek.getLogoBase64() != null && !proyek.getLogoBase64().isEmpty()));
+            Log.d(TAG, "Siteplan base64 available: " + (proyek.getSiteplanBase64() != null && !proyek.getSiteplanBase64().isEmpty()));
+
+            // Set logo proyek dengan improved error handling
             if (proyek.getLogoBase64() != null && !proyek.getLogoBase64().isEmpty()) {
-                try {
-                    byte[] decodedString = Base64.decode(proyek.getLogoBase64(), Base64.DEFAULT);
-                    Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                    imgProyek.setImageBitmap(decodedByte);
-                    Log.d(TAG, "Logo successfully set");
-                } catch (Exception e) {
-                    Log.e(TAG, "Error decoding logo: " + e.getMessage());
+                boolean logoSuccess = setImageFromBase64(proyek.getLogoBase64(), imgProyek, "logo");
+                if (!logoSuccess) {
                     imgProyek.setImageResource(R.drawable.ic_placeholder);
                 }
             } else {
@@ -188,17 +911,15 @@ public class DetailProyekActivity extends AppCompatActivity {
                 imgProyek.setImageResource(R.drawable.ic_placeholder);
             }
 
-            // Set siteplan
+            // Set siteplan dengan improved error handling
             if (proyek.getSiteplanBase64() != null && !proyek.getSiteplanBase64().isEmpty()) {
                 Log.d(TAG, "Siteplan base64 length: " + proyek.getSiteplanBase64().length());
-                try {
-                    byte[] decodedString = Base64.decode(proyek.getSiteplanBase64(), Base64.DEFAULT);
-                    Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                    imgSitePlan.setImageBitmap(decodedByte);
+                boolean siteplanSuccess = setImageFromBase64(proyek.getSiteplanBase64(), imgSitePlan, "siteplan");
+                if (siteplanSuccess) {
                     cardSitePlan.setVisibility(View.VISIBLE);
                     Log.d(TAG, "Siteplan successfully set and card shown");
-                } catch (Exception e) {
-                    Log.e(TAG, "Error decoding siteplan: " + e.getMessage());
+                } else {
+                    Log.e(TAG, "Failed to set siteplan, hiding card");
                     cardSitePlan.setVisibility(View.GONE);
                 }
             } else {
@@ -216,6 +937,185 @@ public class DetailProyekActivity extends AppCompatActivity {
         }
     }
 
+    // Method helper untuk decode Base64 dengan error handling yang lebih baik
+    private boolean setImageFromBase64(String base64String, ImageView imageView, String type) {
+        if (base64String == null || base64String.isEmpty()) {
+            Log.e(TAG, type + " base64 string is null or empty");
+            return false;
+        }
+
+        try {
+            // Clean the base64 string - remove any whitespace or invalid characters
+            String cleanBase64 = base64String.trim();
+
+            // Remove data URL prefix if present
+            if (cleanBase64.contains(",")) {
+                cleanBase64 = cleanBase64.substring(cleanBase64.indexOf(",") + 1);
+            }
+
+            // Remove any whitespace characters
+            cleanBase64 = cleanBase64.replaceAll("\\s", "");
+
+            Log.d(TAG, "Cleaned " + type + " base64 length: " + cleanBase64.length());
+
+            // Validate base64 string
+            if (!isValidBase64(cleanBase64)) {
+                Log.e(TAG, type + " base64 string is not valid");
+                return false;
+            }
+
+            // Decode base64 to byte array
+            byte[] decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
+            if (decodedBytes == null || decodedBytes.length == 0) {
+                Log.e(TAG, type + " decoded bytes are null or empty");
+                return false;
+            }
+
+            Log.d(TAG, type + " decoded bytes length: " + decodedBytes.length);
+
+            // Try to decode bitmap with different options
+            BitmapFactory.Options options = new BitmapFactory.Options();
+
+            // First, just get the dimensions
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length, options);
+
+            Log.d(TAG, type + " image dimensions: " + options.outWidth + "x" + options.outHeight);
+            Log.d(TAG, type + " image mime type: " + options.outMimeType);
+
+            // Check if the image format is supported
+            if (options.outWidth <= 0 || options.outHeight <= 0) {
+                Log.e(TAG, type + " invalid image dimensions");
+                return false;
+            }
+
+            // Calculate sample size to avoid memory issues
+            options.inSampleSize = calculateInSampleSize(options, 800, 600);
+            options.inJustDecodeBounds = false;
+
+            // Try to decode the bitmap
+            Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length, options);
+
+            if (bitmap != null) {
+                imageView.setImageBitmap(bitmap);
+                Log.d(TAG, type + " successfully decoded and set");
+                return true;
+            } else {
+                Log.e(TAG, type + " bitmap is null after decoding");
+                return false;
+            }
+
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, type + " IllegalArgumentException: " + e.getMessage());
+            return false;
+        } catch (OutOfMemoryError e) {
+            Log.e(TAG, type + " OutOfMemoryError: " + e.getMessage());
+            // Try with larger sample size
+            return setImageFromBase64WithLargerSample(base64String, imageView, type);
+        } catch (Exception e) {
+            Log.e(TAG, type + " Error decoding base64: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private void tambahFasilitas(String namaFasilitas, Bitmap gambarBitmap) {
+        if (currentProyek == null) return;
+
+        String gambarBase64 = "";
+        if (gambarBitmap != null) {
+            gambarBase64 = bitmapToBase64(gambarBitmap);
+        }
+
+        Call<BasicResponse> call = apiService.addFasilitas(
+                "addFasilitas",
+                namaFasilitas,
+                currentProyek.getNamaProyek(),
+                gambarBase64
+        );
+
+        call.enqueue(new Callback<BasicResponse>() {
+            @Override
+            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    BasicResponse addResponse = response.body();
+                    if (addResponse.isSuccess()) {
+                        Toast.makeText(DetailProyekActivity.this, "Fasilitas berhasil ditambahkan", Toast.LENGTH_SHORT).show();
+                        // Tutup dialog
+                        if (currentFasilitasDialog != null) {
+                            currentFasilitasDialog.dismiss();
+                            currentFasilitasDialog = null;
+                            currentFasilitasDialogImageView = null;
+                        }
+                        // Reload fasilitas
+                        loadFasilitasData(currentProyek.getNamaProyek());
+                    } else {
+                        Toast.makeText(DetailProyekActivity.this, "Gagal menambah fasilitas: " + addResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BasicResponse> call, Throwable t) {
+                Toast.makeText(DetailProyekActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private boolean setImageFromBase64WithLargerSample(String base64String, ImageView imageView, String type) {
+        try {
+            String cleanBase64 = base64String.trim();
+            if (cleanBase64.contains(",")) {
+                cleanBase64 = cleanBase64.substring(cleanBase64.indexOf(",") + 1);
+            }
+            cleanBase64 = cleanBase64.replaceAll("\\s", "");
+
+            byte[] decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
+
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 4; // Larger sample size to reduce memory usage
+
+            Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length, options);
+
+            if (bitmap != null) {
+                imageView.setImageBitmap(bitmap);
+                Log.d(TAG, type + " successfully decoded with larger sample size");
+                return true;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, type + " Error in fallback decoding: " + e.getMessage());
+        }
+        return false;
+    }
+
+    // Method untuk validasi Base64 string
+    private boolean isValidBase64(String base64) {
+        try {
+            Base64.decode(base64, Base64.DEFAULT);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    // Method untuk calculate sample size
+    private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        Log.d(TAG, "Calculated inSampleSize: " + inSampleSize);
+        return inSampleSize;
+    }
+
     private void loadFasilitasData(String namaProyek) {
         if (namaProyek == null || namaProyek.isEmpty()) {
             Log.e(TAG, "Nama proyek is null or empty");
@@ -223,43 +1123,71 @@ public class DetailProyekActivity extends AppCompatActivity {
             return;
         }
 
-        Log.d(TAG, "Loading facilities for project: " + namaProyek);
+        Log.d(TAG, "Loading facilities for project name: " + namaProyek);
 
         try {
-            Call<List<FasilitasItem>> call = apiService.getFasilitasByProyek("getFasilitasByProyek", namaProyek);
+            // PASTIKAN MENGGUNAKAN api_fasilitas.php
+            Call<List<FasilitasItem>> call = apiService.getFasilitasByProyekFromFasilitas("getFasilitasByProyek", namaProyek);
             call.enqueue(new Callback<List<FasilitasItem>>() {
                 @Override
                 public void onResponse(Call<List<FasilitasItem>> call, Response<List<FasilitasItem>> response) {
+                    Log.d(TAG, "Facilities API response code: " + response.code());
+
                     if (response.isSuccessful() && response.body() != null) {
                         try {
                             fasilitasList.clear();
-                            fasilitasList.addAll(response.body());
+                            List<FasilitasItem> responseBody = response.body();
+                            Log.d(TAG, "Response body size: " + responseBody.size());
+
+                            // DEBUG DETAILED: Log setiap fasilitas yang diterima
+                            for (FasilitasItem item : responseBody) {
+                                Log.d(TAG, "=== FASILITAS DETAIL FROM API_FASILITAS ===");
+                                Log.d(TAG, "ID: " + item.getIdFasilitas() + " (Type: " + ((Object)item.getIdFasilitas()).getClass().getSimpleName() + ")");
+                                Log.d(TAG, "Nama: " + item.getNamaFasilitas());
+                                Log.d(TAG, "Proyek: " + item.getNamaProyek());
+                                Log.d(TAG, "Gambar length: " + (item.getGambarBase64() != null ? item.getGambarBase64().length() : 0));
+
+                                // Validasi ID
+                                if (item.getIdFasilitas() <= 0) {
+                                    Log.e(TAG, "ERROR: Received invalid ID for fasilitas: " + item.getNamaFasilitas());
+                                }
+                                Log.d(TAG, "=== END FASILITAS ===");
+                            }
+
+                            fasilitasList.addAll(responseBody);
                             fasilitasAdapter.notifyDataSetChanged();
 
-                            Log.d(TAG, "Loaded " + fasilitasList.size() + " facilities");
+                            Log.d(TAG, "Successfully loaded " + fasilitasList.size() + " facilities from api_fasilitas.php");
                             showOrHideFasilitasCard();
                         } catch (Exception e) {
-                            Log.e(TAG, "Error processing facilities data: " + e.getMessage());
+                            Log.e(TAG, "Error processing facilities data: " + e.getMessage(), e);
                             hideFasilitasCard();
                         }
                     } else {
-                        Log.e(TAG, "Response error: " + response.code());
+                        Log.e(TAG, "Facilities API response error: " + response.code());
+                        if (response.errorBody() != null) {
+                            try {
+                                String errorBody = response.errorBody().string();
+                                Log.e(TAG, "Error body: " + errorBody);
+                            } catch (IOException e) {
+                                Log.e(TAG, "Error reading error body", e);
+                            }
+                        }
                         hideFasilitasCard();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<List<FasilitasItem>> call, Throwable t) {
-                    Log.e(TAG, "Network error loading facilities: " + t.getMessage());
+                    Log.e(TAG, "Network error loading facilities: " + t.getMessage(), t);
                     hideFasilitasCard();
                 }
             });
         } catch (Exception e) {
-            Log.e(TAG, "Error in loadFasilitasData: " + e.getMessage());
+            Log.e(TAG, "Error in loadFasilitasData: " + e.getMessage(), e);
             hideFasilitasCard();
         }
     }
-
     private void showOrHideFasilitasCard() {
         try {
             CardView cardFasilitas = findViewById(R.id.cardFasilitasSarana);
@@ -282,35 +1210,150 @@ public class DetailProyekActivity extends AppCompatActivity {
         }
     }
 
-    // ... (setupClickListeners, setupNavigation, openFullScreenImage tetap sama)
+    private void openFullScreenFasilitas(FasilitasItem fasilitas) {
+        try {
+            if (fasilitas.getGambarBase64() != null && !fasilitas.getGambarBase64().isEmpty()) {
+                String cacheKey = "fasilitas_" + System.currentTimeMillis();
+                saveToCache(cacheKey, fasilitas.getGambarBase64());
+
+                Intent intent = new Intent(DetailProyekActivity.this, FullscreenSiteplanActivity.class);
+                intent.putExtra("CACHE_KEY", cacheKey);
+                intent.putExtra("PROYEK_NAME", fasilitas.getNamaFasilitas());
+                startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            } else {
+                Toast.makeText(this, "Gambar fasilitas tidak tersedia", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error opening full screen fasilitas: " + e.getMessage(), e);
+            Toast.makeText(this, "Tidak dapat membuka gambar fasilitas", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void setupClickListeners() {
         try {
             // Button Lihat Unit
             if (btnLihatUnit != null) {
                 btnLihatUnit.setOnClickListener(v -> {
                     try {
-                        Toast.makeText(DetailProyekActivity.this, "Fitur Lihat Unit akan datang", Toast.LENGTH_SHORT).show();
+                        if (currentProyek != null) {
+                            Intent intent = new Intent(DetailProyekActivity.this, UnitProyekActivity.class);
+                            intent.putExtra("NAMA_PROYEK", currentProyek.getNamaProyek());
+                            startActivity(intent);
+                        } else {
+                            Toast.makeText(DetailProyekActivity.this, "Data proyek tidak tersedia", Toast.LENGTH_SHORT).show();
+                        }
                     } catch (Exception e) {
-                        Log.e(TAG, "Error opening UnitActivity: " + e.getMessage());
-                        Toast.makeText(this, "Cannot open unit page", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "Error opening UnitProyekActivity: " + e.getMessage());
+                        Toast.makeText(this, "Tidak dapat membuka halaman unit", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
 
-            // Button View Full Site Plan
+            // Button View Full / Ubah Gambar
             if (btnViewFull != null) {
-                btnViewFull.setOnClickListener(v -> openFullScreenImage());
+                btnViewFull.setOnClickListener(v -> {
+                    if (isEditMode) {
+                        // Tambahkan pengecekan level user
+                        if (!"Admin".equals(userLevel)) {
+                            Toast.makeText(this, "Hanya Admin yang dapat mengubah gambar", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        // Mode edit: buka image picker untuk siteplan
+                        openImagePicker(PICK_SITEPLAN_REQUEST);
+                    } else {
+                        // Mode normal: buka fullscreen
+                        openFullScreenSiteplan();
+                    }
+                });
             }
 
-            // Image Site Plan juga bisa diklik untuk fullscreen
+            // Image Site Plan juga bisa diklik untuk fullscreen atau edit
             if (imgSitePlan != null) {
-                imgSitePlan.setOnClickListener(v -> openFullScreenImage());
+                imgSitePlan.setOnClickListener(v -> {
+                    if (isEditMode) {
+                        // Tambahkan pengecekan level user
+                        if (!"Admin".equals(userLevel)) {
+                            Toast.makeText(this, "Hanya Admin yang dapat mengubah gambar", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        openImagePicker(PICK_SITEPLAN_REQUEST);
+                    } else {
+                        openFullScreenSiteplan();
+                    }
+                });
             }
+
+            // Set click listeners for logo editing
+            imgProyek.setOnClickListener(v -> {
+                if (isEditMode) {
+                    // Tambahkan pengecekan level user
+                    if (!"Admin".equals(userLevel)) {
+                        Toast.makeText(this, "Hanya Admin yang dapat mengubah gambar", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    openImagePicker(PICK_LOGO_REQUEST);
+                }
+            });
 
             Log.d(TAG, "Click listeners setup successfully");
 
         } catch (Exception e) {
             Log.e(TAG, "Error setting up click listeners: " + e.getMessage(), e);
+        }
+    }
+
+    private void openFullScreenSiteplan() {
+        try {
+            Log.d(TAG, "openFullScreenSiteplan called");
+
+            if (currentProyek == null || currentProyek.getSiteplanBase64() == null ||
+                    currentProyek.getSiteplanBase64().isEmpty()) {
+                Toast.makeText(this, "Siteplan tidak tersedia", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Simpan base64 ke cache aplikasi
+            String cacheKey = "siteplan_" + System.currentTimeMillis();
+            saveToCache(cacheKey, currentProyek.getSiteplanBase64());
+
+            // Buka activity fullscreen dengan key cache
+            Intent intent = new Intent(DetailProyekActivity.this, FullscreenSiteplanActivity.class);
+            intent.putExtra("CACHE_KEY", cacheKey);
+            intent.putExtra("PROYEK_NAME", currentProyek.getNamaProyek());
+            startActivity(intent);
+
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error opening full screen siteplan: " + e.getMessage(), e);
+            Toast.makeText(this, "Tidak dapat membuka siteplan", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void saveToCache(String key, String data) {
+        try {
+            SharedPreferences prefs = getSharedPreferences("siteplan_cache", MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+
+            // Split data besar menjadi chunks jika perlu
+            if (data.length() > 100000) {
+                int chunks = (int) Math.ceil(data.length() / 100000.0);
+                for (int i = 0; i < chunks; i++) {
+                    int start = i * 100000;
+                    int end = Math.min(start + 100000, data.length());
+                    String chunk = data.substring(start, end);
+                    editor.putString(key + "_chunk_" + i, chunk);
+                }
+                editor.putInt(key + "_chunks", chunks);
+            } else {
+                editor.putString(key, data);
+            }
+
+            editor.apply();
+            Log.d(TAG, "Data saved to cache with key: " + key);
+        } catch (Exception e) {
+            Log.e(TAG, "Error saving to cache: " + e.getMessage());
         }
     }
 
@@ -359,17 +1402,6 @@ public class DetailProyekActivity extends AppCompatActivity {
 
         } catch (Exception e) {
             Log.e(TAG, "Error setting up navigation: " + e.getMessage(), e);
-        }
-    }
-
-    private void openFullScreenImage() {
-        try {
-            // Untuk sementara, beri pesan bahwa fitur akan datang
-            Toast.makeText(this, "Fitur Full Screen Siteplan akan datang", Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "Full screen image feature clicked");
-        } catch (Exception e) {
-            Log.e(TAG, "Error opening full screen image: " + e.getMessage(), e);
-            Toast.makeText(this, "Cannot open image viewer", Toast.LENGTH_SHORT).show();
         }
     }
 

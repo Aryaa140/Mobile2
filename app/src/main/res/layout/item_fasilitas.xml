@@ -1,29 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:layout_weight="1"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="8dp">
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="165dp"
+    android:layout_height="190dp"
+    android:layout_margin="6dp"
+    android:elevation="4dp"
+    android:background="@drawable/card_background">
 
-    <ImageView
-        android:id="@+id/imageFasilitas"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/ic_placeholder"
-        android:contentDescription="Fasilitas" />
+        android:layout_height="match_parent"
+        android:padding="14dp">
 
-    <TextView
-        android:id="@+id/textNamaFasilitas"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Nama Fasilitas"
-        android:textSize="14sp"
-        android:textColor="@android:color/black"
-        android:gravity="center"
-        android:layout_marginTop="6dp"/>
+        <ImageView
+            android:id="@+id/imageFasilitas"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_centerHorizontal="true"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_placeholder"
+            android:contentDescription="Fasilitas" />
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/textNamaFasilitas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/imageFasilitas"
+            android:text="Nama Fasilitas"
+            android:textSize="12sp"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginTop="8dp"
+            android:maxLines="2"
+            android:ellipsize="end"/>
+
+        <!-- Tombol Edit (tampil hanya di mode edit) -->
+        <ImageButton
+            android:id="@+id/btnEditFasilitas"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignTop="@id/imageFasilitas"
+            android:layout_alignEnd="@id/imageFasilitas"
+            android:layout_margin="8dp"
+            android:background="@drawable/circle_background_edit"
+            android:padding="6dp"
+            android:src="@drawable/ic_edit"
+            android:visibility="gone" />
+
+        <!-- Tombol Delete (tampil hanya di mode edit) -->
+        <ImageButton
+            android:id="@+id/btnDeleteFasilitas"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignTop="@id/imageFasilitas"
+            android:layout_alignStart="@id/imageFasilitas"
+            android:layout_margin="8dp"
+            android:background="@drawable/circle_background_delete"
+            android:padding="6dp"
+            android:src="@drawable/ic_delete"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>

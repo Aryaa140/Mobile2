@@ -11,7 +11,8 @@
 
     <color name="red">#F44336</color>
     <color name="green">#4CAF50</color>
-
+    <color name="light_gray">#F5F5F5</color>
+    <color name="very_light_gray">#FAFAFA</color>
     <color name="colorSuccess">#4CAF50</color>
     <color name="colorDanger">#F44336</color>
     <color name="gray_light">#F5F5F5</color>

@@ -2,129 +2,377 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_scroll_gradient"
-    tools:context=".MainActivity"
-    tools:ignore="ExtraText">
+    tools:context=".InputHunianActivity">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/topAppBar"
-        android:layout_width="0dp"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@android:color/transparent"
-        android:theme="@style/ToolbarWhiteIcons"
-        app:navigationIcon="@drawable/ic_back"
-        app:navigationIconTint="@android:color/white"
-        app:title="Menu Input Data Hunian"
-        app:titleCentered="true"
-        app:titleTextColor="@android:color/white"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/container"
+    <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/bg_scroll_gradient"
-        app:layout_constraintTop_toBottomOf="@id/topAppBar"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        android:fillViewport="true"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation">
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardForm"
-        android:layout_width="0dp"
-        android:layout_height="300dp"
-        android:layout_marginTop="125dp"
-        android:layout_marginRight="18dp"
-        android:layout_marginLeft="18dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="6dp"
-        app:layout_constraintTop_toBottomOf="@id/topAppBar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/main"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_height="wrap_content">
 
-            <EditText
-                android:id="@+id/editTextNamaHunian"
-                android:layout_width="match_parent"
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/topAppBar"
+                android:layout_width="0dp"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@android:color/transparent"
+                android:theme="@style/ToolbarWhiteIcons"
+                app:navigationIcon="@drawable/ic_back"
+                app:navigationIconTint="@android:color/white"
+                app:title="Menu Input Data Hunian"
+                app:titleCentered="true"
+                app:titleTextColor="@android:color/white"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardForm"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
                 android:layout_marginTop="20dp"
-                android:textColor="@android:color/black"
-                android:background="@android:drawable/edit_text"
-                android:drawableStart="@drawable/ic_hunian"
-                android:drawablePadding="8dp"
-                android:hint="Masukkan Nama Hunian"
-                android:padding="12dp"/>
+                android:layout_marginLeft="18dp"
+                android:layout_marginRight="18dp"
+                android:layout_marginBottom="20dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp"
+                app:layout_constraintTop_toBottomOf="@id/topAppBar"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="16dp"
-                android:text="Pilih Refrensi Proyek"
-                android:textColor="@android:color/black"
-                android:textSize="15sp" />
-
-            <Spinner
-                android:id="@+id/spinnerRoleProyek"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:textColor="@android:color/black"
-                android:background="@android:drawable/edit_text"
-                android:drawablePadding="8dp"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginTop="16dp">
-
-                <Button
-                    android:id="@+id/btnSimpan"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="24dp"
-                    android:paddingRight="24dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
-                    android:text="Simpan"
-                    android:textColor="@android:color/black"
-                    android:backgroundTint="@android:color/white"
-                    android:layout_marginEnd="12dp"/>
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                <Button
-                    android:id="@+id/btnBatal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="24dp"
-                    android:paddingRight="24dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
-                    android:text="Batal"
-                    android:textColor="@android:color/black"
-                    android:backgroundTint="@android:color/white"/>
-            </LinearLayout>
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
+                    <!-- Nama Hunian -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Nama Hunian"
+                        android:textColor="@color/black"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
 
+                    <EditText
+                        android:id="@+id/editTextNamaHunian"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="15dp"
+                        android:background="@drawable/edit_text_background"
+                        android:drawablePadding="8dp"
+                        android:hint="Contoh: Tipe 21, Tipe 36, Tipe 45"
+                        android:padding="12dp"
+                        android:textColor="@color/black" />
+
+                    <!-- Spinner Proyek -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Pilih Referensi Proyek"
+                        android:textColor="@color/black"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <Spinner
+                        android:id="@+id/spinnerRoleProyek"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="15dp"
+                        android:background="@drawable/edit_text_background"
+                        android:padding="12dp" />
+
+                    <!-- Luas Tanah -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Luas Tanah"
+                        android:textColor="@color/black"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/editTextLuasTanah"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="15dp"
+                        android:background="@drawable/edit_text_background"
+                        android:drawablePadding="8dp"
+                        android:hint="Masukkan luas tanah dalam m² (contoh: 60)"
+                        android:inputType="number"
+                        android:padding="12dp"
+                        android:textColor="@color/black" />
+
+                    <!-- Luas Bangunan -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Luas Bangunan"
+                        android:textColor="@color/black"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/editTextLuasBangunan"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="15dp"
+                        android:background="@drawable/edit_text_background"
+                        android:drawablePadding="8dp"
+                        android:hint="Masukkan luas bangunan dalam m² (contoh: 36)"
+                        android:inputType="number"
+                        android:padding="12dp"
+                        android:textColor="@color/black" />
+
+                    <!-- Deskripsi Hunian -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Deskripsi Hunian"
+                        android:textColor="@color/black"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/editTextDeskripsiHunian"
+                        android:layout_width="match_parent"
+                        android:layout_height="120dp"
+                        android:layout_marginBottom="15dp"
+                        android:background="@drawable/edit_text_background"
+                        android:drawablePadding="8dp"
+                        android:gravity="top"
+                        android:hint="Deskripsikan detail hunian, fasilitas, dan keunggulan..."
+                        android:inputType="textMultiLine"
+                        android:padding="12dp"
+                        android:textColor="@color/black" />
+
+                    <!-- Gambar Unit -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Gambar Unit Hunian"
+                        android:textColor="@color/black"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Pilih gambar yang menunjukkan tampilan unit hunian (foto eksterior/interior)"
+                        android:textColor="@color/gray_500"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btnPilihGambarUnit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:text="Pilih Gambar Unit"
+                        android:textColor="@color/white" />
+
+                    <ImageView
+                        android:id="@+id/imagePreviewUnit"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:layout_marginBottom="15dp"
+                        android:background="@drawable/image_border"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone" />
+
+                    <!-- Gambar Denah -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Gambar Denah Hunian"
+                        android:textColor="@color/black"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Pilih gambar denah layout hunian (denah lantai, tata ruang)"
+                        android:textColor="@color/gray_500"
+                        android:textSize="12sp" />
+
+                    <Button
+                        android:id="@+id/btnPilihGambarDenah"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:text="Pilih Gambar Denah"
+                        android:textColor="@color/white" />
+
+                    <ImageView
+                        android:id="@+id/imagePreviewDenah"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:layout_marginBottom="20dp"
+                        android:background="@drawable/image_border"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone" />
+
+                    <!-- Fasilitas Hunian -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Fasilitas Hunian"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:text="Tambahkan fasilitas yang tersedia di hunian ini"
+                        android:textColor="@color/gray_500"
+                        android:textSize="13sp" />
+
+                    <!-- Input Fasilitas Baru -->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="15dp"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="2dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp"
+                            android:background="@color/light_blue_50">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="6dp"
+                                android:text="Nama Fasilitas"
+                                android:textColor="@color/black"
+                                android:textSize="14sp" />
+
+                            <EditText
+                                android:id="@+id/editTextNamaFasilitas"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="10dp"
+                                android:background="@drawable/edit_text_background"
+                                android:hint="Contoh: Kamar Tidur, Kamar Mandi, Kolam Renang"
+                                android:padding="10dp"
+                                android:textColor="@color/black" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="6dp"
+                                android:text="Jumlah"
+                                android:textColor="@color/black"
+                                android:textSize="14sp" />
+
+                            <EditText
+                                android:id="@+id/editTextJumlahFasilitas"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="10dp"
+                                android:background="@drawable/edit_text_background"
+                                android:hint="Masukkan jumlah (contoh: 2)"
+                                android:inputType="number"
+                                android:padding="10dp"
+                                android:textColor="@color/black" />
+
+                            <Button
+                                android:id="@+id/btnTambahFasilitas"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:backgroundTint="@color/colorPrimary"
+                                android:text="Tambah ke List"
+                                android:textColor="@color/white" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- List Fasilitas yang sudah ditambahkan -->
+                    <TextView
+                        android:id="@+id/textListFasilitas"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Fasilitas yang akan ditambahkan:"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerViewFasilitas"
+                        android:layout_width="match_parent"
+                        android:layout_height="150dp"
+                        android:layout_marginBottom="20dp"
+                        android:visibility="gone" />
+
+                    <!-- Tombol Simpan dan Batal -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/btnSimpan"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="12dp"
+                            android:backgroundTint="@color/green"
+                            android:paddingLeft="24dp"
+                            android:paddingTop="10dp"
+                            android:paddingRight="24dp"
+                            android:paddingBottom="10dp"
+                            android:text="Simpan Data Hunian"
+                            android:textColor="@color/white" />
+
+                        <Button
+                            android:id="@+id/btnBatal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:backgroundTint="@color/red"
+                            android:paddingLeft="24dp"
+                            android:paddingTop="10dp"
+                            android:paddingRight="24dp"
+                            android:paddingBottom="10dp"
+                            android:text="Batal"
+                            android:textColor="@color/white" />
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+    <!-- Bottom Navigation -->
     <View
         android:id="@+id/shadow_view"
         android:layout_width="match_parent"
@@ -149,7 +397,3 @@
         app:itemActiveIndicatorStyle="@style/BottomNav" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
-

@@ -215,12 +215,8 @@ public interface ApiService {
     Call<List<Proyek>> getAllProyek(
             @Query("action") String action
     );
-    @GET("api_proyek.php")
-    Call<List<FasilitasItem>> getFasilitasByProyek(
-            @Query("action") String action,
-            @Query("nama_proyek") String namaProyek
-    );
-    // Method untuk menambah hunian (tambahkan ini)
+
+
     @FormUrlEncoded
     @POST("api_hunian.php")
     Call<BasicResponse> addHunian(
@@ -379,5 +375,119 @@ public interface ApiService {
     // ✅ METHOD UNTUK GET PROMO BY ID (jika perlu)
     @GET("get_promo_by_id.php")
     Call<PromoResponse> getPromoById(@Query("id_promo") int idPromo);
+    @FormUrlEncoded
+    @POST("update_proyek_comprehensive.php")
+    Call<BasicResponse> updateProyekComprehensive(
+            @Field("id_proyek") int idProyek,
+            @Field("old_nama_proyek") String oldNamaProyek,
+            @Field("new_nama_proyek") String newNamaProyek,
+            @Field("lokasi_proyek") String lokasiProyek,
+            @Field("deskripsi_proyek") String deskripsiProyek,
+            @Field("logo") String logoBase64,
+            @Field("siteplan") String siteplanBase64
+    );
+
+
+    @FormUrlEncoded
+    @POST("api_fasilitas.php")
+    Call<BasicResponse> addFasilitas(
+            @Field("action") String action,
+            @Field("nama_fasilitas") String namaFasilitas,
+            @Field("nama_proyek") String namaProyek,
+            @Field("gambar_base64") String gambarBase64
+    );
+
+    @FormUrlEncoded
+    @POST("api_fasilitas.php")
+    Call<BasicResponse> updateFasilitas(
+            @Field("action") String action,
+            @Field("id_fasilitas") int idFasilitas,
+            @Field("nama_fasilitas") String namaFasilitas,
+            @Field("gambar_base64") String gambarBase64
+    );
+
+    // Untuk delete fasilitas
+    @FormUrlEncoded
+    @POST("api_fasilitas.php")
+    Call<BasicResponse> deleteFasilitas(
+            @Field("action") String action,
+            @Field("id_fasilitas") int idFasilitas
+    );
+    @GET("api_fasilitas.php")
+    Call<List<FasilitasItem>> getFasilitasByProyekFromFasilitas(
+            @Query("action") String action,
+            @Query("nama_proyek") String namaProyek
+    );
+    // Tambahkan method ini di ApiService interface
+    @FormUrlEncoded
+    @POST("api_hunian.php")
+    Call<BasicResponse> addHunianComprehensive(
+            @Field("action") String action,
+            @Field("nama_hunian") String namaHunian,
+            @Field("nama_proyek") String namaProyek,
+            @Field("gambar_unit") String gambarUnit,
+            @Field("gambar_denah") String gambarDenah,
+            @Field("luas_tanah") int luasTanah,
+            @Field("luas_bangunan") int luasBangunan,
+            @Field("deskripsi_hunian") String deskripsiHunian,
+            @Field("fasilitas") String fasilitas
+    );
+    @FormUrlEncoded
+    @POST("api_hunian.php")
+    Call<HunianDetailResponse> getHunianDataByProyek(
+            @Field("action") String action,
+            @Field("nama_proyek") String nama_proyek
+    );
+
+
+    @FormUrlEncoded
+    @POST("api_hunian.php")
+    Call<BasicResponse> deleteHunian(
+            @Field("action") String action,
+            @Field("id_hunian") int id_hunian
+    );
+    @FormUrlEncoded
+    @POST("api_fasilitas_hunian.php")
+    Call<BasicResponse> addFasilitasHunian(
+            @Field("action") String action,
+            @Field("nama_hunian") String namaHunian,
+            @Field("nama_fasilitas") String namaFasilitas,
+            @Field("jumlah") int jumlah
+    );
+
+    @FormUrlEncoded
+    @POST("api_fasilitas_hunian.php")
+    Call<BasicResponse> updateFasilitasHunian(
+            @Field("action") String action,
+            @Field("Id_FasilitasHunian") int idFasilitas, // PERBAIKAN: nama field harus sama dengan PHP
+            @Field("nama_fasilitas") String namaFasilitas,
+            @Field("jumlah") int jumlah
+    );
+
+    @FormUrlEncoded
+    @POST("api_fasilitas_hunian.php")
+    Call<BasicResponse> deleteFasilitasHunian(
+            @Field("action") String action,
+            @Field("Id_FasilitasHunian") int idFasilitas // PERBAIKAN: nama field harus sama dengan PHP
+    );
+    @FormUrlEncoded
+    @POST("api_fasilitas_hunian.php")
+    Call<FasilitasHunianResponse> getFasilitasByHunian(
+            @Field("action") String action,
+            @Field("nama_hunian") String namaHunian
+    );
+    @FormUrlEncoded
+    @POST("api_hunian.php")
+    Call<BasicResponse> updateHunianComprehensive(
+            @Field("action") String action,
+            @Field("id_hunian") int idHunian,
+            @Field("old_nama_hunian") String oldNamaHunian,
+            @Field("new_nama_hunian") String newNamaHunian,
+            @Field("luas_tanah") int luasTanah,
+            @Field("luas_bangunan") int luasBangunan,
+            @Field("deskripsi_hunian") String deskripsiHunian,
+            @Field("gambar_unit") String gambarUnit,
+            @Field("gambar_denah") String gambarDenah
+    );
 }
 
