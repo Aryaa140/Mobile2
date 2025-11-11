@@ -1,5 +1,6 @@
 package com.example.mobile;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -26,6 +27,11 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,7 +39,7 @@ import retrofit2.Response;
 
 public class EditDataPromoActivity extends AppCompatActivity {
 
-    private EditText editTextNamaPromo, editTextPenginput;
+    private EditText editTextNamaPromo, editTextPenginput, editTextKadaluwarsa;
     private Spinner spinnerReferensi;
     private Button btnSimpan, btnBatal, btnPilihGambar;
     private BottomNavigationView bottomNavigationView;
@@ -41,17 +47,19 @@ public class EditDataPromoActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private static final String PREFS_NAME = "LoginPrefs";
     private static final String KEY_USERNAME = "username";
-
     private int promoId;
     private String currentImageBase64;
-    private String originalImageBase64; // PERBAIKAN: Simpan gambar original
+    private String originalImageBase64;
+    private String originalKadaluwarsa;
     private static final int PICK_IMAGE_REQUEST = 100;
+    private Calendar calendar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_data_promo);
-
+        calendar = Calendar.getInstance();
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         initViews();
         receiveIntentData();
@@ -77,6 +85,64 @@ public class EditDataPromoActivity extends AppCompatActivity {
         btnSimpan = findViewById(R.id.btnSimpan);
         btnBatal = findViewById(R.id.btnBatal);
         btnPilihGambar = findViewById(R.id.btnInputPromo);
+        editTextKadaluwarsa = findViewById(R.id.editTextKadaluwarsa);
+    }
+    // TAMBAHKAN METHOD UNTUK SETUP DATE PICKER
+    private void setupDatePicker() {
+        editTextKadaluwarsa.setOnClickListener(v -> showDatePickerDialog());
+    }
+
+    // TAMBAHKAN METHOD UNTUK MENAMPILKAN DATE PICKER DIALOG
+    private void showDatePickerDialog() {
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                (view, year, month, dayOfMonth) -> {
+                    calendar.set(Calendar.YEAR, year);
+                    calendar.set(Calendar.MONTH, month);
+                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                    // Format tanggal menjadi yyyy-MM-dd
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                    String selectedDate = dateFormat.format(calendar.getTime());
+                    editTextKadaluwarsa.setText(selectedDate);
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+        );
+
+        // Set minimal date ke hari ini (tidak boleh memilih tanggal sebelum hari ini)
+        datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+
+        datePickerDialog.show();
+    }
+
+    // TAMBAHKAN METHOD VALIDASI TANGGAL KADALUWARSA
+    private boolean validateKadaluwarsa(String kadaluwarsa) {
+        if (kadaluwarsa == null || kadaluwarsa.trim().isEmpty()) {
+            editTextKadaluwarsa.setError("Tanggal kadaluwarsa harus diisi");
+            editTextKadaluwarsa.requestFocus();
+            return false;
+        }
+
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            Date expiryDate = dateFormat.parse(kadaluwarsa);
+            Date today = new Date();
+
+            // Validasi: tanggal kadaluwarsa tidak boleh sebelum hari ini
+            if (expiryDate.before(today)) {
+                editTextKadaluwarsa.setError("Tanggal kadaluwarsa tidak boleh sebelum hari ini");
+                editTextKadaluwarsa.requestFocus();
+                return false;
+            }
+
+            return true;
+        } catch (ParseException e) {
+            editTextKadaluwarsa.setError("Format tanggal tidak valid");
+            editTextKadaluwarsa.requestFocus();
+            return false;
+        }
     }
     private void setupNavigation() {
         topAppBar.setNavigationOnClickListener(v -> {
@@ -117,12 +183,15 @@ public class EditDataPromoActivity extends AppCompatActivity {
             String promoInputter = intent.getStringExtra("PROMO_INPUTTER");
             String promoReference = intent.getStringExtra("PROMO_REFERENCE");
             currentImageBase64 = intent.getStringExtra("PROMO_IMAGE");
-
+            originalKadaluwarsa = intent.getStringExtra("PROMO_KADALUWARSA");
             // PERBAIKAN: Simpan gambar original untuk comparison
             originalImageBase64 = currentImageBase64;
 
             editTextNamaPromo.setText(promoTitle);
             editTextPenginput.setText(promoInputter);
+            if (originalKadaluwarsa != null && !originalKadaluwarsa.isEmpty()) {
+                editTextKadaluwarsa.setText(originalKadaluwarsa);
+            }
             setSpinnerSelection(promoReference);
 
             Log.d("EditPromo", "Editing Promo ID: " + promoId);
@@ -214,7 +283,7 @@ public class EditDataPromoActivity extends AppCompatActivity {
         String namaPromo = editTextNamaPromo.getText().toString().trim();
         String penginput = editTextPenginput.getText().toString().trim();
         String referensi = spinnerReferensi.getSelectedItem().toString();
-
+        String kadaluwarsa = editTextKadaluwarsa.getText().toString().trim();
         // Validasi dasar
         if (namaPromo.isEmpty() || penginput.isEmpty()) {
             Toast.makeText(this, "Harap isi semua field", Toast.LENGTH_SHORT).show();
@@ -233,7 +302,7 @@ public class EditDataPromoActivity extends AppCompatActivity {
 
         boolean dataChanged = !namaPromo.equals(originalTitle) ||
                 !penginput.equals(originalInputter) ||
-                !referensi.equals(originalReference) ||
+                !referensi.equals(originalReference) ||  !kadaluwarsa.equals(originalKadaluwarsa) ||
                 isImageChanged();
 
         Log.d("EditPromo", "=== PERUBAHAN DATA ===");
@@ -242,7 +311,7 @@ public class EditDataPromoActivity extends AppCompatActivity {
         Log.d("EditPromo", "Referensi berubah: " + !referensi.equals(originalReference));
         Log.d("EditPromo", "Gambar berubah: " + isImageChanged());
         Log.d("EditPromo", "Ada perubahan: " + dataChanged);
-
+        Log.d("EditPromo", "Kadaluwarsa berubah: " + !kadaluwarsa.equals(originalKadaluwarsa));
         if (!dataChanged) {
             Toast.makeText(this, "Tidak ada perubahan data", Toast.LENGTH_SHORT).show();
             return;
@@ -264,6 +333,7 @@ public class EditDataPromoActivity extends AppCompatActivity {
         Log.d("EditPromo", "ID: " + promoId);
         Log.d("EditPromo", "Nama: " + namaPromo);
         Log.d("EditPromo", "Penginput: " + penginput);
+        Log.d("EditPromo", "Kadaluwarsa: " + kadaluwarsa);
         Log.d("EditPromo", "Referensi: " + referensi);
         Log.d("EditPromo", "Gambar dikirim: " + (imageToSend != null ? imageToSend.length() + " chars" : "null"));
 
@@ -273,7 +343,8 @@ public class EditDataPromoActivity extends AppCompatActivity {
                 namaPromo,
                 penginput,
                 referensi,
-                imageToSend
+                imageToSend,
+                kadaluwarsa
         );
 
         call.enqueue(new Callback<BasicResponse>() {
