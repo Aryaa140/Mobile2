@@ -1,5 +1,6 @@
 package com.example.mobile;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -17,17 +18,20 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
-import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -35,7 +39,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class EditDataPromooActivity extends AppCompatActivity {
-    private EditText editTextNamaPromo, editTextPenginput;
+    private EditText editTextNamaPromo, editTextPenginput, editTextKadaluwarsa;
     private Spinner spinnerReferensi;
     private Button btnSimpan, btnBatal, btnPilihGambar;
     private BottomNavigationView bottomNavigationView;
@@ -46,7 +50,9 @@ public class EditDataPromooActivity extends AppCompatActivity {
     private int promoId;
     private String currentImageBase64;
     private String originalImageBase64;
+    private String originalKadaluwarsa;
     private static final int PICK_IMAGE_REQUEST = 100;
+    private Calendar calendar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,18 +65,20 @@ public class EditDataPromooActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
+        calendar = Calendar.getInstance();
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         initViews();
         receiveIntentData();
         setupAutoData();
         setupListeners();
         setupNavigation();
+        setupDatePicker();
+
+        // ✅ TAMBAHKAN: Debug log untuk memastikan data diterima
+        logIntentData();
     }
 
     private void initViews() {
-        bottomNavigationView = findViewById(R.id.bottom_navigation);
-        topAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         topAppBar = findViewById(R.id.topAppBar);
         editTextNamaPromo = findViewById(R.id.editTextNama);
@@ -79,6 +87,92 @@ public class EditDataPromooActivity extends AppCompatActivity {
         btnSimpan = findViewById(R.id.btnSimpan);
         btnBatal = findViewById(R.id.btnBatal);
         btnPilihGambar = findViewById(R.id.btnInputPromo);
+        editTextKadaluwarsa = findViewById(R.id.editTextKadaluwarsa);
+    }
+
+    // ✅ METHOD BARU: DEBUG LOG INTENT DATA
+    private void logIntentData() {
+        Intent intent = getIntent();
+        Log.d("EditPromo", "=== INTENT DATA DEBUG ===");
+        Log.d("EditPromo", "PROMO_ID: " + intent.getIntExtra("PROMO_ID", -1));
+        Log.d("EditPromo", "PROMO_TITLE: " + intent.getStringExtra("PROMO_TITLE"));
+        Log.d("EditPromo", "PROMO_INPUTTER: " + intent.getStringExtra("PROMO_INPUTTER"));
+        Log.d("EditPromo", "PROMO_REFERENCE: " + intent.getStringExtra("PROMO_REFERENCE"));
+        Log.d("EditPromo", "PROMO_KADALUWARSA: " + intent.getStringExtra("PROMO_KADALUWARSA"));
+        Log.d("EditPromo", "PROMO_IMAGE: " + (intent.getStringExtra("PROMO_IMAGE") != null ?
+                intent.getStringExtra("PROMO_IMAGE").length() + " chars" : "null"));
+        Log.d("EditPromo", "=== END INTENT DATA ===");
+    }
+
+    // TAMBAHKAN METHOD UNTUK SETUP DATE PICKER
+    private void setupDatePicker() {
+        editTextKadaluwarsa.setOnClickListener(v -> showDatePickerDialog());
+    }
+
+    // TAMBAHKAN METHOD UNTUK MENAMPILKAN DATE PICKER DIALOG
+    private void showDatePickerDialog() {
+        // ✅ PERBAIKAN: Set calendar ke tanggal yang sudah ada jika ada
+        if (originalKadaluwarsa != null && !originalKadaluwarsa.isEmpty()) {
+            try {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                Date existingDate = dateFormat.parse(originalKadaluwarsa);
+                if (existingDate != null) {
+                    calendar.setTime(existingDate);
+                }
+            } catch (ParseException e) {
+                Log.e("EditPromo", "Error parsing existing date: " + e.getMessage());
+            }
+        }
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                (view, year, month, dayOfMonth) -> {
+                    calendar.set(Calendar.YEAR, year);
+                    calendar.set(Calendar.MONTH, month);
+                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                    // Format tanggal menjadi yyyy-MM-dd
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                    String selectedDate = dateFormat.format(calendar.getTime());
+                    editTextKadaluwarsa.setText(selectedDate);
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+        );
+
+        // Set minimal date ke hari ini (tidak boleh memilih tanggal sebelum hari ini)
+        datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+
+        datePickerDialog.show();
+    }
+
+    // TAMBAHKAN METHOD VALIDASI TANGGAL KADALUWARSA
+    private boolean validateKadaluwarsa(String kadaluwarsa) {
+        if (kadaluwarsa == null || kadaluwarsa.trim().isEmpty()) {
+            editTextKadaluwarsa.setError("Tanggal kadaluwarsa harus diisi");
+            editTextKadaluwarsa.requestFocus();
+            return false;
+        }
+
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            Date expiryDate = dateFormat.parse(kadaluwarsa);
+            Date today = new Date();
+
+            // Validasi: tanggal kadaluwarsa tidak boleh sebelum hari ini
+            if (expiryDate.before(today)) {
+                editTextKadaluwarsa.setError("Tanggal kadaluwarsa tidak boleh sebelum hari ini");
+                editTextKadaluwarsa.requestFocus();
+                return false;
+            }
+
+            return true;
+        } catch (ParseException e) {
+            editTextKadaluwarsa.setError("Format tanggal tidak valid");
+            editTextKadaluwarsa.requestFocus();
+            return false;
+        }
     }
 
     private void setupNavigation() {
@@ -121,13 +215,30 @@ public class EditDataPromooActivity extends AppCompatActivity {
             String promoReference = intent.getStringExtra("PROMO_REFERENCE");
             currentImageBase64 = intent.getStringExtra("PROMO_IMAGE");
 
+            // ✅ PERBAIKAN BESAR: AMBIL DATA KADALUWARSA DENGAN CARA YANG LEBIH ROBUST
+            originalKadaluwarsa = intent.getStringExtra("PROMO_KADALUWARSA");
+
+            // Debug log untuk memastikan data kadaluwarsa diterima
+            Log.d("EditPromo", "Received KADALUWARSA from intent: " + originalKadaluwarsa);
+
             originalImageBase64 = currentImageBase64;
 
             editTextNamaPromo.setText(promoTitle);
             editTextPenginput.setText(promoInputter);
+
+            // ✅ PERBAIKAN: SET NILAI KADALUWARSA DENGAN VALIDASI LEBIH KETAT
+            if (originalKadaluwarsa != null && !originalKadaluwarsa.isEmpty() && !originalKadaluwarsa.equals("null")) {
+                editTextKadaluwarsa.setText(originalKadaluwarsa);
+                Log.d("EditPromo", "Kadaluwarsa set to EditText: " + originalKadaluwarsa);
+            } else {
+                editTextKadaluwarsa.setText("");
+                Log.w("EditPromo", "Kadaluwarsa is null, empty, or 'null' string");
+            }
+
             setSpinnerSelection(promoReference);
 
             Log.d("EditPromo", "Editing Promo ID: " + promoId);
+            Log.d("EditPromo", "Kadaluwarsa: " + originalKadaluwarsa);
             Log.d("EditPromo", "Original image length: " +
                     (originalImageBase64 != null ? originalImageBase64.length() : "null"));
         }
@@ -213,8 +324,13 @@ public class EditDataPromooActivity extends AppCompatActivity {
         String namaPromo = editTextNamaPromo.getText().toString().trim();
         String penginput = editTextPenginput.getText().toString().trim();
         String referensi = spinnerReferensi.getSelectedItem().toString();
+        String kadaluwarsa = editTextKadaluwarsa.getText().toString().trim();
 
         // Validasi dasar
+        if (!validateKadaluwarsa(kadaluwarsa)) {
+            return; // Validasi gagal, keluar dari method
+        }
+
         if (namaPromo.isEmpty() || penginput.isEmpty()) {
             Toast.makeText(this, "Harap isi semua field", Toast.LENGTH_SHORT).show();
             return;
@@ -233,6 +349,7 @@ public class EditDataPromooActivity extends AppCompatActivity {
         boolean dataChanged = !namaPromo.equals(originalTitle) ||
                 !penginput.equals(originalInputter) ||
                 !referensi.equals(originalReference) ||
+                !kadaluwarsa.equals(originalKadaluwarsa) ||
                 isImageChanged();
 
         Log.d("EditPromo", "=== PERUBAHAN DATA ===");
@@ -240,6 +357,9 @@ public class EditDataPromooActivity extends AppCompatActivity {
         Log.d("EditPromo", "Penginput berubah: " + !penginput.equals(originalInputter));
         Log.d("EditPromo", "Referensi berubah: " + !referensi.equals(originalReference));
         Log.d("EditPromo", "Gambar berubah: " + isImageChanged());
+        Log.d("EditPromo", "Kadaluwarsa berubah: " + !kadaluwarsa.equals(originalKadaluwarsa));
+        Log.d("EditPromo", "Original Kadaluwarsa: " + originalKadaluwarsa);
+        Log.d("EditPromo", "New Kadaluwarsa: " + kadaluwarsa);
         Log.d("EditPromo", "Ada perubahan: " + dataChanged);
 
         if (!dataChanged) {
@@ -261,6 +381,7 @@ public class EditDataPromooActivity extends AppCompatActivity {
         Log.d("EditPromo", "Penginput: " + penginput);
         Log.d("EditPromo", "Referensi: " + referensi);
         Log.d("EditPromo", "Gambar dikirim: " + (imageToSend != null ? imageToSend.length() + " chars" : "null"));
+        Log.d("EditPromo", "Kadaluwarsa: " + kadaluwarsa);
 
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
         Call<BasicResponse> call = apiService.updatePromo(
@@ -268,7 +389,8 @@ public class EditDataPromooActivity extends AppCompatActivity {
                 namaPromo,
                 penginput,
                 referensi,
-                imageToSend
+                imageToSend,
+                kadaluwarsa
         );
 
         call.enqueue(new Callback<BasicResponse>() {
@@ -346,6 +468,7 @@ public class EditDataPromooActivity extends AppCompatActivity {
             Log.e("EditPromo", "Error showing local update notification: " + e.getMessage());
         }
     }
+
     private void savePromoUpdateToHistori(int promoId, String title, String penginput, String imageData) {
         Log.d("EditPromo", "=== SAVE UPDATE HISTORI WITH IMAGE ===");
 
@@ -595,6 +718,7 @@ public class EditDataPromooActivity extends AppCompatActivity {
             }
         });
     }
+
     private void sendRefreshBroadcastToNews() {
         Intent refreshIntent = new Intent("REFRESH_NEWS_DATA");
         sendBroadcast(refreshIntent);

@@ -1,5 +1,6 @@
 package com.example.mobile;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -29,9 +30,14 @@ import com.google.android.material.appbar.MaterialToolbar;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -45,7 +51,7 @@ public class InputPromoActivity extends AppCompatActivity {
     private static final int MAX_IMAGE_SIZE = 1024; // Max width/height untuk resize
 
     private MaterialToolbar topAppBar;
-    private EditText editTextNamaPromo, editTextPenginput;
+    private EditText editTextNamaPromo, editTextPenginput, editTextKadaluwarsa;
     private Spinner spinnerReferensi;
     private Button btnPilihGambar, btnSimpan, btnBatal;
     private SharedPreferences sharedPreferences;
@@ -53,6 +59,7 @@ public class InputPromoActivity extends AppCompatActivity {
     private String imageBase64;
     private List<Proyek> proyekList = new ArrayList<>();
     private ArrayAdapter<String> spinnerAdapter;
+    private Calendar calendar;
 
 
     @Override
@@ -64,16 +71,18 @@ public class InputPromoActivity extends AppCompatActivity {
 
         // PERBAIKAN: EdgeToEdge setelah setContentView
         EdgeToEdge.enable(this);
+        // Inisialisasi calendar untuk date picker
+        calendar = Calendar.getInstance();
 
         // Inisialisasi SharedPreferences
         sharedPreferences = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
 
-        // Inisialisasi views dengan try-catch
         try {
             initViews();
             setupToolbar();
             setupForm();
             setupButtons();
+            setupDatePicker();
         } catch (Exception e) {
             Log.e(TAG, "Error during initialization: " + e.getMessage());
             Toast.makeText(this, "Error inisialisasi: " + e.getMessage(), Toast.LENGTH_LONG).show();
@@ -105,6 +114,12 @@ public class InputPromoActivity extends AppCompatActivity {
                 throw new RuntimeException("editTextProspek not found");
             }
 
+            // TAMBAHKAN INISIALISASI EDIT TEXT KADALUWARSA
+            editTextKadaluwarsa = findViewById(R.id.editTextKadaluwarsa);
+            if (editTextKadaluwarsa == null) {
+                throw new RuntimeException("editTextKadaluwarsa not found");
+            }
+
             spinnerReferensi = findViewById(R.id.spinnerRole);
             if (spinnerReferensi == null) {
                 throw new RuntimeException("spinnerRole not found");
@@ -132,7 +147,63 @@ public class InputPromoActivity extends AppCompatActivity {
             throw e; // Re-throw untuk ditangkap di caller
         }
     }
+    // TAMBAHKAN METHOD UNTUK SETUP DATE PICKER
+    private void setupDatePicker() {
+        editTextKadaluwarsa.setOnClickListener(v -> showDatePickerDialog());
+    }
 
+    // TAMBAHKAN METHOD UNTUK MENAMPILKAN DATE PICKER DIALOG
+    private void showDatePickerDialog() {
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                (view, year, month, dayOfMonth) -> {
+                    calendar.set(Calendar.YEAR, year);
+                    calendar.set(Calendar.MONTH, month);
+                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                    // Format tanggal menjadi yyyy-MM-dd
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                    String selectedDate = dateFormat.format(calendar.getTime());
+                    editTextKadaluwarsa.setText(selectedDate);
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+        );
+
+        // Set minimal date ke hari ini (tidak boleh memilih tanggal sebelum hari ini)
+        datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+
+        datePickerDialog.show();
+    }
+
+    // TAMBAHKAN METHOD VALIDASI TANGGAL KADALUWARSA
+    private boolean validateKadaluwarsa(String kadaluwarsa) {
+        if (kadaluwarsa == null || kadaluwarsa.trim().isEmpty()) {
+            editTextKadaluwarsa.setError("Tanggal kadaluwarsa harus diisi");
+            editTextKadaluwarsa.requestFocus();
+            return false;
+        }
+
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            Date expiryDate = dateFormat.parse(kadaluwarsa);
+            Date today = new Date();
+
+            // Validasi: tanggal kadaluwarsa tidak boleh sebelum hari ini
+            if (expiryDate.before(today)) {
+                editTextKadaluwarsa.setError("Tanggal kadaluwarsa tidak boleh sebelum hari ini");
+                editTextKadaluwarsa.requestFocus();
+                return false;
+            }
+
+            return true;
+        } catch (ParseException e) {
+            editTextKadaluwarsa.setError("Format tanggal tidak valid");
+            editTextKadaluwarsa.requestFocus();
+            return false;
+        }
+    }
     private void setupToolbar() {
         topAppBar.setNavigationOnClickListener(v -> {
             // PERBAIKAN: Tambahkan konfirmasi sebelum keluar
@@ -447,7 +518,7 @@ public class InputPromoActivity extends AppCompatActivity {
             String namaPenginput = editTextPenginput.getText().toString().trim();
             String referensiProyek = spinnerReferensi.getSelectedItem() != null ?
                     spinnerReferensi.getSelectedItem().toString() : "";
-
+            String kadaluwarsa = editTextKadaluwarsa.getText().toString().trim();
             // Validasi input
             if (namaPromo.isEmpty()) {
                 editTextNamaPromo.setError("Nama promo harus diisi");
@@ -470,7 +541,7 @@ public class InputPromoActivity extends AppCompatActivity {
             btnSimpan.setText("Menyimpan...");
 
             // Panggil API
-            callApiSimpanPromo(namaPromo, namaPenginput, referensiProyek, imageBase64);
+            callApiSimpanPromo(namaPromo, namaPenginput, referensiProyek, imageBase64,kadaluwarsa);
 
         } catch (Exception e) {
             Log.e(TAG, "Error in simpanPromo: " + e.getMessage());
@@ -480,15 +551,17 @@ public class InputPromoActivity extends AppCompatActivity {
     }
 
     // ✅ PERBAIKAN: Ganti method callApiSimpanPromo
-    private void callApiSimpanPromo(String namaPromo, String namaPenginput, String referensiProyek, String imageBase64) {
+    private void callApiSimpanPromo(String namaPromo, String namaPenginput, String referensiProyek, String imageBase64, String kadaluwarsa) {
         Log.d(TAG, "=== CALL API SIMPAN PROMO ===");
+        Log.d(TAG, "Kadaluwarsa: " + kadaluwarsa);
 
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
         Call<BasicResponse> call = apiService.tambahPromo(
                 namaPromo,
                 namaPenginput,
                 referensiProyek,
-                imageBase64
+                imageBase64,
+                kadaluwarsa
         );
 
         call.enqueue(new Callback<BasicResponse>() {

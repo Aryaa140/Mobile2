@@ -21,16 +21,21 @@ public class Promo {
     @SerializedName("tanggal_input")
     private String tanggalInput;
 
+    // TAMBAHKAN FIELD KADALUWARSA
+    @SerializedName("kadaluwarsa")
+    private String kadaluwarsa;
+
     // Constructor
     public Promo() {}
 
-    public Promo(int idPromo, String namaPromo, String namaPenginput, String referensiProyek, String gambarBase64, String tanggalInput) {
+    public Promo(int idPromo, String namaPromo, String namaPenginput, String referensiProyek, String gambarBase64, String tanggalInput, String kadaluwarsa) {
         this.idPromo = idPromo;
         this.namaPromo = namaPromo;
         this.namaPenginput = namaPenginput;
         this.referensiProyek = referensiProyek;
         this.gambarBase64 = gambarBase64;
         this.tanggalInput = tanggalInput;
+        this.kadaluwarsa = kadaluwarsa;
     }
 
     // Getter and Setter methods
@@ -47,11 +52,18 @@ public class Promo {
     public void setReferensiProyek(String referensiProyek) { this.referensiProyek = referensiProyek; }
 
     public String getGambarBase64() {
-        // Pastikan base64 tidak null
         return gambarBase64 != null ? gambarBase64 : "";
     }
     public void setGambarBase64(String gambarBase64) { this.gambarBase64 = gambarBase64; }
 
     public String getTanggalInput() { return tanggalInput; }
     public void setTanggalInput(String tanggalInput) { this.tanggalInput = tanggalInput; }
+
+    // GETTER DAN SETTER UNTUK KADALUWARSA
+    public String getKadaluwarsa() {
+        return kadaluwarsa != null ? kadaluwarsa : "";
+    }
+    public void setKadaluwarsa(String kadaluwarsa) {
+        this.kadaluwarsa = kadaluwarsa;
+    }
 }

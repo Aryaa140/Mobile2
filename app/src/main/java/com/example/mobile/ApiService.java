@@ -140,8 +140,11 @@ public interface ApiService {
             @Field("nama_promo") String namaPromo, // Diubah ke huruf kecil
             @Field("nama_penginput") String namaPenginput, // Diubah ke huruf kecil
             @Field("referensi_proyek") String referensiProyek, // Diubah ke huruf kecil
-            @Field("gambar") String gambarBase64
+            @Field("gambar") String gambarBase64,
+              @Field("kadaluwarsa") String kadaluwarsa
     );
+    @GET("auto_delete_expired_promos.php")
+    Call<BasicResponse> autoDeleteExpiredPromos();
     @GET("get_promo.php")
     Call<PromoResponse> getSemuaPromo();
     @FormUrlEncoded
@@ -156,8 +159,11 @@ public interface ApiService {
             @Field("nama_promo") String namaPromo,
             @Field("nama_penginput") String namaPenginput,
             @Field("referensi_proyek") String referensiProyek,
-            @Field("gambar_base64") String gambarBase64
+            @Field("gambar_base64") String gambarBase64,
+            @Field("kadaluwarsa") String kadaluwarsa
     );
+    @GET("get_promo.php")
+    Call<PromoResponse> getSemuaPromoWithTimestamp(@Query("timestamp") long timestamp);
     @FormUrlEncoded
     @POST("check_new_promo.php")
     Call<PollingResponse> checkNewPromos(

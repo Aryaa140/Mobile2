@@ -18,7 +18,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -29,7 +33,7 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
     private Context context;
     private List<Promo> promoList;
     private OnPromoActionListener actionListener;
-    private String userLevel = "Operator"; // Default ke Operator
+    private String userLevel = "Operator";
 
     public static final int EDIT_PROMO_REQUEST = 1001;
 
@@ -41,9 +45,13 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
     public PromoAdapter(Context context, List<Promo> promoList) {
         this.context = context;
         this.promoList = promoList;
+
+        // ❌ HAPUS PEMANGGILAN AUTO DELETE DARI CONSTRUCTOR
+        // SEKARANG DITANGANI OLEH NewBeranda BACKGROUND SERVICE
+        Log.d("PromoAdapter", "Adapter created - Auto Delete handled by NewBeranda service");
     }
 
-    // METHOD BARU: Set user level
+    // ✅ METHOD SETTER - TETAP SAMA
     public void setUserLevel(String level) {
         this.userLevel = level != null ? level : "Operator";
         Log.d("PromoAdapter", "User level set to: " + this.userLevel);
@@ -54,6 +62,15 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
         Log.d("PromoAdapter", "Listener set: " + (listener != null));
     }
 
+    // ✅ METHOD UNTUK REFRESH DATA DARI ACTIVITY
+    public void refreshData(List<Promo> newPromoList) {
+        this.promoList.clear();
+        this.promoList.addAll(newPromoList);
+        notifyDataSetChanged();
+        Log.d("PromoAdapter", "Data refreshed: " + promoList.size() + " items");
+    }
+
+    // 🎯 METHOD-METHOD LAIN TETAP SAMA PERSIS
     @NonNull
     @Override
     public PromoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -66,7 +83,6 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
         Promo promo = promoList.get(position);
         holder.bind(promo);
 
-        // ATUR VISIBILITAS TOMBOL MENU BERDASARKAN LEVEL USER
         if ("Admin".equals(userLevel)) {
             holder.btnMenu.setVisibility(View.VISIBLE);
             holder.btnMenu.setOnClickListener(v -> {
@@ -100,7 +116,6 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
     private void openEditActivity(Promo promo) {
         Log.d("PromoAdapter", "Opening EditActivity for promo ID: " + promo.getIdPromo());
 
-        // Validasi data sebelum dikirim
         if (promo == null) {
             Log.e("PromoAdapter", "Promo data is null");
             return;
@@ -115,14 +130,21 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
             intent.putExtra("PROMO_REFERENCE", promo.getReferensiProyek() != null ? promo.getReferensiProyek() : "");
             intent.putExtra("PROMO_IMAGE", promo.getGambarBase64() != null ? promo.getGambarBase64() : "");
 
+            String kadaluwarsa = promo.getKadaluwarsa();
+            if (kadaluwarsa != null && !kadaluwarsa.isEmpty() && !kadaluwarsa.equals("null")) {
+                intent.putExtra("PROMO_KADALUWARSA", kadaluwarsa);
+            } else {
+                intent.putExtra("PROMO_KADALUWARSA", "");
+            }
+
+            Log.d("PromoAdapter", "Data ke EditActivity - ID: " + promo.getIdPromo() + ", Kadaluwarsa: " + kadaluwarsa);
+
             if (context instanceof android.app.Activity) {
                 ((android.app.Activity) context).startActivityForResult(intent, EDIT_PROMO_REQUEST);
             } else {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }
-
-            Log.d("PromoAdapter", "✅ Edit activity opened successfully");
 
         } catch (Exception e) {
             Log.e("PromoAdapter", "Error opening edit activity: " + e.getMessage());
@@ -134,31 +156,20 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
         Log.d("PromoAdapter", "=== UPDATE PROMO ITEM ===");
         Log.d("PromoAdapter", "Target ID: " + promoId);
 
-        boolean found = false;
-
         for (int i = 0; i < promoList.size(); i++) {
             Promo promo = promoList.get(i);
             if (promo.getIdPromo() == promoId) {
                 Log.d("PromoAdapter", "Found promo at position: " + i);
-                found = true;
 
-                // Update data
                 if (updatedImage != null && !updatedImage.isEmpty()) {
                     promo.setGambarBase64(updatedImage);
                     Log.d("PromoAdapter", "Image updated for promo: " + promo.getNamaPromo());
                 }
 
                 notifyItemChanged(i);
-
-                // ✅ TAMBAHKAN NOTIFIKASI UPDATE BERHASIL
                 showUpdateSuccessNotification(promo.getNamaPromo(), promo.getNamaPenginput());
-
                 break;
             }
-        }
-
-        if (!found) {
-            Log.w("PromoAdapter", "Promo not found for update: " + promoId);
         }
     }
 
@@ -174,13 +185,10 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
 
             builder.setNegativeButton("Batal", (dialog, which) -> {
                 dialog.dismiss();
-                Log.d("PromoAdapter", "Delete operation cancelled");
             });
 
             AlertDialog dialog = builder.create();
             dialog.show();
-
-            Log.d("PromoAdapter", "Delete confirmation dialog shown");
 
         } catch (Exception e) {
             Log.e("PromoAdapter", "Error showing delete dialog: " + e.getMessage());
@@ -191,14 +199,12 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
     private void deletePromo(Promo promo, int position) {
         Log.d("PromoAdapter", "Deleting promo with ID: " + promo.getIdPromo());
 
-        // Validasi position
         if (position < 0 || position >= promoList.size()) {
             Log.e("PromoAdapter", "Invalid position for delete: " + position);
             showErrorNotification("Posisi promo tidak valid");
             return;
         }
 
-        // Tampilkan loading state
         showLoadingState(true);
 
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
@@ -225,48 +231,31 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
             public void onFailure(Call<BasicResponse> call, Throwable t) {
                 showLoadingState(false);
                 handleDeleteError("Error koneksi: " + t.getMessage());
-                Log.e("PromoAdapter", "Network error: " + t.getMessage());
             }
         });
     }
 
     private void handleDeleteSuccess(Promo promo, int position) {
-
-        // Validasi ulang position sebelum remove
         if (position >= 0 && position < promoList.size()) {
             String promoName = getSafePromoName(promo);
             String penginput = promo.getNamaPenginput() != null ? promo.getNamaPenginput() : "Unknown";
 
-            // Hapus dari list
             promoList.remove(position);
             notifyItemRemoved(position);
             notifyItemRangeChanged(position, promoList.size());
 
-            // ✅ TAMBAHKAN NOTIFIKASI DELETE BERHASIL
             showDeleteSuccessNotification(promoName, penginput);
 
-            // PANGGIL LISTENER UNTUK NEWS DAN NOTIFIKASI
             if (actionListener != null) {
                 actionListener.onPromoDeleted(promoName, penginput);
-                Log.d("PromoAdapter", "Listener called for delete: " + promoName + " by " + penginput);
-            } else {
-                Log.w("PromoAdapter", "Action listener is null for delete!");
             }
 
             Log.d("PromoAdapter", "✅ Promo deleted successfully: " + promoName);
             savePromoDeleteToHistori(promo.getIdPromo(), promoName, penginput, promo.getGambarBase64());
-        } else {
-            Log.e("PromoAdapter", "Invalid position after delete: " + position);
         }
-
     }
-    private void savePromoDeleteToHistori(int promoId, String title, String penginput, String imageData) {
-        Log.d("PromoAdapter", "=== SAVE DELETE HISTORI ===");
-        Log.d("PromoAdapter", "Promo ID: " + promoId);
-        Log.d("PromoAdapter", "Title: " + title);
-        Log.d("PromoAdapter", "Penginput: " + penginput);
-        Log.d("PromoAdapter", "Image Data: " + (imageData != null ? imageData.length() + " chars" : "null"));
 
+    private void savePromoDeleteToHistori(int promoId, String title, String penginput, String imageData) {
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
         Call<BasicResponse> call = apiService.deletePromoHistori(
                 "delete_promo_histori",
@@ -285,35 +274,24 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
                         Log.d("PromoAdapter", "✅ Histori delete berhasil disimpan");
                     } else {
                         Log.e("PromoAdapter", "❌ Gagal menyimpan histori delete: " + basicResponse.getMessage());
-                        // Tampilkan error detail untuk debugging
-                        Toast.makeText(context, "Error histori: " + basicResponse.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 } else {
                     Log.e("PromoAdapter", "❌ Error response histori delete: " + response.code());
-                    try {
-                        if (response.errorBody() != null) {
-                            String errorBody = response.errorBody().string();
-                            Log.e("PromoAdapter", "Error body: " + errorBody);
-                        }
-                    } catch (Exception e) {
-                        Log.e("PromoAdapter", "Error reading error body", e);
-                    }
                 }
             }
 
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
                 Log.e("PromoAdapter", "❌ Error menyimpan histori delete: " + t.getMessage());
-                t.printStackTrace();
             }
         });
     }
+
     private void handleDeleteError(String errorMessage) {
         Log.e("PromoAdapter", "Delete failed: " + errorMessage);
         showErrorNotification(errorMessage);
     }
 
-    // ✅ METHOD BARU: NOTIFIKASI UPDATE BERHASIL
     private void showUpdateSuccessNotification(String promoName, String updatedBy) {
         try {
             String title = "✅ Promo Diupdate";
@@ -324,14 +302,11 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
             }
 
             NotificationHelper.showSimpleNotification(context, title, message);
-            Log.d("PromoAdapter", "Update notification shown: " + promoName);
-
         } catch (Exception e) {
             Log.e("PromoAdapter", "Error showing update notification: " + e.getMessage());
         }
     }
 
-    // ✅ METHOD BARU: NOTIFIKASI DELETE BERHASIL
     private void showDeleteSuccessNotification(String promoName, String deletedBy) {
         try {
             String title = "🗑️ Promo Dihapus";
@@ -342,26 +317,20 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
             }
 
             NotificationHelper.showSimpleNotification(context, title, message);
-            Log.d("PromoAdapter", "Delete notification shown: " + promoName);
-
         } catch (Exception e) {
             Log.e("PromoAdapter", "Error showing delete notification: " + e.getMessage());
         }
     }
 
-    // ✅ METHOD BARU: NOTIFIKASI ERROR
     private void showErrorNotification(String message) {
         try {
             NotificationHelper.showSimpleNotification(context, "❌ Error", message);
-            Log.e("PromoAdapter", "Error notification shown: " + message);
         } catch (Exception e) {
             Log.e("PromoAdapter", "Error showing error notification: " + e.getMessage());
         }
     }
 
-    // ✅ METHOD BARU: LOADING STATE
     private void showLoadingState(boolean isLoading) {
-        // Anda bisa implement loading indicator di sini jika diperlukan
         if (isLoading) {
             Log.d("PromoAdapter", "Loading state: ON");
         } else {
@@ -374,7 +343,6 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
         return promoList != null ? promoList.size() : 0;
     }
 
-    // Helper method untuk mendapatkan nama promo yang aman
     private String getSafePromoName(Promo promo) {
         return promo.getNamaPromo() != null ? promo.getNamaPromo() : "Unknown Promo";
     }
@@ -394,11 +362,9 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
         }
 
         private void loadImage(String base64Image) {
-            // Reset ke placeholder dulu
             imgPromo.setImageResource(R.drawable.ic_placeholder);
 
             if (base64Image == null || base64Image.trim().isEmpty()) {
-                Log.d("PromoViewHolder", "Base64 image is null or empty");
                 return;
             }
 
@@ -406,14 +372,12 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
                 String cleanBase64 = base64Image.trim();
 
                 if (cleanBase64.length() < 100) {
-                    Log.w("PromoViewHolder", "Base64 too short: " + cleanBase64.length());
                     return;
                 }
 
                 byte[] decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
 
                 if (decodedBytes == null || decodedBytes.length == 0) {
-                    Log.w("PromoViewHolder", "Decoded bytes are empty");
                     return;
                 }
 
@@ -421,9 +385,6 @@ public class PromoAdapter extends RecyclerView.Adapter<PromoAdapter.PromoViewHol
 
                 if (bitmap != null) {
                     imgPromo.setImageBitmap(bitmap);
-                    Log.d("PromoViewHolder", "✅ Image loaded successfully");
-                } else {
-                    Log.w("PromoViewHolder", "Failed to decode bitmap");
                 }
 
             } catch (Exception e) {

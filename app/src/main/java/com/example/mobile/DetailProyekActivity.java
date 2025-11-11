@@ -90,6 +90,7 @@ public class DetailProyekActivity extends AppCompatActivity {
     // User level
     private String userLevel;
     private SharedPreferences sharedPreferences;
+    private CardView cardTambahFasilitas;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -235,6 +236,7 @@ public class DetailProyekActivity extends AppCompatActivity {
             recyclerViewFasilitas.setAdapter(fasilitasAdapter);
 
             // Inisialisasi btnTambahFasilitas
+            cardTambahFasilitas = findViewById(R.id.cardTambahFasilitas);
             btnTambahFasilitas = findViewById(R.id.btnTambahFasilitas);
 
             // Card 3 - Siteplan
@@ -252,43 +254,8 @@ public class DetailProyekActivity extends AppCompatActivity {
         }
     }
 
-    // Method untuk menampilkan dialog tambah fasilitas
-    private void showTambahFasilitasDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_fasilitas, null);
 
-        EditText editNamaFasilitas = dialogView.findViewById(R.id.editNamaFasilitas);
-        ImageView imageFasilitas = dialogView.findViewById(R.id.imageFasilitasDialog);
-        Button btnPilihGambar = dialogView.findViewById(R.id.btnPilihGambarFasilitas);
 
-        selectedFasilitasBitmap = null;
-        currentFasilitasDialogImageView = imageFasilitas;
-
-        btnPilihGambar.setOnClickListener(v -> {
-            openImagePicker(PICK_FASILITAS_REQUEST);
-        });
-
-        builder.setView(dialogView)
-                .setTitle("Tambah Fasilitas")
-                .setPositiveButton("Simpan", (dialog, which) -> {
-                    String namaFasilitas = editNamaFasilitas.getText().toString().trim();
-                    if (namaFasilitas.isEmpty()) {
-                        Toast.makeText(this, "Nama fasilitas tidak boleh kosong", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    tambahFasilitas(namaFasilitas, selectedFasilitasBitmap);
-                })
-                .setNegativeButton("Batal", (dialog, which) -> {
-                    currentFasilitasDialog = null;
-                    currentFasilitasDialogImageView = null;
-                });
-
-        currentFasilitasDialog = builder.create();
-        currentFasilitasDialog.show();
-    }
-
-    // Method untuk menampilkan dialog edit fasilitas
     private void showEditFasilitasDialog(FasilitasItem fasilitas) {
         // DEBUG: Validasi data fasilitas
         Log.d(TAG, "showEditFasilitasDialog - ID: " + fasilitas.getIdFasilitas() +
@@ -394,8 +361,8 @@ public class DetailProyekActivity extends AppCompatActivity {
         }
 
         // Tampilkan tombol tambah fasilitas dan set mode edit di adapter
-        if (btnTambahFasilitas != null) {
-            btnTambahFasilitas.setVisibility(View.VISIBLE);
+        if (cardTambahFasilitas != null) {
+            cardTambahFasilitas.setVisibility(View.VISIBLE);
             btnTambahFasilitas.setOnClickListener(v -> {
                 // PERBAIKAN: Keluar dari mode edit sebelum buka activity tambah fasilitas
                 exitEditMode();
@@ -461,8 +428,8 @@ public class DetailProyekActivity extends AppCompatActivity {
         editDeskripsi.setVisibility(View.GONE);
 
         // Sembunyikan tombol tambah fasilitas dan set adapter ke mode normal
-        if (btnTambahFasilitas != null) {
-            btnTambahFasilitas.setVisibility(View.GONE);
+        if (cardTambahFasilitas != null) {
+            cardTambahFasilitas.setVisibility(View.GONE);
         }
         fasilitasAdapter.setEditMode(false);
 
@@ -1262,7 +1229,11 @@ public class DetailProyekActivity extends AppCompatActivity {
         try {
             CardView cardFasilitas = findViewById(R.id.cardFasilitasSarana);
             if (cardFasilitas != null) {
-                cardFasilitas.setVisibility(fasilitasList.isEmpty() ? View.GONE : View.VISIBLE);
+                if (fasilitasList.isEmpty() && !isEditMode) {
+                    cardFasilitas.setVisibility(View.GONE);
+                } else {
+                    cardFasilitas.setVisibility(View.VISIBLE);
+                }
             }
         } catch (Exception e) {
             Log.e(TAG, "Error showing/hiding facilities card: " + e.getMessage());
