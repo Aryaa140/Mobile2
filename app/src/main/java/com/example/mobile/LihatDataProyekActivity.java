@@ -29,6 +29,7 @@ import retrofit2.Response;
 public class LihatDataProyekActivity extends AppCompatActivity {
 
     private static final String TAG = "LihatDataProyekActivity";
+    private List<ProyekWithInfo> proyekListFull = new ArrayList<>();
 
     private RecyclerView recyclerView;
     private EditText searchEditText;
@@ -129,15 +130,108 @@ public class LihatDataProyekActivity extends AppCompatActivity {
     }
 
     private void setupSearch() {
-        // Search functionality disabled for now
-        Log.d(TAG, "Search functionality temporarily disabled");
+        Log.d(TAG, "Setting up search functionality");
 
-        // Optional: Show message that search is disabled
         if (searchEditText != null) {
-            searchEditText.setHint("Cari... (Fitur sementara dinonaktifkan)");
+            searchEditText.setHint("Cari nama proyek...");
+            searchEditText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    // Filter data ketika teks berubah
+                    filterProyekData(s.toString());
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {}
+            });
+        } else {
+            Log.e(TAG, "Search EditText is null");
         }
     }
 
+    private void filterProyekData(String searchText) {
+        try {
+            List<ProyekWithInfo> filteredList = new ArrayList<>();
+
+            if (searchText.isEmpty()) {
+                // Jika search kosong, tampilkan semua data
+                filteredList.addAll(proyekListFull);
+            } else {
+                // Filter berdasarkan nama proyek (case insensitive)
+                String searchPattern = searchText.toLowerCase().trim();
+                for (ProyekWithInfo proyek : proyekListFull) {
+                    if (proyek.getNamaProyek().toLowerCase().contains(searchPattern)) {
+                        filteredList.add(proyek);
+                    }
+                }
+            }
+
+            // Update adapter dengan data yang sudah difilter
+            updateAdapterWithFilteredData(filteredList);
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error filtering data: " + e.getMessage());
+        }
+    }
+
+    private void updateAdapterWithFilteredData(List<ProyekWithInfo> filteredList) {
+        runOnUiThread(() -> {
+            try {
+                if (proyekAdapter != null) {
+                    proyekAdapter.updateData(filteredList);
+
+                    // Optional: Beri feedback jumlah hasil pencarian
+                    if (!searchEditText.getText().toString().isEmpty()) {
+                        String message = "Ditemukan " + filteredList.size() + " proyek";
+                        if (filteredList.isEmpty()) {
+                            message = "Tidak ditemukan proyek dengan nama '" +
+                                    searchEditText.getText().toString() + "'";
+                        }
+                        // Bisa tambahkan Toast atau text indicator di sini jika perlu
+                        Log.d(TAG, message);
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error updating filtered data: " + e.getMessage());
+            }
+        });
+    }
+
+    private void updateUIWithData(List<ProyekWithInfo> data) {
+        runOnUiThread(() -> {
+            try {
+                Log.d(TAG, "Updating UI with data: " + data.size() + " items");
+
+                // SIMPAN DATA FULL untuk keperluan pencarian
+                proyekListFull.clear();
+                proyekListFull.addAll(data);
+
+                if (proyekAdapter == null) {
+                    Log.e(TAG, "Adapter is null during UI update!");
+                    proyekAdapter = new ProyekAdapter(data);
+                    if (recyclerView != null) {
+                        recyclerView.setAdapter(proyekAdapter);
+                    }
+                } else {
+                    proyekAdapter.updateData(data);
+                }
+
+                // Beri feedback ke user
+                if (data.isEmpty()) {
+                    Toast.makeText(this, "Tidak ada data proyek", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Data loaded: " + data.size() + " proyek", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "UI update completed successfully");
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error updating UI: " + e.getMessage());
+                Toast.makeText(this, "Error menampilkan data", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
     private void loadProyekData() {
         Log.d(TAG, "=== LOADING PROYEK DATA ===");
 
@@ -284,34 +378,6 @@ public class LihatDataProyekActivity extends AppCompatActivity {
         } catch (Exception e) {
             Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-    }
-    private void updateUIWithData(List<ProyekWithInfo> data) {
-        runOnUiThread(() -> {
-            try {
-                Log.d(TAG, "Updating UI with data: " + data.size() + " items");
-
-                if (proyekAdapter == null) {
-                    Log.e(TAG, "Adapter is null during UI update!");
-                    proyekAdapter = new ProyekAdapter(data);
-                    if (recyclerView != null) {
-                        recyclerView.setAdapter(proyekAdapter);
-                    }
-                } else {
-                    proyekAdapter.updateData(data);
-                }
-
-                // Beri feedback ke user
-                if (data.isEmpty()) {
-                    Toast.makeText(this, "Tidak ada data proyek", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Data loaded: " + data.size() + " proyek", Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, "UI update completed successfully");
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error updating UI: " + e.getMessage());
-                Toast.makeText(this, "Error menampilkan data", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     @Override

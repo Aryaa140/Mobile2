@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_scroll_gradient"
     android:padding="24dp"
-    tools:context=".LupaPasswordActivity">
+    tools:context=".VerifikasiKodeActivity">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -42,17 +42,28 @@
                     android:src="@drawable/logo" />
 
                 <TextView
-                    android:id="@+id/textViewInputData"
+                    android:id="@+id/textViewJudul"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:layout_marginBottom="8dp"
-                    android:text="Silahkan Input Data"
+                    android:text="Verifikasi Kode"
                     android:textColor="@android:color/black"
-                    android:textSize="18sp" />
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textViewDeskripsi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="Masukkan kode verifikasi 6 digit yang dikirim ke email Anda"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    android:textAlignment="center" />
 
                 <EditText
-                    android:id="@+id/username"
+                    android:id="@+id/kodeVerifikasi"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
@@ -60,50 +71,51 @@
                     android:layout_marginRight="15dp"
                     android:textColor="@android:color/black"
                     android:background="@android:drawable/edit_text"
-                    android:drawableStart="@drawable/ic_username"
+                    android:drawableStart="@drawable/ic_lock"
                     android:drawablePadding="8dp"
-                    android:hint="Masukkan Username Anda"
+                    android:hint="Masukkan Kode Verifikasi"
+                    android:inputType="number"
+                    android:maxLength="6"
                     android:padding="12dp" />
 
-                <EditText
-                    android:id="@+id/noNip"
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/textViewEmail"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
+                    android:text="Kode dikirim ke: user@example.com"
                     android:textColor="@android:color/black"
-                    android:background="@android:drawable/edit_text"
-                    android:drawableStart="@drawable/ic_nip"
-                    android:drawablePadding="8dp"
-                    android:hint="Masukkan No. NIP Anda"
-                    android:padding="12dp"/>
+                    android:textSize="12sp" />
 
-                <EditText
-                    android:id="@+id/email"
-                    android:layout_width="match_parent"
+                <!-- Tambahkan TextView untuk timer -->
+                <TextView
+                    android:id="@+id/textViewTimer"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:textColor="@android:color/black"
-                    android:background="@android:drawable/edit_text"
-                    android:drawableStart="@drawable/ic_request"
-                    android:drawablePadding="8dp"
-                    android:hint="Masukkan Email"
-                    android:inputType="textEmailAddress"
-                    android:padding="12dp" />
+                    android:layout_marginBottom="16dp"
+                    android:text="Kode berlaku: 05:00"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="12sp" />
 
                 <Button
-                    android:id="@+id/btnKirimPermintaan"
+                    android:id="@+id/btnVerifikasi"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:layout_marginLeft="70dp"
                     android:layout_marginRight="70dp"
                     android:backgroundTint="@android:color/holo_blue_dark"
-                    android:text="Kirim Kode Verifikasi"
+                    android:text="Verifikasi Kode"
                     android:textColor="@android:color/white" />
+
+                <Button
+                    android:id="@+id/btnKirimUlang"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:backgroundTint="@android:color/transparent"
+                    android:text="Kirim Ulang Kode"
+                    android:textColor="@android:color/holo_blue_dark" />
 
                 <Button
                     android:id="@+id/btnKembali"

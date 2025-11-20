@@ -27,7 +27,24 @@ public interface ApiService {
             @Field("ussername") String username,
             @Field("NIP") String nip,
             @Field("Divisi") String division,
-            @Field("Password") String password
+            @Field("Password") String password,
+            @Field("Email") String email
+    );
+
+    @FormUrlEncoded
+    @POST("verifikasi_data_user.php")
+    Call<BasicResponse> verifikasiDataUser(
+            @Field("username") String username,
+            @Field("nip") String nip,
+            @Field("email") String email
+    );
+
+    @FormUrlEncoded
+    @POST("kirim_kode_verifikasi.php")
+    Call<BasicResponse> kirimKodeVerifikasi(
+            @Field("username") String username,
+            @Field("email") String email,
+            @Field("kode_verifikasi") int kodeVerifikasi
     );
     @FormUrlEncoded
     @POST("check_nip.php")
