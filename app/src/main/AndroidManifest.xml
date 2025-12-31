@@ -85,10 +85,16 @@
             android:name=".EditDataKavlingActivity"
             android:exported="false" />
         <activity
+            android:name=".HistoriRealisasiActivity"
+            android:exported="false" />
+        <activity
             android:name=".VerifikasiKodeActivity"
             android:exported="false" />
         <activity
             android:name=".ResetPasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LihatDataRealisasiActivity"
             android:exported="false" />
         <activity
             android:name=".InputKavlingActivity"

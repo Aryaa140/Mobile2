@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,6 +41,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -84,7 +86,7 @@ public class LihatDataUserpActivity extends AppCompatActivity {
     private String userName;
     private ApiService apiService;
     private static final String TAG = "LihatDataUserp";
-
+    private static final int REQUEST_REALISASI = 100;
     private static final String PREFS_NAME = "LoginPrefs";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_LEVEL = "level";
@@ -276,7 +278,92 @@ public class LihatDataUserpActivity extends AppCompatActivity {
             }
         });
     }
+    private void showRealisasiDialog(UserProspekSimple userProspek) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Realisasi Data User Prospek");
 
+        // Inflate custom layout
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_realisasi, null);
+        builder.setView(dialogView);
+
+        DatePicker datePicker = dialogView.findViewById(R.id.datePicker);
+        MaterialButton btnSimpanRealisasi = dialogView.findViewById(R.id.btnSimpanRealisasi);
+        MaterialButton btnBatalRealisasi = dialogView.findViewById(R.id.btnBatalRealisasi);
+
+        AlertDialog dialog = builder.create();
+
+        btnSimpanRealisasi.setOnClickListener(v -> {
+            // Get selected date
+            int year = datePicker.getYear();
+            int month = datePicker.getMonth();
+            int day = datePicker.getDayOfMonth();
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(year, month, day);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            String tanggalRealisasi = dateFormat.format(calendar.getTime());
+
+            // Panggil API untuk realisasi
+            realisasiUserProspek(userProspek, tanggalRealisasi);
+            dialog.dismiss();
+        });
+
+        btnBatalRealisasi.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+    }
+    private void realisasiUserProspek(UserProspekSimple userProspek, String tanggalRealisasi) {
+        Log.d(TAG, "🎯 Memproses realisasi untuk: " + userProspek.getNama());
+
+        Call<BasicResponse> call = apiService.realisasiUserProspek(
+                userProspek.getId(),
+                userProspek.getNama(),
+                userProspek.getPenginput(),
+                userProspek.getEmail(),
+                userProspek.getNohp(),
+                userProspek.getAlamat(),
+                userProspek.getProyek(),
+                userProspek.getHunian(),
+                userProspek.getTipeHunian(),
+                userProspek.getDp(),
+                userProspek.getBpjs(),
+                userProspek.getNpwp(),
+                userProspek.getTanggal(),
+                tanggalRealisasi
+        );
+
+        call.enqueue(new Callback<BasicResponse>() {
+            @Override
+            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                runOnUiThread(() -> {
+                    if (response.isSuccessful() && response.body() != null) {
+                        BasicResponse apiResponse = response.body();
+                        if (apiResponse.isSuccess()) {
+                            Toast.makeText(LihatDataUserpActivity.this,
+                                    "✅ Data berhasil direalisasikan!", Toast.LENGTH_LONG).show();
+                            // Refresh data setelah berhasil realisasi
+                            loadUserProspekData();
+                        } else {
+                            Toast.makeText(LihatDataUserpActivity.this,
+                                    "❌ Gagal: " + apiResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(LihatDataUserpActivity.this,
+                                "❌ Error response: " + response.code(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Call<BasicResponse> call, Throwable t) {
+                runOnUiThread(() -> {
+                    Log.e(TAG, "❌ API Call Failed: " + t.getMessage(), t);
+                    Toast.makeText(LihatDataUserpActivity.this,
+                            "❌ Network Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+    }
 
     // PERBAIKAN: Method untuk request permission dengan explanation jika diperlukan
     private void requestStoragePermissionWithExplanation() {
@@ -797,7 +884,23 @@ public class LihatDataUserpActivity extends AppCompatActivity {
                     holder.btnEdit.setVisibility(View.GONE);
                 }
             }
-
+// PERBAIKAN: Tombol realisasi - bisa diakses semua user
+            if (holder.btnRealisasi != null) {
+                holder.btnRealisasi.setVisibility(View.VISIBLE);
+                holder.btnRealisasi.setOnClickListener(v -> {
+                    try {
+                        Log.d(TAG, "🎯 Button Realisasi diklik untuk: " + userProspek.getNama());
+                        showRealisasiDialog(userProspek);
+                    } catch (Exception e) {
+                        Log.e(TAG, "❌ Error saat realisasi: " + e.getMessage());
+                        runOnUiThread(() -> {
+                            Toast.makeText(LihatDataUserpActivity.this,
+                                    "Error: " + e.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        });
+                    }
+                });
+            }
             if (holder.btnHistori != null) {
                 holder.btnHistori.setVisibility(View.VISIBLE);
                 holder.btnHistori.setOnClickListener(v -> {
@@ -844,7 +947,7 @@ public class LihatDataUserpActivity extends AppCompatActivity {
 
         public class ViewHolder extends RecyclerView.ViewHolder {
             TextView tvPenginput, tvTanggal, tvNama, tvEmail, tvNoHp, tvAlamat, tvJumlahUangTandaJadi, tvHunian, tvTipeHunian;
-            MaterialButton btnEdit, btnDelete, btnHistori, btnCetak;
+            MaterialButton btnEdit, btnDelete, btnHistori, btnCetak,btnRealisasi;
 
             public ViewHolder(View itemView) {
                 super(itemView);
@@ -861,6 +964,7 @@ public class LihatDataUserpActivity extends AppCompatActivity {
                 btnDelete = itemView.findViewById(R.id.btnDelete);
                 btnHistori = itemView.findViewById(R.id.btnHistori);
                 btnCetak = itemView.findViewById(R.id.btnCetak);
+                btnRealisasi = itemView.findViewById(R.id.btnRealisasi);
             }
         }
     }

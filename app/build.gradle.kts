@@ -65,4 +65,5 @@ dependencies {
 
     implementation ("com.itextpdf:itext7-core:7.1.15")
     implementation ("com.google.android.material:material:1.6.0")
+    implementation ("com.google.android.material:material:1.6.0")
 }
