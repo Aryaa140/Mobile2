@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SignUpActivity extends AppCompatActivity {
-    private EditText editTextUsername, editTextNoNip, editTextPassword, editTextPassword2;
+    private EditText editTextUsername, editTextEmail, editTextNoNip, editTextPassword, editTextPassword2;
     private Spinner spinnerDivision;
     private Button buttonBuatAkun, buttonKembali;
     private DatabaseHelper databaseHelper;
@@ -47,6 +47,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         // Inisialisasi view
         editTextUsername = findViewById(R.id.username);
+        editTextEmail = findViewById(R.id.email); // Tambahkan ini
         spinnerDivision = findViewById(R.id.spinnerOpsi);
         editTextNoNip = findViewById(R.id.noNip);
         editTextPassword = findViewById(R.id.password);
@@ -68,11 +69,12 @@ public class SignUpActivity extends AppCompatActivity {
                 if (validateInput()) {
                     // Daftarkan pengguna baru
                     String username = editTextUsername.getText().toString().trim();
+                    String email = editTextEmail.getText().toString().trim(); // Tambahkan ini
                     String nip = editTextNoNip.getText().toString().trim();
                     String password = editTextPassword.getText().toString().trim();
 
                     // Cek NIP terlebih dahulu sebelum registrasi
-                    checkNIPBeforeRegister(username, nip, selectedDivision, password);
+                    checkNIPBeforeRegister(username, email, nip, selectedDivision, password);
                 }
             }
         });
@@ -161,6 +163,7 @@ public class SignUpActivity extends AppCompatActivity {
     // Method untuk validasi input
     private boolean validateInput() {
         String username = editTextUsername.getText().toString().trim();
+        String email = editTextEmail.getText().toString().trim(); // Tambahkan ini
         String nip = editTextNoNip.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
         String password2 = editTextPassword2.getText().toString().trim();
@@ -168,6 +171,17 @@ public class SignUpActivity extends AppCompatActivity {
         if (TextUtils.isEmpty(username)) {
             editTextUsername.setError("Username tidak boleh kosong");
             editTextUsername.requestFocus();
+            return false;
+        }
+
+        // Validasi email
+        if (TextUtils.isEmpty(email)) {
+            editTextEmail.setError("Email tidak boleh kosong");
+            editTextEmail.requestFocus();
+            return false;
+        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            editTextEmail.setError("Format email tidak valid");
+            editTextEmail.requestFocus();
             return false;
         }
 
@@ -203,8 +217,8 @@ public class SignUpActivity extends AppCompatActivity {
         return true;
     }
 
-    // METHOD UNTUK CEK NIP SEBELUM REGISTRASI
-    private void checkNIPBeforeRegister(String username, String nip, String division, String password) {
+    // METHOD UNTUK CEK NIP SEBELUM REGISTRASI - TAMBAH PARAMETER EMAIL
+    private void checkNIPBeforeRegister(String username, String email, String nip, String division, String password) {
         showLoading(true);
 
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
@@ -220,7 +234,7 @@ public class SignUpActivity extends AppCompatActivity {
                         // NIP valid, cek kecocokan divisi dengan kode NIP
                         if (validateDivisionWithNIP(division, nip)) {
                             // Kecocokan valid, lanjutkan registrasi
-                            registerUserToMySQL(username, nip, division, password);
+                            registerUserToMySQL(username, email, nip, division, password);
                         } else {
                             showLoading(false);
                             Toast.makeText(SignUpActivity.this,
@@ -261,12 +275,12 @@ public class SignUpActivity extends AppCompatActivity {
         return false;
     }
 
-    // METHOD UNTUK REGISTRASI KE MYSQL MELALUI API PHP
-    private void registerUserToMySQL(String username, String nip, String division, String password) {
+    // METHOD UNTUK REGISTRASI KE MYSQL MELALUI API PHP - TAMBAH PARAMETER EMAIL
+    private void registerUserToMySQL(String username, String email, String nip, String division, String password) {
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
 
-        // Gunakan method yang sudah ada di ApiService (4 parameter)
-        Call<RegisterResponse> call = apiService.registerUser(username, nip, division, password);
+        // Gunakan method yang sudah ada di ApiService (5 parameter dengan email)
+        Call<RegisterResponse> call = apiService.registerUser(username, nip, division, password, email);
 
         call.enqueue(new Callback<RegisterResponse>() {
             @Override
@@ -310,6 +324,7 @@ public class SignUpActivity extends AppCompatActivity {
             buttonKembali.setEnabled(false);
             spinnerDivision.setEnabled(false);
             editTextUsername.setEnabled(false);
+            editTextEmail.setEnabled(false); // Tambahkan ini
             editTextNoNip.setEnabled(false);
             editTextPassword.setEnabled(false);
             editTextPassword2.setEnabled(false);
@@ -320,6 +335,7 @@ public class SignUpActivity extends AppCompatActivity {
             buttonKembali.setEnabled(true);
             spinnerDivision.setEnabled(true);
             editTextUsername.setEnabled(true);
+            editTextEmail.setEnabled(true); // Tambahkan ini
             editTextNoNip.setEnabled(true);
             editTextPassword.setEnabled(true);
             editTextPassword2.setEnabled(true);

@@ -33,10 +33,10 @@
                 android:singleLine="true" />
 
             <TextView
-                android:id="@+id/tvTanggal"
+                android:id="@+id/tvTanggalRealisasi"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tanggal: -"
+                android:text="Tgl Realisasi: -"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="12sp"
                 android:ellipsize="end"
@@ -61,7 +61,7 @@
                     android:id="@+id/tvNama"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Nama User Prospek: -"
+                    android:text="Nama User: -"
                     android:textStyle="bold"
                     android:textColor="@android:color/black"
                     android:textSize="16sp"
@@ -88,7 +88,6 @@
                     android:ellipsize="end"
                     android:singleLine="true" />
 
-                <!-- TAMBAHAN: Hunian -->
                 <TextView
                     android:id="@+id/tvHunian"
                     android:layout_width="wrap_content"
@@ -99,7 +98,6 @@
                     android:ellipsize="end"
                     android:singleLine="true" />
 
-                <!-- TAMBAHAN: Tipe Hunian -->
                 <TextView
                     android:id="@+id/tvTipeHunian"
                     android:layout_width="wrap_content"
@@ -134,21 +132,22 @@
                     android:id="@+id/tvStatusNPWP"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Status NPWP : -"
+                    android:text="Status NPWP: -"
                     android:textColor="@android:color/darker_gray"
                     android:textSize="14sp"
                     android:ellipsize="end"
                     android:maxLines="2" />
 
                 <TextView
-                    android:id="@+id/tvJumlahUangTandaJadi"
+                    android:id="@+id/tvJumlahDP"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="DP : -"
+                    android:text="DP: -"
                     android:textColor="@android:color/darker_gray"
                     android:textSize="14sp"
                     android:ellipsize="end"
                     android:maxLines="2" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -170,41 +169,16 @@
                     app:cornerRadius="8dp"
                     app:backgroundTint="@android:color/holo_blue_dark" />
 
-                <!-- TAMBAHAN: Button Cetak -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnCetak"
-                    android:layout_width="96dp"
-                    android:layout_height="48dp"
-                    android:layout_marginBottom="8dp"
-                    android:text="Cetak"
-                    android:textAllCaps="false"
-                    android:textColor="@android:color/white"
-                    android:textSize="14sp"
-                    app:cornerRadius="8dp"
-                    />
-
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnHistori"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_width="96dp"
+                    android:layout_height="48dp"
                     android:text="Histori"
                     android:textAllCaps="false"
                     android:textColor="@android:color/white"
                     android:textSize="14sp"
                     app:cornerRadius="8dp"
-                    app:backgroundTint="@color/brown_500" />
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnRealisasi"
-                    android:layout_width="96dp"
-                    android:layout_height="48dp"
-                    android:layout_marginBottom="8dp"
-                    android:text="Realisasi"
-                    android:textAllCaps="false"
-                    android:textColor="@android:color/white"
-                    android:textSize="11sp"
-                    app:cornerRadius="8dp"
-                    app:backgroundTint="@color/green_500" />
+                    app:backgroundTint="@android:color/holo_green_dark" />
 
             </LinearLayout>
         </LinearLayout>

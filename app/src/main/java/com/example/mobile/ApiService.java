@@ -27,7 +27,24 @@ public interface ApiService {
             @Field("ussername") String username,
             @Field("NIP") String nip,
             @Field("Divisi") String division,
-            @Field("Password") String password
+            @Field("Password") String password,
+            @Field("Email") String email
+    );
+
+    @FormUrlEncoded
+    @POST("verifikasi_data_user.php")
+    Call<BasicResponse> verifikasiDataUser(
+            @Field("username") String username,
+            @Field("nip") String nip,
+            @Field("email") String email
+    );
+
+    @FormUrlEncoded
+    @POST("kirim_kode_verifikasi.php")
+    Call<BasicResponse> kirimKodeVerifikasi(
+            @Field("username") String username,
+            @Field("email") String email,
+            @Field("kode_verifikasi") int kodeVerifikasi
     );
     @FormUrlEncoded
     @POST("check_nip.php")
@@ -495,5 +512,52 @@ public interface ApiService {
             @Field("gambar_unit") String gambarUnit,
             @Field("gambar_denah") String gambarDenah
     );
+
+    // ✅ METHOD BARU: Untuk Deleted News dengan parameter
+    @GET("get_news_histori.php")
+    Call<NewsHistoriResponse> getDeletedNews(
+            @Query("limit") int limit,
+            @Query("offset") int offset,
+            @Query("for_deleted") String forDeleted
+    );
+
+    // ✅ METHOD BARU: Untuk News Activity dengan parameter
+    @GET("get_news_histori.php")
+    Call<NewsHistoriResponse> getNewsActivityData(
+            @Query("limit") int limit,
+            @Query("offset") int offset,
+            @Query("for_news") String forNews
+    );
+    @FormUrlEncoded
+    @POST("realisasi_userprospek.php")
+    Call<BasicResponse> realisasiUserProspek(
+            @Field("id_userprospek") int idUserProspek,
+            @Field("nama_user") String namaUser,
+            @Field("nama_penginput") String namaPenginput,
+            @Field("email") String email,
+            @Field("no_hp") String noHp,
+            @Field("alamat") String alamat,
+            @Field("proyek") String proyek,
+            @Field("hunian") String hunian,
+            @Field("tipe_hunian") String tipeHunian,
+            @Field("dp") int dp,
+            @Field("status_bpjs") String statusBpjs,
+            @Field("status_npwp") String statusNpwp,
+            @Field("tanggal_input") String tanggalInput,
+            @Field("tanggal_realisasi") String tanggalRealisasi
+    );
+    @GET("get_realisasi_data.php")
+    Call<RealisasiResponse> getRealisasiData(
+            @Query("penginput") String penginput
+    );
+    @FormUrlEncoded
+    @POST("update_realisasi.php")
+    Call<BasicResponse> updateRealisasi(
+            @Field("id_realisasi") int idRealisasi,
+            @Field("tanggal_realisasi") String tanggalRealisasi
+    );
+    @FormUrlEncoded
+    @POST("get_histori_realisasi.php")
+    Call<HistoriRealisasiResponse> getHistoriRealisasi(@Field("id_realisasi") int idRealisasi);
 }
 
