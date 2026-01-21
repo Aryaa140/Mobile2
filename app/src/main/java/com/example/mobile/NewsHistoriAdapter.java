@@ -39,13 +39,18 @@ public class NewsHistoriAdapter extends RecyclerView.Adapter<NewsHistoriAdapter.
     public void onBindViewHolder(@NonNull NewsHistoriViewHolder holder, int position) {
         NewsHistoriItem item = newsHistoriItems.get(position);
 
-        // Set data ke view
-        holder.tvNewsTitle.setText(item.getTitle());
-        holder.tvPenginput.setText("Oleh: " + item.getPenginput());
-        holder.tvStatus.setText("Status: " + item.getStatus());
-        holder.tvNewsDate.setText(item.getFormattedTime());
+        // ✅ PERBAIKAN: Pastikan menggunakan TextView yang benar untuk setiap data
+        Log.d("NewsHistoriAdapter", "Binding item: " + item.getTitle() + " | Status: " + item.getStatus());
 
-        // Set background color berdasarkan type
+        // Set data ke view dengan ID yang benar
+        holder.tvNewsTitle.setText(item.getTitle() != null ? item.getTitle() : "No Title");
+        holder.tvPenginput.setText("Oleh: " + (item.getPenginput() != null ? item.getPenginput() : "Unknown"));
+        holder.tvStatus.setText("Status: " + (item.getStatus() != null ? item.getStatus() : "Unknown"));
+
+        // ✅ PERBAIKAN: Gunakan method getFormattedTime() untuk timestamp
+        holder.tvNewsDate.setText(item.getFormattedTime() != null ? item.getFormattedTime() : "Baru saja");
+
+        // Set background color berdasarkan status
         setCardBackgroundBasedOnType(holder.cardView, item.getType());
 
         // Tampilkan gambar jika ada
@@ -71,6 +76,9 @@ public class NewsHistoriAdapter extends RecyclerView.Adapter<NewsHistoriAdapter.
                     break;
                 case "promo_deleted":
                     backgroundColor = 0xFFFFEBEE; // Light red for deleted
+                    break;
+                case "promo_expired": // ✅ TAMBAHKAN UNTUK KADALUWARSA
+                    backgroundColor = 0xFFFFF3CD; // Light yellow for expired
                     break;
                 default:
                     backgroundColor = 0xFFFFFFFF; // White for unknown
@@ -167,6 +175,7 @@ public class NewsHistoriAdapter extends RecyclerView.Adapter<NewsHistoriAdapter.
     public void updateData(List<NewsHistoriItem> newItems) {
         this.newsHistoriItems = newItems;
         notifyDataSetChanged();
+        Log.d("NewsHistoriAdapter", "Data updated: " + newItems.size() + " items");
     }
 
     public static class NewsHistoriViewHolder extends RecyclerView.ViewHolder {
@@ -176,12 +185,16 @@ public class NewsHistoriAdapter extends RecyclerView.Adapter<NewsHistoriAdapter.
 
         public NewsHistoriViewHolder(@NonNull View itemView) {
             super(itemView);
+
+            // ✅ PERBAIKAN: Pastikan ID TextView sesuai dengan layout item_news_card.xml
             imgNews = itemView.findViewById(R.id.imgNews);
             tvNewsTitle = itemView.findViewById(R.id.tvNewsTitle);
             tvPenginput = itemView.findViewById(R.id.tvPenginput);
             tvStatus = itemView.findViewById(R.id.tvStatus);
-            tvNewsDate = itemView.findViewById(R.id.tvNewsDate);
+            tvNewsDate = itemView.findViewById(R.id.tvTimestamp); // ✅ PERBAIKAN: Pastikan ID ini benar
             cardView = itemView.findViewById(R.id.cardView);
+
+            Log.d("NewsHistoriAdapter", "ViewHolder initialized with correct IDs");
         }
     }
 }

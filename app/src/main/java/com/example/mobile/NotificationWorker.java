@@ -15,7 +15,7 @@ import java.util.List;
 public class NotificationWorker extends Worker {
     private static final String TAG = "NotificationWorker";
 
-    public NotificationWorker(@NonNull Context context, @NonNull WorkerParameters params) {
+    public NotificationWorker(@NonNull Context context, @NonNull WorkerParameters params) { 
         super(context, params);
     }
 
@@ -98,7 +98,7 @@ public class NotificationWorker extends Worker {
         if (newPromoCount > 0) {
             Log.d(TAG, "🎉 Found " + newPromoCount + " new promos");
         } else {
-            Log.d(TAG, "ℹ️ No new promos found");
+            Log.d(TAG, "ℹ No new promos found");
         }
     }
 

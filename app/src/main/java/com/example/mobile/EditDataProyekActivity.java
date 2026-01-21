@@ -1,6 +1,7 @@
 package com.example.mobile;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -27,7 +28,6 @@ public class EditDataProyekActivity extends AppCompatActivity {
     private MaterialToolbar topAppBar;
     private BottomNavigationView bottomNavigationView;
     private EditText editTextNamaProyek;
-
     private int idProyek;
     private String oldNamaProyek;
 
@@ -144,10 +144,30 @@ public class EditDataProyekActivity extends AppCompatActivity {
     private void callApiUpdateProyek(String newNamaProyek) {
         try {
             ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-            Call<BasicResponse> call = apiService.updateProyek(
+
+            // ✅ DAPATKAN USER INFO UNTUK NOTIFIKASI
+            SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+            String username = sharedPreferences.getString("username", "");
+            String namaUser = sharedPreferences.getString("nama_user", username);
+
+            // ✅ GUNAKAN namaUser SEBAGAI updated_by
+            String updatedBy = !namaUser.isEmpty() ? namaUser : username;
+
+            Log.d(TAG, "Updating proyek - ID: " + idProyek +
+                    ", Old: " + oldNamaProyek +
+                    ", New: " + newNamaProyek +
+                    ", Updated By: " + updatedBy);
+
+            // ✅ PERBAIKAN: HANYA KIRIM updated_by, HAPUS username
+            Call<BasicResponse> call = apiService.updateProyekComprehensive(
                     idProyek,
                     oldNamaProyek,
-                    newNamaProyek
+                    newNamaProyek,
+                    "",
+                    "",
+                    "",
+                    "",
+                    updatedBy
             );
 
             call.enqueue(new Callback<BasicResponse>() {
@@ -156,11 +176,21 @@ public class EditDataProyekActivity extends AppCompatActivity {
                     btnUbah.setEnabled(true);
                     btnUbah.setText("Ubah");
 
+                    Log.d(TAG, "Update response code: " + response.code());
+
                     if (response.isSuccessful() && response.body() != null) {
                         BasicResponse updateResponse = response.body();
+                        Log.d(TAG, "Update response success: " + updateResponse.isSuccess());
+                        Log.d(TAG, "Update response message: " + updateResponse.getMessage());
+
                         if (updateResponse.isSuccess()) {
                             Toast.makeText(EditDataProyekActivity.this,
                                     "Proyek berhasil diupdate", Toast.LENGTH_SHORT).show();
+
+                            // ✅ TAMPILKAN INFO FCM JIKA ADA
+                            if (updateResponse.getFcmNotification() != null) {
+                                Log.d(TAG, "FCM Notification Result: " + updateResponse.getFcmNotification());
+                            }
 
                             // Kembali ke halaman sebelumnya
                             Intent resultIntent = new Intent();
@@ -173,6 +203,17 @@ public class EditDataProyekActivity extends AppCompatActivity {
                     } else {
                         Toast.makeText(EditDataProyekActivity.this,
                                 "Error response: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "Update response error: " + response.code());
+
+                        // ✅ COBA BACA ERROR BODY UNTUK DEBUG
+                        try {
+                            if (response.errorBody() != null) {
+                                String errorBody = response.errorBody().string();
+                                Log.e(TAG, "Error body: " + errorBody);
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error reading error body: " + e.getMessage());
+                        }
                     }
                 }
 
@@ -182,15 +223,16 @@ public class EditDataProyekActivity extends AppCompatActivity {
                     btnUbah.setText("Ubah");
                     Toast.makeText(EditDataProyekActivity.this,
                             "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Network error: " + t.getMessage());
                 }
             });
         } catch (Exception e) {
             btnUbah.setEnabled(true);
             btnUbah.setText("Ubah");
             Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Exception in callApiUpdateProyek: " + e.getMessage());
         }
     }
-
     private void navigateToHome() {
         Intent intent = new Intent(EditDataProyekActivity.this, LihatDataProyekActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);

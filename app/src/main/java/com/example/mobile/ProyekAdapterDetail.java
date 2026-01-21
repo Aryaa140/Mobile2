@@ -43,6 +43,7 @@ public class ProyekAdapterDetail extends RecyclerView.Adapter<ProyekAdapterDetai
         void onProyekDeleted(); // Callback untuk refresh data setelah delete
     }
 
+
     public ProyekAdapterDetail(List<Proyek> proyekList, OnItemClickListener listener, Context context) {
         this.proyekList = proyekList;
         this.listener = listener;
@@ -312,7 +313,21 @@ public class ProyekAdapterDetail extends RecyclerView.Adapter<ProyekAdapterDetai
         private void deleteProyek(Proyek proyek) {
             Log.d(TAG, "Menghapus proyek: " + proyek.getNamaProyek() + " (ID: " + proyek.getIdProyek() + ")");
 
-            Call<BasicResponse> call = apiService.deleteProyek(proyek.getIdProyek(), proyek.getNamaProyek());
+            // ✅ DAPATKAN USER INFO UNTUK NOTIFIKASI
+            SharedPreferences sharedPreferences = context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+            String username = sharedPreferences.getString("username", "");
+            String namaUser = sharedPreferences.getString("nama_user", username);
+
+            Log.d(TAG, "User info - Username: " + username + ", Nama: " + namaUser);
+
+            // ✅ GUNAKAN API DENGAN PARAMETER USER INFO
+            Call<BasicResponse> call = apiService.deleteProyek(
+                    proyek.getIdProyek(),
+                    proyek.getNamaProyek(),
+                    username,
+                    namaUser
+            );
+
             call.enqueue(new Callback<BasicResponse>() {
                 @Override
                 public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
@@ -320,6 +335,12 @@ public class ProyekAdapterDetail extends RecyclerView.Adapter<ProyekAdapterDetai
                         BasicResponse deleteResponse = response.body();
                         if (deleteResponse.isSuccess()) {
                             Toast.makeText(context, "Proyek berhasil dihapus", Toast.LENGTH_SHORT).show();
+
+                            // ✅ TAMPILKAN INFO FCM JIKA ADA
+                            if (deleteResponse.getFcmNotification() != null) {
+                                Log.d(TAG, "FCM Delete Notification Result: " + deleteResponse.getFcmNotification());
+                            }
+
                             // Panggil callback untuk refresh data
                             if (listener != null) {
                                 listener.onProyekDeleted();
@@ -328,8 +349,18 @@ public class ProyekAdapterDetail extends RecyclerView.Adapter<ProyekAdapterDetai
                             Toast.makeText(context, "Gagal menghapus: " + deleteResponse.getMessage(), Toast.LENGTH_LONG).show();
                         }
                     } else {
-                        Toast.makeText(context, "Error response dari server", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Error response dari server: " + response.code(), Toast.LENGTH_SHORT).show();
                         Log.e(TAG, "Delete response error: " + response.code());
+
+                        // ✅ COBA BACA ERROR BODY UNTUK DEBUG
+                        try {
+                            if (response.errorBody() != null) {
+                                String errorBody = response.errorBody().string();
+                                Log.e(TAG, "Delete error body: " + errorBody);
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error reading delete error body: " + e.getMessage());
+                        }
                     }
                 }
 
@@ -340,11 +371,5 @@ public class ProyekAdapterDetail extends RecyclerView.Adapter<ProyekAdapterDetai
                 }
             });
         }
-    }
-
-    // Method untuk update data
-    public void updateData(List<Proyek> newProyekList) {
-        this.proyekList = newProyekList;
-        notifyDataSetChanged();
     }
 }

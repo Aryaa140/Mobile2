@@ -1,0 +1,8 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Chip selected state -->
+    <item android:color="@color/colorPrimary" android:state_selected="true"/>
+    <item android:color="@color/colorPrimary" android:state_checked="true"/>
+
+    <!-- Chip default state -->
+    <item android:color="#4DFFFFFF"/>
+</selector>

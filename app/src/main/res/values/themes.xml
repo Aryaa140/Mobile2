@@ -9,4 +9,13 @@
 
     <style name="Theme.Mobile" parent="Base.Theme.Mobile" />
 
+    <!-- Tema khusus untuk DeletedNewsActivity -->
+    <style name="Theme.DeletedNews" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <!-- Atur warna untuk toolbar dan komponen lain sesuai kebutuhan -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
 </resources>

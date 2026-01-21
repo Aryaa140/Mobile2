@@ -49,7 +49,6 @@ public class ProfileActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawerLayout);
         navigationView = findViewById(R.id.navigationView);
         cardLogout = findViewById(R.id.card_logout);
-        cardEditProfil = findViewById(R.id.cardEditProfil);
         cardGantiPW = findViewById(R.id.cardGantiPW);
 
         bottomNavigationView.setSelectedItemId(R.id.nav_profile);
@@ -70,10 +69,6 @@ public class ProfileActivity extends AppCompatActivity {
         tvDivisi.setText("Divisi: " + division);
         checkAccountExpiry();
 
-        cardEditProfil.setOnClickListener(v -> {
-            Intent intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
-            startActivity(intent);
-        });
 
         cardGantiPW.setOnClickListener(v -> {
             Intent intent = new Intent(ProfileActivity.this, GantiPasswordActivity.class);

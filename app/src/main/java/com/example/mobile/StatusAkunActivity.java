@@ -1,5 +1,6 @@
 package com.example.mobile;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -17,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +30,7 @@ import retrofit2.Response;
 public class StatusAkunActivity extends AppCompatActivity implements StatusAkunAdapter.OnStatusAkunActionListener {
 
     private MaterialToolbar topAppBar;
+    private com.google.android.material.bottomnavigation.BottomNavigationView BottomNavigationView;
     private EditText searchEditText;
     private RecyclerView recyclerView;
     private StatusAkunAdapter adapter;
@@ -45,6 +48,38 @@ public class StatusAkunActivity extends AppCompatActivity implements StatusAkunA
         loadUserData();
         setupSearch();
         setupToolbar();
+
+        BottomNavigationView.setSelectedItemId(R.id.nav_home);
+
+        // Navigation
+        topAppBar.setNavigationOnClickListener(v -> {
+            Intent intent = new Intent(StatusAkunActivity.this, NewBeranda.class);
+            startActivity(intent);
+            finish();
+        });
+
+        BottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.nav_home) {
+                startActivity(new Intent(this, NewBeranda.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_folder) {
+                startActivity(new Intent(this, LihatDataActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_news) {
+                startActivity(new Intent(this, NewsActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            }
+            return false;
+        });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());

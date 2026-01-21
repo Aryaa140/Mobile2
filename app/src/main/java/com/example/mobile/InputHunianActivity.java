@@ -1,11 +1,12 @@
 package com.example.mobile;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -25,6 +26,8 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,7 +44,6 @@ public class InputHunianActivity extends AppCompatActivity implements FasilitasH
     private static final String TAG = "InputHunianActivity";
     private static final int PICK_IMAGE_UNIT_REQUEST = 1;
     private static final int PICK_IMAGE_DENAH_REQUEST = 2;
-
     private Button btnSimpan, btnBatal, btnPilihGambarUnit, btnPilihGambarDenah, btnTambahFasilitas;
     private MaterialToolbar topAppBar;
     private BottomNavigationView bottomNavigationView;
@@ -52,6 +54,7 @@ public class InputHunianActivity extends AppCompatActivity implements FasilitasH
     private RecyclerView recyclerViewFasilitas;
     private TextView textListFasilitas;
 
+    private int currentHunianId = 0;
     private ApiService apiService;
     private List<String> proyekList = new ArrayList<>();
     private android.widget.ArrayAdapter<String> proyekAdapter;
@@ -140,6 +143,10 @@ public class InputHunianActivity extends AppCompatActivity implements FasilitasH
             } else if (id == R.id.nav_folder) {
                 startActivity(new Intent(this, LihatDataActivity.class));
                 finish();
+                return true;
+            } else if (id == R.id.nav_news) {
+                startActivity(new Intent(this, NewsActivity.class));
+                overridePendingTransition(0, 0);
                 return true;
             } else if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
@@ -409,7 +416,7 @@ public class InputHunianActivity extends AppCompatActivity implements FasilitasH
     }
 
     private void simpanDataHunian() {
-        // Validasi input
+        // Validasi input - TAMBAHKAN VALIDASI GAMBAR
         String namaHunian = editTextNamaHunian.getText().toString().trim();
         String namaProyek = spinnerProyek.getSelectedItem() != null ?
                 spinnerProyek.getSelectedItem().toString() : "";
@@ -431,11 +438,24 @@ public class InputHunianActivity extends AppCompatActivity implements FasilitasH
             return;
         }
 
+        // Validasi deskripsi
+        if (deskripsiHunian.isEmpty()) {
+            editTextDeskripsiHunian.setError("Deskripsi hunian harus diisi");
+            editTextDeskripsiHunian.requestFocus();
+            return;
+        }
+
         // Konversi luas tanah dan bangunan ke integer
         int luasTanah, luasBangunan;
         try {
             luasTanah = Integer.parseInt(luasTanahStr);
             luasBangunan = Integer.parseInt(luasBangunanStr);
+
+            // Validasi angka positif
+            if (luasTanah <= 0 || luasBangunan <= 0) {
+                Toast.makeText(this, "Luas tanah dan bangunan harus lebih dari 0", Toast.LENGTH_SHORT).show();
+                return;
+            }
         } catch (NumberFormatException e) {
             Toast.makeText(this, "Format luas tanah/bangunan tidak valid. Harus berupa angka", Toast.LENGTH_SHORT).show();
             return;
@@ -460,6 +480,21 @@ public class InputHunianActivity extends AppCompatActivity implements FasilitasH
         String finalGambarUnit = (gambarUnitBase64 == null || gambarUnitBase64.isEmpty() || gambarUnitBase64.equals("null")) ? "" : gambarUnitBase64;
         String finalGambarDenah = (gambarDenahBase64 == null || gambarDenahBase64.isEmpty() || gambarDenahBase64.equals("null")) ? "" : gambarDenahBase64;
 
+        // Validasi ukuran gambar untuk menghindari error
+        if (finalGambarUnit.length() > 1000000) { // 1MB limit
+            Toast.makeText(this, "Ukuran gambar unit terlalu besar (max 1MB)", Toast.LENGTH_LONG).show();
+            btnSimpan.setEnabled(true);
+            btnSimpan.setText("Simpan Data Hunian");
+            return;
+        }
+
+        if (finalGambarDenah.length() > 1000000) { // 1MB limit
+            Toast.makeText(this, "Ukuran gambar denah terlalu besar (max 1MB)", Toast.LENGTH_LONG).show();
+            btnSimpan.setEnabled(true);
+            btnSimpan.setText("Simpan Data Hunian");
+            return;
+        }
+
         // Debug log lebih detail
         Log.d(TAG, "=== PARAMETER YANG AKAN DIKIRIM ===");
         Log.d(TAG, "action: addHunian");
@@ -468,24 +503,60 @@ public class InputHunianActivity extends AppCompatActivity implements FasilitasH
         Log.d(TAG, "luas_tanah: " + luasTanah);
         Log.d(TAG, "luas_bangunan: " + luasBangunan);
         Log.d(TAG, "deskripsi_hunian: " + deskripsiHunian);
-        Log.d(TAG, "fasilitas: " + fasilitasJson);
-        Log.d(TAG, "gambar_unit length: " + (finalGambarUnit != null ? finalGambarUnit.length() : 0));
-        Log.d(TAG, "gambar_denah length: " + (finalGambarDenah != null ? finalGambarDenah.length() : 0));
+        Log.d(TAG, "fasilitas count: " + fasilitasForJson.size());
+        Log.d(TAG, "fasilitas JSON: " + fasilitasJson);
+        Log.d(TAG, "gambar_unit length: " + finalGambarUnit.length());
+        Log.d(TAG, "gambar_denah length: " + finalGambarDenah.length());
 
         // PERBAIKAN: Pastikan action tidak null
         String action = "addHunian";
 
-        // Kirim data ke server
+        SharedPreferences sharedPreferences = getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
+        String username = sharedPreferences.getString("username", "");
+        String namaPenginput = sharedPreferences.getString("nama_lengkap", username);
+
+        // ✅ PERBAIKAN: Validasi username tidak kosong
+        if (username.isEmpty()) {
+            Toast.makeText(this, "Username tidak ditemukan. Silakan login ulang", Toast.LENGTH_LONG).show();
+            btnSimpan.setEnabled(true);
+            btnSimpan.setText("Simpan Data Hunian");
+            return;
+        }
+
+        if (namaPenginput.isEmpty()) {
+            namaPenginput = username; // Fallback ke username jika nama kosong
+        }
+
+        Log.d(TAG, "User info - Username: " + username + ", Nama: " + namaPenginput);
+
+        Log.d(TAG, "=== MENGIRIM DATA KE SERVER (FormUrlEncoded) ===");
+
+        // Pastikan gambar tidak null
+        String gambarUnitFinal = (finalGambarUnit == null || finalGambarUnit.isEmpty() || finalGambarUnit.equals("null")) ? "" : finalGambarUnit;
+        String gambarDenahFinal = (finalGambarDenah == null || finalGambarDenah.isEmpty() || finalGambarDenah.equals("null")) ? "" : finalGambarDenah;
+
+        Log.d(TAG, "Gambar Unit length: " + gambarUnitFinal.length());
+        Log.d(TAG, "Gambar Denah length: " + gambarDenahFinal.length());
+
+        // Trim nama proyek (hilangkan "Pilih Proyek" jika ada)
+        String namaProyekFinal = namaProyek;
+        if (namaProyekFinal.contains("Pilih Proyek")) {
+            Toast.makeText(this, "Pilih proyek yang valid", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Call<BasicResponse> call = apiService.addHunianComprehensive(
-                action, // Pastikan ini tidak null
+                "addHunianComprehensive", // action
                 namaHunian,
-                namaProyek,
-                finalGambarUnit,
-                finalGambarDenah,
+                namaProyekFinal,
+                gambarUnitFinal,
+                gambarDenahFinal,
                 luasTanah,
                 luasBangunan,
                 deskripsiHunian,
-                fasilitasJson
+                fasilitasJson,
+                username,
+                namaPenginput
         );
 
         call.enqueue(new Callback<BasicResponse>() {
@@ -500,52 +571,59 @@ public class InputHunianActivity extends AppCompatActivity implements FasilitasH
 
                 if (response.isSuccessful() && response.body() != null) {
                     BasicResponse basicResponse = response.body();
-                    Log.d(TAG, "Response success: " + basicResponse.isSuccess());
-                    Log.d(TAG, "Response message: " + basicResponse.getMessage());
+                    Log.d(TAG, "Success: " + basicResponse.isSuccess());
+                    Log.d(TAG, "Message: " + basicResponse.getMessage());
 
                     if (basicResponse.isSuccess()) {
+                        // ✅ PERBAIKAN: Simpan ID hunian ke variabel class
+                        currentHunianId = basicResponse.getIdHunian() != null ? basicResponse.getIdHunian() : 0;
+
                         Toast.makeText(InputHunianActivity.this,
-                                "✅ " + basicResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                                "✅ " + basicResponse.getMessage(),
+                                Toast.LENGTH_SHORT).show();
 
-                        // Reset form
+                        // ✅ PERBAIKAN: Gunakan ID yang sudah disimpan
+                        saveHunianHistoriAfterSuccess(
+                                currentHunianId, // Gunakan variabel class
+                                namaHunian,
+                                namaProyekFinal,
+                                luasTanah,
+                                luasBangunan,
+                                gambarUnitFinal
+                        );
+
                         resetForm();
-
-                        // Redirect ke halaman beranda setelah delay singkat
                         new android.os.Handler().postDelayed(
                                 () -> navigateToHome(),
                                 1500
                         );
                     } else {
-                        String errorMsg = "❌ " + basicResponse.getMessage();
                         Toast.makeText(InputHunianActivity.this,
-                                errorMsg, Toast.LENGTH_LONG).show();
-                        Log.e(TAG, "Server error: " + errorMsg);
+                                "❌ " + basicResponse.getMessage(),
+                                Toast.LENGTH_LONG).show();
                     }
                 } else {
-                    // Handle error response dengan lebih detail
-                    String errorMessage = "Gagal menyimpan data. ";
+                    // DEBUG: Coba parse error sebagai JSON
                     try {
-                        if (response.errorBody() != null) {
-                            String errorBody = response.errorBody().string();
-                            errorMessage += "Error: " + errorBody;
-                            Log.e(TAG, "Error Body: " + errorBody);
+                        String errorJson = response.errorBody() != null ?
+                                response.errorBody().string() : "{}";
+                        Log.e(TAG, "Error JSON: " + errorJson);
+
+                        // Coba parse sebagai JSON
+                        if (errorJson.startsWith("{")) {
+                            JSONObject errorObj = new JSONObject(errorJson);
+                            String errorMsg = errorObj.optString("message", "Unknown error");
+                            Toast.makeText(InputHunianActivity.this,
+                                    "Server Error: " + errorMsg,
+                                    Toast.LENGTH_LONG).show();
                         } else {
-                            errorMessage += "HTTP Code: " + response.code();
+                            Toast.makeText(InputHunianActivity.this,
+                                    "HTTP Error " + response.code() + ": " + errorJson,
+                                    Toast.LENGTH_LONG).show();
                         }
                     } catch (Exception e) {
-                        errorMessage += "HTTP Code: " + response.code() + ", Exception: " + e.getMessage();
-                    }
-
-                    Log.e(TAG, "Response error: " + errorMessage);
-
-                    // PERBAIKAN: Tampilkan pesan error yang lebih spesifik
-                    if (response.code() == 500) {
                         Toast.makeText(InputHunianActivity.this,
-                                "❌ Error server internal (500). Periksa log server.",
-                                Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(InputHunianActivity.this,
-                                "❌ Gagal terhubung ke server. Code: " + response.code(),
+                                "HTTP Error " + response.code() + " (Cannot parse error)",
                                 Toast.LENGTH_LONG).show();
                     }
                 }
@@ -558,12 +636,110 @@ public class InputHunianActivity extends AppCompatActivity implements FasilitasH
 
                 Log.e(TAG, "Network error: " + t.getMessage(), t);
                 Toast.makeText(InputHunianActivity.this,
-                        "❌ Error koneksi: " + t.getMessage() +
-                                "\nPastikan:\n• Internet aktif\n• Server menyala\n• IP server benar",
+                        "Network Error: " + t.getMessage(),
                         Toast.LENGTH_LONG).show();
             }
         });
     }
+
+    // PERBAIKAN: Di InputHunianActivity.java - method saveHunianHistoriAfterSuccess()
+    private void saveHunianHistoriAfterSuccess(int hunianId, String namaHunian, String namaProyek,
+                                               int luasTanah, int luasBangunan, String finalGambarUnit) {
+
+        SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+        String penginput = prefs.getString("nama_lengkap", prefs.getString("username", "User"));
+
+        Log.d(TAG, "📝 Saving hunian histori to server...");
+        Log.d(TAG, "  - Hunian ID: " + hunianId);
+        Log.d(TAG, "  - Nama Hunian: " + namaHunian);
+        Log.d(TAG, "  - Nama Proyek: " + namaProyek);
+        Log.d(TAG, "  - Luas Tanah: " + luasTanah);
+        Log.d(TAG, "  - Luas Bangunan: " + luasBangunan);
+        Log.d(TAG, "  - Penginput: " + penginput);
+        Log.d(TAG, "  - Image length: " + (finalGambarUnit != null ? finalGambarUnit.length() : 0));
+
+        // ✅ PERBAIKAN: Validasi ID hunian
+        if (hunianId <= 0) {
+            Log.e(TAG, "❌ Invalid hunian ID for histori: " + hunianId);
+            return;
+        }
+
+        // ✅ PERBAIKAN: Validasi gambar untuk histori
+        String imageDataForHistori = "";
+        if (finalGambarUnit != null && !finalGambarUnit.isEmpty() &&
+                !finalGambarUnit.equals("null") && !finalGambarUnit.equals("NULL")) {
+
+            String cleanImage = finalGambarUnit.trim();
+
+            // Untuk hunian, kriteria lebih longgar
+            if (cleanImage.length() >= 30 &&
+                    !cleanImage.startsWith("data:image") && // Hindari data URL
+                    !cleanImage.endsWith("...") &&
+                    !cleanImage.endsWith("..")) {
+
+                imageDataForHistori = cleanImage;
+                Log.d(TAG, "✅ Using image for hunian histori, length: " + imageDataForHistori.length());
+            }
+        }
+
+        // ✅ PERBAIKAN: Gunakan thread baru agar tidak block UI
+        String finalImageDataForHistori = imageDataForHistori;
+        new Thread(() -> {
+            try {
+                ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+
+                // ✅ PERBAIKAN: Tambahkan timeout
+                Call<BasicResponse> call = apiService.addHunianHistori(
+                        "add_hunian_histori", // action
+                        hunianId,
+                        namaHunian,
+                        namaProyek,
+                        luasTanah,       // ✅ Tambahkan luas tanah
+                        luasBangunan,    // ✅ Tambahkan luas bangunan
+                        penginput,
+                        "Ditambahkan",   // ✅ Status
+                        finalImageDataForHistori
+                );
+
+                Response<BasicResponse> response = call.execute(); // Gunakan execute() untuk synchronous call
+
+                if (response.isSuccessful() && response.body() != null) {
+                    BasicResponse basicResponse = response.body();
+                    if (basicResponse.isSuccess()) {
+                        Log.d(TAG, "✅ Hunian histori saved successfully to server");
+
+                        // Kirim broadcast untuk refresh NewsActivity
+                        sendHunianHistoriBroadcast("Ditambahkan", namaHunian, namaProyek, penginput);
+                    } else {
+                        Log.e(TAG, "❌ Server response failed: " + basicResponse.getMessage());
+                    }
+                } else {
+                    Log.e(TAG, "❌ HTTP error saving hunian histori: " + response.code());
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "❌ Network error saving hunian histori: " + e.getMessage());
+
+                // Tetap kirim broadcast meskipun histori gagal
+                sendHunianHistoriBroadcast("Ditambahkan", namaHunian, namaProyek, penginput);
+            }
+        }).start();
+    }
+
+    // ✅ Method untuk kirim broadcast
+    private void sendHunianHistoriBroadcast(String status, String namaHunian, String namaProyek, String penginput) {
+        Intent broadcastIntent = new Intent("REFRESH_NEWS_DATA");
+        broadcastIntent.putExtra("ACTION", "HUNIAN_ADDED");
+        broadcastIntent.putExtra("TYPE", "hunian");
+        broadcastIntent.putExtra("NAMA_HUNIAN", namaHunian);
+        broadcastIntent.putExtra("NAMA_PROYEK", namaProyek);
+        broadcastIntent.putExtra("PENGINPUT", penginput);
+        broadcastIntent.putExtra("HUNIAN_ID", currentHunianId);
+        broadcastIntent.putExtra("STATUS", status);
+
+        sendBroadcast(broadcastIntent);
+        Log.d(TAG, "📡 Broadcast sent for hunian: " + namaHunian);
+    }
+
 
     private void resetForm() {
         editTextNamaHunian.setText("");

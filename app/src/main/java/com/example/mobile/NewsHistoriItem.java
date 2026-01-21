@@ -1,6 +1,8 @@
 package com.example.mobile;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 public class NewsHistoriItem {
     private int id_news;
@@ -10,13 +12,14 @@ public class NewsHistoriItem {
     private String status;
     private String timestamp;
     private String image_base64;
+    private String kadaluwarsa;
+    private SimpleDateFormat outputFormat;
 
-    // Constructor
     public NewsHistoriItem() {
     }
 
     public NewsHistoriItem(int id_news, int promo_id, String title, String penginput,
-                           String status, String timestamp, String image_base64) {
+                           String status, String timestamp, String image_base64, String kadaluwarsa) {
         this.id_news = id_news;
         this.promo_id = promo_id;
         this.title = title;
@@ -24,6 +27,7 @@ public class NewsHistoriItem {
         this.status = status;
         this.timestamp = timestamp;
         this.image_base64 = image_base64;
+        this.kadaluwarsa = kadaluwarsa;
     }
 
     // Getters and Setters
@@ -83,7 +87,15 @@ public class NewsHistoriItem {
         this.image_base64 = image_base64;
     }
 
-    // Helper methods
+    public String getKadaluwarsa() {
+        return kadaluwarsa;
+    }
+
+    public void setKadaluwarsa(String kadaluwarsa) {
+        this.kadaluwarsa = kadaluwarsa;
+    }
+
+    // PERBAIKAN: Helper methods untuk timestamp relatif
     public String getFormattedTime() {
         if (timestamp == null || timestamp.isEmpty()) {
             return "Baru saja";
@@ -91,21 +103,77 @@ public class NewsHistoriItem {
 
         try {
             // Parse timestamp dari database (format: YYYY-MM-DD HH:MM:SS)
-            java.text.SimpleDateFormat dbFormat = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
             Date date = dbFormat.parse(timestamp);
 
             long diff = System.currentTimeMillis() - date.getTime();
-            long minutes = diff / (60 * 1000);
-            long hours = diff / (60 * 60 * 1000);
-            long days = diff / (24 * 60 * 60 * 1000);
+            long seconds = diff / 1000;
+            long minutes = seconds / 60;
+            long hours = minutes / 60;
+            long days = hours / 24;
+            long weeks = days / 7;
+            long months = days / 30;
+            long years = days / 365;
 
-            if (minutes < 1) return "Baru saja";
-            else if (minutes < 60) return minutes + " menit lalu";
-            else if (hours < 24) return hours + " jam lalu";
-            else return days + " hari lalu";
+            if (seconds < 60) {
+                return "Baru saja";
+            } else if (minutes == 1) {
+                return "1 menit yang lalu";
+            } else if (minutes < 60) {
+                return minutes + " menit yang lalu";
+            } else if (hours == 1) {
+                return "1 jam yang lalu";
+            } else if (hours < 24) {
+                return hours + " jam yang lalu";
+            } else if (days == 1) {
+                return "1 hari yang lalu";
+            } else if (days < 7) {
+                return days + " hari yang lalu";
+            } else if (weeks == 1) {
+                return "1 minggu yang lalu";
+            } else if (weeks < 4) {
+                return weeks + " minggu yang lalu";
+            } else if (months == 1) {
+                return "1 bulan yang lalu";
+            } else if (months < 12) {
+                return months + " bulan yang lalu";
+            } else if (years == 1) {
+                return "1 tahun yang lalu";
+            } else {
+                return years + " tahun yang lalu";
+            }
 
         } catch (Exception e) {
+            // Fallback ke format asli jika parsing gagal
             return timestamp;
+        }
+    }
+
+    // ✅ METHOD BARU: Format kadaluwarsa untuk tampilan
+    public String getFormattedKadaluwarsa() {
+        if (kadaluwarsa == null || kadaluwarsa.isEmpty() || kadaluwarsa.equals("null")) {
+            return "Tidak ada kadaluwarsa";
+        }
+
+        try {
+            // Format dari database: yyyy-MM-dd
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            // Format untuk tampilan: dd MMMM yyyy
+            SimpleDateFormat outputFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
+
+            Date date = inputFormat.parse(kadaluwarsa);
+            return outputFormat.format(date);
+
+        } catch (Exception e) {
+            // Fallback: coba format lain atau return as-is
+            try {
+                // Coba format dengan timezone
+                SimpleDateFormat altFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                Date altDate = altFormat.parse(kadaluwarsa);
+                return outputFormat.format(altDate);
+            } catch (Exception e2) {
+                return kadaluwarsa; // Return as-is jika semua parsing gagal
+            }
         }
     }
 
@@ -119,6 +187,8 @@ public class NewsHistoriItem {
                 return "promo_updated";
             case "Dihapus":
                 return "promo_deleted";
+            case "Kadaluwarsa":
+                return "promo_expired";
             default:
                 return "promo_general";
         }
@@ -134,6 +204,7 @@ public class NewsHistoriItem {
                 ", status='" + status + '\'' +
                 ", timestamp='" + timestamp + '\'' +
                 ", image_base64_length=" + (image_base64 != null ? image_base64.length() : 0) +
+                ", kadaluwarsa='" + kadaluwarsa + '\'' +
                 '}';
     }
 }

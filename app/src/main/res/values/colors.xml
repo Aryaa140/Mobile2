@@ -21,6 +21,8 @@
     <color name="light_blue_400">#29B6F6</color>
     <color name="light_blue_600">#039BE5</color>
 
+    <color name="blue_50">#E3F2FD</color>
+    <color name="blue_100">#BBDEFB</color>
     <color name="blue_500">#007BFF</color>
     <color name="blue_300">#339CFF</color>
     <color name="gray_500">#808080</color>
@@ -50,5 +52,14 @@
     <color name="colorTextSecondary">#757575</color>
     <color name="placeholder_color">#9E9E9E</color>
     <color name="error_color">#F44336</color>
+
+    <color name="shadow_color">#80000000</color>
+    <color name="shadow_light">#33000000</color>
+    <color name="shadow_medium">#66000000</color>
+    <color name="shadow_dark">#CC000000</color>
+
+
+
+
 </resources>
 

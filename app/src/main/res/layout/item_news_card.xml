@@ -33,6 +33,7 @@
             android:orientation="vertical"
             android:paddingStart="12dp">
 
+            <!-- PERBAIKAN: Judul Promo -->
             <TextView
                 android:id="@+id/tvNewsTitle"
                 android:layout_width="match_parent"
@@ -44,16 +45,18 @@
                 android:maxLines="2"
                 android:ellipsize="end"/>
 
+            <!-- PERBAIKAN: Nama Penginput -->
             <TextView
                 android:id="@+id/tvPenginput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Oleh: Nama Penginput"
+                android:text="User : Nama Penginput"
                 android:textSize="14sp"
                 android:textColor="#666666"
                 android:maxLines="1"
                 android:layout_marginTop="4dp"/>
 
+            <!-- PERBAIKAN: Status -->
             <TextView
                 android:id="@+id/tvStatus"
                 android:layout_width="match_parent"
@@ -64,14 +67,41 @@
                 android:maxLines="1"
                 android:layout_marginTop="2dp"/>
 
+            <!-- PERBAIKAN: Timestamp -->
             <TextView
-                android:id="@+id/tvNewsDate"
+                android:id="@+id/tvTimestamp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Waktu update"
+                android:text="1 jam lalu"
                 android:textSize="12sp"
-                android:textColor="#999999"
-                android:layout_marginTop="4dp"/>
+                android:textColor="#666666"
+                android:maxLines="1"
+                android:layout_marginTop="2dp"/>
+
+            <!-- PERBAIKAN: Kadaluwarsa -->
+            <TextView
+                android:id="@+id/tvKadaluwarsa"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Kadaluwarsa: 31 Desember 2024"
+                android:textSize="12sp"
+                android:textColor="#666666"
+                android:drawablePadding="4dp"
+                android:paddingTop="4dp"
+                android:visibility="visible" />
+
+            <!-- Tambahkan TextView untuk itemType badge -->
+            <TextView
+                android:id="@+id/tvItemType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:textSize="10sp"
+                android:textColor="@android:color/white"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

@@ -28,8 +28,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 
 import java.io.ByteArrayOutputStream;
@@ -47,9 +51,8 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
     private static final String TAG = "DetailUnitProyek";
     private static final int PICK_IMAGE_UNIT = 1;
     private static final int PICK_IMAGE_DENAH = 2;
-
     private MaterialToolbar topAppBar;
-
+    private BottomNavigationView bottomNavigationView;
     // Views untuk Card 1 - Detail Unit
     private ImageView imgUnit, imgDenah;
     private TextView txtNamaHunian, txtNamaProyek, txtLuasTanah, txtLuasBangunan, txtDeskripsi;
@@ -115,6 +118,37 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
         setupTopAppBar();
         loadHunianData();
         loadFasilitasData();
+
+        bottomNavigationView.setSelectedItemId(R.id.nav_home);
+
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.nav_home) {
+                startActivity(new Intent(this, NewBeranda.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_folder) {
+                startActivity(new Intent(this, LihatDataActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_news) {
+                startActivity(new Intent(this, NewsActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            }
+            return false;
+        });
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
     }
     private TextWatcher textWatcher = new TextWatcher() {
         @Override
@@ -130,6 +164,7 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
     };
     private void initViews() {
         topAppBar = findViewById(R.id.topAppBar);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         // Card 1 - Detail Unit - TextView (mode baca)
         imgUnit = findViewById(R.id.imgUnit);
@@ -766,13 +801,37 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
         saveHunianChanges();
     }
 
+    private void sendNewsActivityBroadcast() {
+        try {
+            Intent broadcastIntent = new Intent("REFRESH_NEWS_DATA");
+            broadcastIntent.putExtra("ACTION", "HUNIAN_UPDATED");
+            broadcastIntent.putExtra("TYPE", "hunian");
+            broadcastIntent.putExtra("NAMA_HUNIAN", currentHunian.getNamaHunian());
+            broadcastIntent.putExtra("NAMA_PROYEK", currentHunian.getNamaProyek());
+
+            SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+            String username = prefs.getString("username", "");
+            String namaLengkap = prefs.getString("nama_lengkap", username);
+            broadcastIntent.putExtra("PENGINPUT", namaLengkap);
+
+            sendBroadcast(broadcastIntent);
+            Log.d(TAG, "📢 Broadcast sent to refresh NewsActivity");
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Error sending broadcast: " + e.getMessage());
+        }
+    }
+
     private void saveHunianChanges() {
         String newNamaHunian = editNamaHunian.getText().toString().trim();
         String newLuasTanahStr = editLuasTanah.getText().toString().trim();
         String newLuasBangunanStr = editLuasBangunan.getText().toString().trim();
         String newDeskripsi = editDeskripsi.getText().toString().trim();
 
-        // Validation lebih ketat
+        SharedPreferences sharedPreferences = getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
+        String username = sharedPreferences.getString("username", "");
+        String updatedBy = sharedPreferences.getString("nama_lengkap", username);
+
+        // Validasi
         if (newNamaHunian.isEmpty()) {
             Toast.makeText(this, "Nama hunian tidak boleh kosong", Toast.LENGTH_SHORT).show();
             return;
@@ -807,98 +866,225 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
         // Show loading
         Toast.makeText(this, "Menyimpan perubahan hunian...", Toast.LENGTH_SHORT).show();
 
-        // Prepare base64 strings for images
-        final String gambarUnitBase64;
-        final String gambarDenahBase64;
+        // ✅ PERBAIKAN: Jangan kirim 'null' string, kirim string kosong jika tidak ada perubahan gambar
+        String gambarUnitBase64 = "";
+        String gambarDenahBase64 = "";
 
         if (selectedUnitBitmap != null) {
             gambarUnitBase64 = bitmapToBase64(selectedUnitBitmap);
-            Log.d(TAG, "Gambar unit akan diupdate, size: " + gambarUnitBase64.length());
+            Log.d(TAG, "✅ Gambar unit akan diupdate, size: " + gambarUnitBase64.length());
         } else {
-            gambarUnitBase64 = "";
-            Log.d(TAG, "Gambar unit tidak diubah");
+            Log.d(TAG, "🔄 Gambar unit tidak diubah, mengirim string kosong");
         }
 
         if (selectedDenahBitmap != null) {
             gambarDenahBase64 = bitmapToBase64(selectedDenahBitmap);
-            Log.d(TAG, "Gambar denah akan diupdate, size: " + gambarDenahBase64.length());
+            Log.d(TAG, "✅ Gambar denah akan diupdate, size: " + gambarDenahBase64.length());
         } else {
-            gambarDenahBase64 = "";
-            Log.d(TAG, "Gambar denah tidak diubah");
+            Log.d(TAG, "🔄 Gambar denah tidak diubah, mengirim string kosong");
         }
 
-        Log.d(TAG, "Mengupdate hunian - ID: " + currentHunian.getIdHunian() +
-                ", Nama Lama: " + currentHunian.getNamaHunian() +
-                ", Nama Baru: " + newNamaHunian);
+        final int hunianId = currentHunian.getIdHunian();
+
+        Log.d(TAG, "📡 Mengirim request update hunian ke server...");
+        Log.d(TAG, "📊 Data: Nama=" + newNamaHunian +
+                ", LuasTanah=" + newLuasTanah +
+                ", LuasBangunan=" + newLuasBangunan +
+                ", UpdatedBy=" + updatedBy +
+                ", Username=" + username +
+                ", GambarUnit=" + (gambarUnitBase64.isEmpty() ? "empty" : "base64") +
+                ", GambarDenah=" + (gambarDenahBase64.isEmpty() ? "empty" : "base64"));
+
+        Log.d(TAG, "📡 Mengirim request update hunian ke server...");
+        Log.d(TAG, "📊 Data: Nama=" + newNamaHunian +
+                ", LuasTanah=" + newLuasTanah +
+                ", LuasBangunan=" + newLuasBangunan +
+                ", UpdatedBy=" + updatedBy +
+                ", Username=" + username);
 
         Call<BasicResponse> call = apiService.updateHunianComprehensive(
                 "updateHunian",
-                currentHunian.getIdHunian(),
-                currentHunian.getNamaHunian(), // old name
+                hunianId,
+                currentHunian.getNamaHunian(),
                 newNamaHunian,
                 newLuasTanah,
                 newLuasBangunan,
                 newDeskripsi,
                 gambarUnitBase64,
-                gambarDenahBase64
+                gambarDenahBase64,
+                username,      // ✅ PARAMETER KE-9: username
+                updatedBy      // ✅ PARAMETER KE-10: updated_by
         );
 
+        String finalGambarUnitBase6 = gambarUnitBase64;
+        String finalGambarDenahBase6 = gambarDenahBase64;
+        String finalGambarUnitBase7 = gambarUnitBase64;
+        String finalGambarDenahBase7 = gambarDenahBase64;
+        String finalGambarUnitBase8 = gambarUnitBase64;
+        String finalGambarDenahBase8 = gambarDenahBase64;
+        String finalGambarUnitBase9 = gambarUnitBase64;
+        String finalGambarDenahBase9 = gambarDenahBase64;
+        String finalGambarUnitBase10 = gambarUnitBase64;
         call.enqueue(new Callback<BasicResponse>() {
             @Override
             public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
-                Log.d(TAG, "Update hunian response code: " + response.code());
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    try {
+                        if (response.body() != null) {
+                            BasicResponse updateResponse = response.body();
+                            Log.d(TAG, "✅ Update response: " + updateResponse.isSuccess());
+                            Log.d(TAG, "📝 Update message: " + updateResponse.getMessage());
 
-                if (response.isSuccessful() && response.body() != null) {
-                    BasicResponse updateResponse = response.body();
-                    Log.d(TAG, "Update success: " + updateResponse.isSuccess());
-                    Log.d(TAG, "Update message: " + updateResponse.getMessage());
+                            if (updateResponse.isSuccess()) {
+                                // ✅ PERBAIKAN: Update data lokal SEBELUM UI
+                                updateCurrentHunianData(newNamaHunian, newLuasTanah, newLuasBangunan,
+                                        newDeskripsi,
+                                        finalGambarUnitBase9.isEmpty() ? currentHunian.getGambarUnit() : finalGambarUnitBase9,
+                                        finalGambarDenahBase9.isEmpty() ? currentHunian.getGambarDenah() : finalGambarDenahBase9);
 
-                    if (updateResponse.isSuccess()) {
-                        Toast.makeText(DetailUnitProyekActivity.this, "Data hunian berhasil disimpan", Toast.LENGTH_SHORT).show();
+                                // ✅ PERBAIKAN: Update UI di main thread
+                                runOnUiThread(() -> {
+                                    // 1. Update toolbar title
+                                    if (topAppBar != null) {
+                                        topAppBar.setTitle("Detail " + newNamaHunian);
+                                    }
 
-                        // Update current hunian data
-                        updateCurrentHunianData(newNamaHunian, newLuasTanah, newLuasBangunan, newDeskripsi,
-                                gambarUnitBase64, gambarDenahBase64);
+                                    // 2. Update TextView data
+                                    txtNamaHunian.setText(newNamaHunian);
+                                    txtLuasTanah.setText("Luas Tanah: " + newLuasTanah + " m²");
+                                    txtLuasBangunan.setText("Luas Bangunan: " + newLuasBangunan + " m²");
+                                    txtDeskripsi.setText(newDeskripsi.isEmpty() ? "Tidak ada deskripsi" : newDeskripsi);
 
-                        // Update toolbar title
-                        if (topAppBar != null) {
-                            topAppBar.setTitle("Detail " + newNamaHunian);
+                                    // 3. Update gambar jika ada
+                                    if (!finalGambarUnitBase9.isEmpty()) {
+                                        setImageFromBase64(finalGambarUnitBase9, imgUnit);
+                                    }
+                                    if (!finalGambarDenahBase9.isEmpty()) {
+                                        setImageFromBase64(finalGambarDenahBase9, imgDenah);
+                                    }
+
+                                    Toast.makeText(DetailUnitProyekActivity.this,
+                                            "Data hunian berhasil disimpan",
+                                            Toast.LENGTH_SHORT).show();
+                                });
+
+                                saveHunianUpdateHistori(
+                                        hunianId,
+                                        newNamaHunian,
+                                        currentHunian.getNamaProyek(),
+                                        newLuasTanah,
+                                        newLuasBangunan,
+                                        updatedBy,
+                                        !finalGambarUnitBase10.isEmpty() ? finalGambarUnitBase10 : null
+                                );
+
+                                sendNewsActivityBroadcast();
+
+                                // ✅ PERBAIKAN: Kirim broadcast untuk refresh NewsActivity
+                                sendUpdateBroadcast(newNamaHunian, currentHunian.getNamaProyek());
+
+                                // Simpan perubahan fasilitas jika ada
+                                if (!pendingOperations.isEmpty()) {
+                                    saveAllFasilitasChanges();
+                                } else {
+                                    exitEditModeAfterSave();
+                                }
+
+                            } else {
+                                runOnUiThread(() -> {
+                                    Toast.makeText(DetailUnitProyekActivity.this,
+                                            "Gagal: " + updateResponse.getMessage(),
+                                            Toast.LENGTH_LONG).show();
+                                });
+                                Log.e(TAG, "❌ Update response failed: " + updateResponse.getMessage());
+                            }
+                        } else if (response.code() == 500) {
+                            // HTTP 500: Server error
+                            Log.e(TAG, "❌ HTTP 500 Error, but data might be saved");
+
+                            // ✅ PERBAIKAN: Tetap update UI meskipun HTTP 500
+                            runOnUiThread(() -> {
+                                // Update UI dengan data baru
+                                txtNamaHunian.setText(newNamaHunian);
+                                txtLuasTanah.setText("Luas Tanah: " + newLuasTanah + " m²");
+                                txtLuasBangunan.setText("Luas Bangunan: " + newLuasBangunan + " m²");
+                                txtDeskripsi.setText(newDeskripsi.isEmpty() ? "Tidak ada deskripsi" : newDeskripsi);
+
+                                // Update data lokal
+                                updateCurrentHunianData(newNamaHunian, newLuasTanah, newLuasBangunan,
+                                        newDeskripsi,
+                                        finalGambarUnitBase9.isEmpty() ? currentHunian.getGambarUnit() : finalGambarUnitBase9,
+                                        finalGambarDenahBase9.isEmpty() ? currentHunian.getGambarDenah() : finalGambarDenahBase9);
+
+                                Toast.makeText(DetailUnitProyekActivity.this,
+                                        "✅ Data hunian berhasil diperbarui (meskipun ada error server)",
+                                        Toast.LENGTH_SHORT).show();
+
+                                // Kirim broadcast untuk refresh NewsActivity
+                                sendUpdateBroadcast(newNamaHunian, currentHunian.getNamaProyek());
+
+                                // Keluar dari mode edit
+                                exitEditModeAfterSave();
+                            });
                         }
-
-                        // Simpan perubahan fasilitas jika ada
-                        if (!pendingOperations.isEmpty()) {
-                            saveAllFasilitasChanges();
-                        } else {
-                            // Jika tidak ada perubahan fasilitas, langsung exit edit mode
-                            exitEditModeAfterSave();
-                        }
-
-                    } else {
-                        Toast.makeText(DetailUnitProyekActivity.this, "Gagal menyimpan: " + updateResponse.getMessage(), Toast.LENGTH_LONG).show();
-                        Log.e(TAG, "Update hunian gagal: " + updateResponse.getMessage());
+                    } catch (Exception e) {
+                        Log.e(TAG, "❌ Error parsing response: " + e.getMessage());
                     }
                 } else {
-                    String errorMsg = "Error response: " + response.code();
+                    // Handle other HTTP errors
+                    String errorMsg = "HTTP Error: " + response.code();
                     if (response.errorBody() != null) {
                         try {
                             errorMsg += " - " + response.errorBody().string();
                         } catch (IOException e) {
-                            Log.e(TAG, "Error reading error body", e);
+                            Log.e(TAG, "❌ Error reading error body", e);
                         }
                     }
-                    Toast.makeText(DetailUnitProyekActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, errorMsg);
+
+                    final String finalErrorMsg = errorMsg;
+                    runOnUiThread(() -> {
+                        Toast.makeText(DetailUnitProyekActivity.this,
+                                "Server error: " + finalErrorMsg,
+                                Toast.LENGTH_LONG).show();
+                    });
+                    Log.e(TAG, "❌ HTTP Error: " + errorMsg);
                 }
             }
 
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
-                Log.e(TAG, "Network error updating hunian: " + t.getMessage(), t);
-                Toast.makeText(DetailUnitProyekActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "❌ Network error: " + t.getMessage(), t);
+                runOnUiThread(() -> {
+                    Toast.makeText(DetailUnitProyekActivity.this,
+                            "Gagal terhubung ke server: " + t.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                });
             }
         });
     }
 
+    // ✅ METHOD BARU: Kirim broadcast untuk refresh NewsActivity
+    private void sendUpdateBroadcast(String namaHunian, String namaProyek) {
+        try {
+            // Dapatkan informasi penginput
+            SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+            String username = prefs.getString("username", "");
+            String namaLengkap = prefs.getString("nama_lengkap", username);
+
+            Intent broadcastIntent = new Intent("REFRESH_NEWS_DATA");
+            broadcastIntent.putExtra("ACTION", "HUNIAN_UPDATED");
+            broadcastIntent.putExtra("TYPE", "hunian");
+            broadcastIntent.putExtra("NAMA_HUNIAN", namaHunian);
+            broadcastIntent.putExtra("NAMA_PROYEK", namaProyek);
+            broadcastIntent.putExtra("PENGINPUT", namaLengkap);
+
+            sendBroadcast(broadcastIntent);
+            Log.d(TAG, "📢 Broadcast sent for hunian update: " + namaHunian);
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Error sending broadcast: " + e.getMessage());
+        }
+    }
 
     // TAMBAHKAN METHOD UNTUK SAVE FASILITAS CHANGES
     private void saveAllFasilitasChanges() {
@@ -1027,17 +1213,21 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
 
     private void updateCurrentHunianData(String newNamaHunian, int newLuasTanah, int newLuasBangunan,
                                          String newDeskripsi, String gambarUnitBase64, String gambarDenahBase64) {
+        // Update object currentHunian dengan data baru
         currentHunian.setNamaHunian(newNamaHunian);
         currentHunian.setLuasTanah(newLuasTanah);
         currentHunian.setLuasBangunan(newLuasBangunan);
         currentHunian.setDeskripsiHunian(newDeskripsi);
 
-        if (!gambarUnitBase64.isEmpty()) {
+        if (!gambarUnitBase64.isEmpty() && !gambarUnitBase64.equals("null")) {
             currentHunian.setGambarUnit(gambarUnitBase64);
         }
-        if (!gambarDenahBase64.isEmpty()) {
+
+        if (!gambarDenahBase64.isEmpty() && !gambarDenahBase64.equals("null")) {
             currentHunian.setGambarDenah(gambarDenahBase64);
         }
+
+        Log.d(TAG, "✅ Current hunian data updated in memory");
     }
 
     private String bitmapToBase64(Bitmap bitmap) {
@@ -1057,6 +1247,92 @@ public class DetailUnitProyekActivity extends AppCompatActivity {
         intent.setType("image/*");
         startActivityForResult(intent, requestCode);
     }
+
+
+    // PERBAIKAN: Di DetailUnitProyekActivity.java - Method untuk save hunian update histori
+    private void saveHunianUpdateHistori(int hunianId, String newNamaHunian, String namaProyek,
+                                         int luasTanah, int luasBangunan, String updatedBy, String imageData) {
+
+        Log.d(TAG, "📝 Saving hunian update histori...");
+
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+
+        // ✅ PERBAIKAN: Validasi gambar untuk update
+        String imageDataForHistori = "";
+        if (imageData != null && !imageData.isEmpty() && !imageData.equals("null")) {
+            String cleanImage = imageData.trim();
+            if (cleanImage.length() >= 30 &&
+                    !cleanImage.equals("NULL") &&
+                    !cleanImage.endsWith("...") &&
+                    !cleanImage.endsWith("..")) {
+
+                imageDataForHistori = cleanImage;
+                Log.d(TAG, "✅ Using image for hunian update histori: " + imageDataForHistori.length() + " chars");
+            }
+        }
+
+        Call<BasicResponse> call = apiService.addHunianHistori(
+                "add_hunian_histori",
+                hunianId,
+                newNamaHunian,
+                namaProyek,
+                luasTanah,
+                luasBangunan,
+                updatedBy,
+                "Diubah",
+                imageDataForHistori
+        );
+
+        call.enqueue(new Callback<BasicResponse>() {
+            @Override
+            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    BasicResponse historiResponse = response.body();
+                    if (historiResponse.isSuccess()) {
+                        Log.d(TAG, "✅ Hunian update histori saved: " + newNamaHunian);
+
+                        // Kirim broadcast
+                        sendUpdateBroadcast(newNamaHunian, namaProyek);
+                    } else {
+                        Log.e(TAG, "❌ Failed to save hunian update histori: " + historiResponse.getMessage());
+                    }
+                } else {
+                    Log.e(TAG, "❌ HTTP error saving hunian update histori: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BasicResponse> call, Throwable t) {
+                Log.e(TAG, "❌ Network error saving hunian update histori: " + t.getMessage());
+                // Tetap kirim broadcast meskipun histori gagal
+                sendUpdateBroadcast(newNamaHunian, namaProyek);
+            }
+        });
+    }
+
+    // ✅ METHOD BARU: Validasi gambar untuk histori
+    private boolean isValidImageForHistori(String imageData) {
+        if (imageData == null || imageData.isEmpty()) {
+            Log.d(TAG, "❌ Image data is null or empty");
+            return false;
+        }
+
+        String cleanData = imageData.trim();
+
+        // Kriteria untuk gambar histori
+        boolean isValid = cleanData.length() >= 100 &&
+                !cleanData.equals("null") &&
+                !cleanData.equals("NULL") &&
+                cleanData.matches("^[A-Za-z0-9+/]*={0,2}$");
+
+        Log.d(TAG, "🖼️ Histori Image Validation - Length: " + cleanData.length() +
+                ", Is 'null': " + cleanData.equals("null") +
+                ", Valid: " + isValid);
+
+        return isValid;
+    }
+
+
 
     @Override
     public void onBackPressed() {

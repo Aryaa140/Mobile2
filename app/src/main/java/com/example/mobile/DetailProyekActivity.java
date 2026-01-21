@@ -24,6 +24,9 @@ import android.content.SharedPreferences;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -132,6 +135,12 @@ public class DetailProyekActivity extends AppCompatActivity {
             Toast.makeText(this, "Error loading page", Toast.LENGTH_SHORT).show();
             finish();
         }
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
     }
 
     @Override
@@ -520,9 +529,8 @@ public class DetailProyekActivity extends AppCompatActivity {
             }
         }
     }
-    // Method untuk update fasilitas
-    // Method untuk update fasilitas
-    // Method untuk update fasilitas - PERBAIKAN UTAMA
+
+
     private void updateFasilitas(int idFasilitas, String namaFasilitas, Bitmap gambarBitmap) {
         Log.d(TAG, "=== UPDATE FASILITAS ===");
         Log.d(TAG, "ID Fasilitas: " + idFasilitas);
@@ -536,6 +544,7 @@ public class DetailProyekActivity extends AppCompatActivity {
         }
 
         String gambarBase64 = "no_change"; // Default: tidak mengubah gambar
+
 
         // PERBAIKAN: Handle konversi bitmap ke base64 dengan lebih baik
         if (gambarBitmap != null) {
@@ -561,11 +570,18 @@ public class DetailProyekActivity extends AppCompatActivity {
         // Tampilkan loading
         Toast.makeText(this, "Mengupdate fasilitas...", Toast.LENGTH_SHORT).show();
 
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String username = sharedPreferences.getString("username", "");
+        String namaUser = sharedPreferences.getString("nama_user", username);
+
+        // ✅ BUAT CALL DENGAN PARAMETER USER INFO
         Call<BasicResponse> call = apiService.updateFasilitas(
                 "updateFasilitas",
                 idFasilitas,
                 namaFasilitas,
-                gambarBase64
+                gambarBase64,
+                username,      // ✅ TAMBAHKAN username
+                namaUser       // ✅ TAMBAHKAN updated_by
         );
 
         call.enqueue(new Callback<BasicResponse>() {
@@ -648,9 +664,21 @@ public class DetailProyekActivity extends AppCompatActivity {
             return;
         }
 
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String username = sharedPreferences.getString("username", "");
+        String namaUser = sharedPreferences.getString("nama_user", username);
+
+        // ✅ DAPATKAN NAMA FASILITAS (jika perlu)
+        String fasilitasName = "";
+        String proyekName = currentProyek != null ? currentProyek.getNamaProyek() : "";
+
+        // ✅ BUAT CALL DENGAN PARAMETER USER INFO
         Call<BasicResponse> call = apiService.deleteFasilitas(
                 "deleteFasilitas",
-                idFasilitas
+                idFasilitas,
+                username,      // ✅ TAMBAHKAN username
+                namaUser,      // ✅ TAMBAHKAN deleted_by
+                proyekName     // ✅ TAMBAHKAN proyek_name
         );
 
         call.enqueue(new Callback<BasicResponse>() {
@@ -708,6 +736,29 @@ public class DetailProyekActivity extends AppCompatActivity {
             }
         });
     }
+
+    // DI DetailProyekActivity.java
+    private void sendProyekUpdateBroadcast() {
+        try {
+            Intent broadcastIntent = new Intent("REFRESH_NEWS_DATA");
+            broadcastIntent.putExtra("ACTION", "PROYEK_UPDATED");
+            broadcastIntent.putExtra("TYPE", "proyek");
+            broadcastIntent.putExtra("NAMA_PROYEK", currentProyek.getNamaProyek());
+            broadcastIntent.putExtra("LOKASI_PROYEK", currentProyek.getLokasiProyek());
+
+            SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+            String username = prefs.getString("username", "");
+            String namaLengkap = prefs.getString("nama_lengkap", username);
+            broadcastIntent.putExtra("PENGINPUT", namaLengkap);
+
+            sendBroadcast(broadcastIntent);
+            Log.d(TAG, "📢 Broadcast sent for proyek update");
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Error sending proyek broadcast: " + e.getMessage());
+        }
+    }
+
+    // Panggil method ini setelah update proyek berhasil di saveProyekData()
     private void saveProyekData() {
         if (currentProyek == null) {
             Toast.makeText(this, "Data proyek tidak tersedia", Toast.LENGTH_SHORT).show();
@@ -723,6 +774,17 @@ public class DetailProyekActivity extends AppCompatActivity {
             Toast.makeText(this, "Semua field harus diisi", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        // ✅ DAPATKAN USER INFO UNTUK NOTIFIKASI
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String username = sharedPreferences.getString("username", "");
+        String namaUser = sharedPreferences.getString("nama_user", username);
+
+        if (namaUser.isEmpty()) {
+            namaUser = username;
+        }
+
+        Log.d(TAG, "User info - Username: " + username + ", Nama: " + namaUser);
 
         // SOLUSI: Gunakan array untuk menghindari masalah inner class
         final String[] logoBase64Holder = new String[1];
@@ -750,27 +812,43 @@ public class DetailProyekActivity extends AppCompatActivity {
         // Show loading
         Toast.makeText(this, "Menyimpan perubahan...", Toast.LENGTH_SHORT).show();
 
-        Log.d(TAG, "Sending update request - ID: " + currentProyek.getIdProyek() +
+        // ✅ PERBAIKAN: Deklarasikan variabel final untuk inner class
+        // ✅ PERBAIKAN: Deklarasikan variabel final untuk inner class
+        final int proyekId = currentProyek.getIdProyek();
+        final String lokasiProyekUpdate = currentProyek.getLokasiProyek(); // Ambil dari currentProyek
+        username = sharedPreferences.getString("username", "");
+        final String updatedBy = sharedPreferences.getString("nama_lengkap", username);
+
+        Log.d(TAG, "Sending update request - ID: " + proyekId +
                 ", Old Name: " + currentProyek.getNamaProyek() +
-                ", New Name: " + newNama);
+                ", New Name: " + newNama +
+                ", Updated By: " + updatedBy +
+                ", Username: " + username);
 
         Call<BasicResponse> call = apiService.updateProyekComprehensive(
-                currentProyek.getIdProyek(),
-                currentProyek.getNamaProyek(), // old name
+                proyekId,
+                currentProyek.getNamaProyek(),
                 newNama,
                 newLokasi,
                 newDeskripsi,
-                logoBase64Holder[0],    // Gunakan dari array
-                siteplanBase64Holder[0] // Gunakan dari array
+                logoBase64Holder[0],
+                siteplanBase64Holder[0],
+                updatedBy
         );
+
 
         call.enqueue(new Callback<BasicResponse>() {
             @Override
             public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     BasicResponse updateResponse = response.body();
                     if (updateResponse.isSuccess()) {
                         Toast.makeText(DetailProyekActivity.this, "Proyek berhasil diupdate", Toast.LENGTH_SHORT).show();
+
+                        // ✅ TAMPILKAN INFO FCM JIKA ADA
+                        if (updateResponse.getFcmNotification() != null) {
+                            Log.d(TAG, "FCM Notification Result: " + updateResponse.getFcmNotification());
+                        }
 
                         // Update current project data
                         currentProyek.setNamaProyek(newNama);
@@ -789,6 +867,11 @@ public class DetailProyekActivity extends AppCompatActivity {
                         if (topAppBar != null) {
                             topAppBar.setTitle("Detail " + newNama);
                         }
+
+                        // ✅ PERBAIKAN: JANGAN panggil saveProyekUpdateToHistori() lagi
+                        // Histori sudah disimpan otomatis di PHP
+
+                        sendProyekUpdateBroadcast();
 
                         exitEditMode();
 
@@ -812,7 +895,6 @@ public class DetailProyekActivity extends AppCompatActivity {
                     Log.e(TAG, errorMsg);
                 }
             }
-
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
                 Log.e(TAG, "Network error updating project: " + t.getMessage(), t);
@@ -1058,16 +1140,30 @@ public class DetailProyekActivity extends AppCompatActivity {
     private void tambahFasilitas(String namaFasilitas, Bitmap gambarBitmap) {
         if (currentProyek == null) return;
 
+        // ✅ DAPATKAN USER INFO
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String username = sharedPreferences.getString("username", "");
+        String namaUser = sharedPreferences.getString("nama_user", username);
+
+        if (namaUser.isEmpty()) {
+            namaUser = username;
+        }
+
+        Log.d(TAG, "Tambah fasilitas - User: " + username + ", Nama: " + namaUser);
+
         String gambarBase64 = "";
         if (gambarBitmap != null) {
             gambarBase64 = bitmapToBase64(gambarBitmap);
         }
 
+        // ✅ PERBAIKAN: Gunakan method dengan 6 parameter
         Call<BasicResponse> call = apiService.addFasilitas(
                 "addFasilitas",
                 namaFasilitas,
                 currentProyek.getNamaProyek(),
-                gambarBase64
+                gambarBase64,
+                username,      // ✅ Parameter ke-5: username
+                namaUser       // ✅ Parameter ke-6: created_by
         );
 
         call.enqueue(new Callback<BasicResponse>() {
@@ -1076,7 +1172,14 @@ public class DetailProyekActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     BasicResponse addResponse = response.body();
                     if (addResponse.isSuccess()) {
-                        Toast.makeText(DetailProyekActivity.this, "Fasilitas berhasil ditambahkan", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(DetailProyekActivity.this,
+                                "Fasilitas berhasil ditambahkan", Toast.LENGTH_SHORT).show();
+
+                        // ✅ TAMPILKAN INFO FCM JIKA ADA
+                        if (addResponse.getFcmNotification() != null) {
+                            Log.d(TAG, "FCM Add Notification: " + addResponse.getFcmNotification());
+                        }
+
                         // Tutup dialog
                         if (currentFasilitasDialog != null) {
                             currentFasilitasDialog.dismiss();
@@ -1086,14 +1189,21 @@ public class DetailProyekActivity extends AppCompatActivity {
                         // Reload fasilitas
                         loadFasilitasData(currentProyek.getNamaProyek());
                     } else {
-                        Toast.makeText(DetailProyekActivity.this, "Gagal menambah fasilitas: " + addResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(DetailProyekActivity.this,
+                                "Gagal menambah fasilitas: " + addResponse.getMessage(),
+                                Toast.LENGTH_SHORT).show();
                     }
+                } else {
+                    Toast.makeText(DetailProyekActivity.this,
+                            "Error response: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
-                Toast.makeText(DetailProyekActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(DetailProyekActivity.this,
+                        "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Error adding fasilitas: " + t.getMessage());
             }
         });
     }
@@ -1396,6 +1506,64 @@ public class DetailProyekActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e(TAG, "Error saving to cache: " + e.getMessage());
         }
+    }
+
+    private void saveProyekUpdateToHistori(int proyekId, String namaProyek, String lokasiProyek, String imageData) {
+        SharedPreferences prefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+        String penginput = prefs.getString("nama_lengkap", prefs.getString("username", "User"));
+
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+
+        Call<BasicResponse> call = apiService.addProyekHistori(
+                "add_proyek_histori", // action
+                proyekId,
+                namaProyek,
+                lokasiProyek,
+                penginput,
+                "Diubah",  // PERUBAHAN: Status "Diubah"
+                imageData
+        );
+
+        call.enqueue(new Callback<BasicResponse>() {
+            @Override
+            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Log.d(TAG, "✅ Proyek update histori saved");
+
+                    // ✅ PERBAIKAN: Kirim broadcast untuk refresh NewsActivity
+                    Intent broadcastIntent = new Intent("REFRESH_NEWS_DATA");
+                    broadcastIntent.putExtra("ACTION", "PROYEK_UPDATED");
+                    broadcastIntent.putExtra("TYPE", "proyek");
+                    broadcastIntent.putExtra("NAMA_PROYEK", namaProyek);
+                    broadcastIntent.putExtra("LOKASI_PROYEK", lokasiProyek);
+                    broadcastIntent.putExtra("PENGINPUT", penginput);
+                    broadcastIntent.putExtra("PROYEK_ID", proyekId);
+
+                    sendBroadcast(broadcastIntent);
+                    Log.d(TAG, "📡 Broadcast sent for proyek update: " + namaProyek);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BasicResponse> call, Throwable t) {
+                Log.e(TAG, "❌ Failed to save proyek update histori: " + t.getMessage());
+
+                // Tetap kirim broadcast meskipun histori gagal
+                try {
+                    Intent broadcastIntent = new Intent("REFRESH_NEWS_DATA");
+                    broadcastIntent.putExtra("ACTION", "PROYEK_UPDATED");
+                    broadcastIntent.putExtra("TYPE", "proyek");
+                    broadcastIntent.putExtra("NAMA_PROYEK", namaProyek);
+                    broadcastIntent.putExtra("LOKASI_PROYEK", lokasiProyek);
+                    broadcastIntent.putExtra("PENGINPUT", penginput);
+
+                    sendBroadcast(broadcastIntent);
+                    Log.d(TAG, "📡 Broadcast sent (fallback) for proyek update: " + namaProyek);
+                } catch (Exception e) {
+                    Log.e(TAG, "❌ Error sending fallback broadcast: " + e.getMessage());
+                }
+            }
+        });
     }
 
     private void setupNavigation() {

@@ -1,10 +1,15 @@
 package com.example.mobile;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,8 +44,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -64,8 +71,6 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
     private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
     private static final String KEY_LEVEL = "level";
     private static final String KEY_DIVISION = "division";
-
-    // SHARED PREFERENCES UNTUK NEWS
     private SharedPreferences newsPrefs;
     private static final String NEWS_PREFS_NAME = "NewsUpdates";
     private static final String TAG = "NewBeranda";
@@ -73,8 +78,8 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
     private String userLevel = "";
     private Handler autoDeleteHandler;
     private Runnable autoDeleteRunnable;
-    private static final long AUTO_DELETE_INTERVAL = 5 * 60 * 1000; // 5 menit
-    private static final long INITIAL_DELAY = 10000;
+    private static final long AUTO_DELETE_INTERVAL = 2 * 60 * 1000; // 2 menit (dari 5 menit)
+    private static final long INITIAL_DELAY = 5000; // 5 detik (dari 10 detik)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,7 +97,12 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         setupNavigation();
         setupAccessBasedOnLevel();
         checkAndRequestPermissions();
-        startAutoDeleteBackgroundService();
+        startEnhancedAutoDeleteService();
+
+        // ✅ DEBUG: Manual check saat startup
+        new Handler().postDelayed(() -> {
+            debugManualExpiryCheck();
+        }, 3000);
 
         checkAccountExpiry();
         checkAccountExpiryRealTime();
@@ -511,50 +521,6 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         Log.d("BerandaActivity", "RecyclerView setup completed with level: " + userLevel);
     }
 
-    private void loadPromoData() {
-        Log.d("NewBeranda", "🔄 Loading Promo Data with Cache Busting");
-
-        // Gunakan timestamp untuk hindari cache
-        long timestamp = System.currentTimeMillis();
-
-        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-        Call<PromoResponse> call = apiService.getSemuaPromoWithTimestamp(timestamp);
-
-        call.enqueue(new Callback<PromoResponse>() {
-            @Override
-            public void onResponse(Call<PromoResponse> call, Response<PromoResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    PromoResponse promoResponse = response.body();
-                    if (promoResponse.isSuccess()) {
-                        promoList.clear();
-                        promoList.addAll(promoResponse.getData());
-                        promoAdapter.notifyDataSetChanged();
-
-                        Log.d("NewBeranda", "✅ Promo Data Loaded: " + promoList.size() + " items");
-
-                        // ✅ TAMBAHKAN INI - Setelah load data, cek manual expired promos sebagai backup
-                        new Handler().postDelayed(() -> {
-                            checkManualExpiredPromos();
-                        }, 1000);
-
-                    } else {
-                        Log.e("NewBeranda", "❌ Failed to load promo: " + promoResponse.getMessage());
-                        Toast.makeText(NewBeranda.this, "Gagal memuat promo: " + promoResponse.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Log.e("NewBeranda", "❌ Server Error: " + response.code());
-                    Toast.makeText(NewBeranda.this, "Error response server", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<PromoResponse> call, Throwable t) {
-                Log.e("NewBeranda", "❌ Network Error: " + t.getMessage());
-                Toast.makeText(NewBeranda.this, "Gagal memuat promo: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
     private void checkAndRequestPermissions() {
         if (!PermissionUtils.areAllPermissionsGranted(this)) {
             if (shouldShowRequestPermissionRationale()) {
@@ -643,10 +609,139 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        Log.d("NewBeranda", "onActivityResult - Request: " + requestCode + ", Result: " + resultCode);
+
+        if (requestCode == PromoAdapter.EDIT_PROMO_REQUEST && resultCode == RESULT_OK && data != null) {
+            handleEditPromoResult(data);
+        }
+    }
+
+    // ✅ METHOD BARU: Handle promo kadaluwarsa dengan status yang benar
+    @Override
+    public void onPromoExpired(String promoTitle, String penginput) {
+        Log.d("NewBeranda", "Promo expired: " + promoTitle);
+
+        // ✅ SIMPAN KE HISTORI DENGAN STATUS KADALUWARSA
+        savePromoExpiredForNews(promoTitle, penginput);
+
+        // ✅ KIRIM BROADCAST KE DELETED NEWS ACTIVITY
+        sendExpiredPromoBroadcast(promoTitle, penginput);
+
+        // ✅ TAMPILKAN NOTIFIKASI KADALUWARSA
+        showExpiredNotification(promoTitle);
+    }
+
+    // ✅ METHOD BARU: Simpan info expired untuk NewsActivity
+    private void savePromoExpiredForNews(String promoTitle, String penginput) {
+        SharedPreferences.Editor editor = newsPrefs.edit();
+        editor.putString("last_expired_title", promoTitle);
+        editor.putString("last_expired_inputter", penginput);
+        editor.putString("last_expired_status", "Kadaluwarsa");
+        editor.putLong("last_expired_time", System.currentTimeMillis());
+        editor.apply();
+
+        Log.d("NewBeranda", "Saved expired info for DeletedNewsActivity - Title: " + promoTitle);
+    }
+
+    // ✅ METHOD BARU: Kirim broadcast khusus untuk promo kadaluwarsa
+    private void sendExpiredPromoBroadcast(String promoTitle, String penginput) {
+        try {
+            Intent broadcastIntent = new Intent("REFRESH_DELETED_NEWS_DATA");
+            broadcastIntent.putExtra("ACTION", "PROMO_EXPIRED");
+            broadcastIntent.putExtra("PROMO_TITLE", promoTitle);
+            broadcastIntent.putExtra("PENGINPUT", penginput);
+            broadcastIntent.putExtra("STATUS", "Kadaluwarsa"); // ✅ STATUS YANG BENAR
+
+            sendBroadcast(broadcastIntent);
+            Log.d("NewBeranda", "📢 Expired broadcast sent: " + promoTitle);
+        } catch (Exception e) {
+            Log.e("NewBeranda", "❌ Error sending expired broadcast: " + e.getMessage());
+        }
+    }
+
+    // ✅ METHOD BARU: Notifikasi untuk promo kadaluwarsa
+    private void showExpiredNotification(String promoName) {
+        try {
+            String title = "🕒 Promo Kadaluwarsa";
+            String message = "Promo '" + promoName + "' telah kadaluwarsa dan dipindahkan ke arsip";
+
+            NotificationHelper.showSimpleNotification(this, title, message);
+
+            runOnUiThread(() -> {
+                Toast.makeText(NewBeranda.this, message, Toast.LENGTH_LONG).show();
+            });
+
+            Log.d("NewBeranda", "📢 Expired notification: " + message);
+        } catch (Exception e) {
+            Log.e("NewBeranda", "❌ Error showing expired notification: " + e.getMessage());
+        }
+    }
+
+    // DI NEWBERANDA.JAVA - PERBAIKI METHOD handleEditPromoResult
+    private void handleEditPromoResult(Intent data) {
+        int updatedPromoId = data.getIntExtra("UPDATED_PROMO_ID", -1);
+        String updatedImage = data.getStringExtra("UPDATED_IMAGE");
+        String updatedTitle = data.getStringExtra("UPDATED_TITLE");
+        String updatedUser = data.getStringExtra("UPDATED_USER");
+        boolean isSuccess = data.getBooleanExtra("IS_SUCCESS", false);
+
+        Log.d("NewBeranda", "Handle edit result - ID: " + updatedPromoId +
+                ", Success: " + isSuccess +
+                ", Image: " + (updatedImage != null ? updatedImage.length() + " chars" : "null") +
+                ", Title: " + updatedTitle);
+
+        if (isSuccess && updatedPromoId != -1) {
+            // ✅ PERBAIKAN: Update adapter dengan gambar baru
+            if (promoAdapter != null) {
+                promoAdapter.updatePromoItem(updatedPromoId, updatedImage);
+                Log.d("NewBeranda", "✅ Adapter updated with new image for promo ID: " + updatedPromoId);
+            }
+
+            // ✅ PERBAIKAN: Simpan info update untuk NewsActivity dengan data lengkap
+            savePromoUpdateForNews(updatedPromoId, "Diubah", updatedImage, updatedTitle, updatedUser);
+
+            // ✅ PERBAIKAN: Kirim broadcast langsung ke NewsActivity
+            sendUpdateBroadcastToNews(updatedPromoId, updatedImage, updatedTitle, updatedUser);
+
+            // Refresh data dari server untuk memastikan konsistensi
+            new Handler().postDelayed(() -> {
+                loadPromoData();
+            }, 1000);
+
+            Toast.makeText(this, "Promo '" + updatedTitle + "' berhasil diupdate", Toast.LENGTH_SHORT).show();
+        } else {
+            String errorMessage = data.getStringExtra("ERROR_MESSAGE");
+            Log.w("NewBeranda", "Update failed: " + errorMessage);
+            Toast.makeText(this, "Update gagal: " + errorMessage, Toast.LENGTH_SHORT).show();
+            loadPromoData(); // Refresh anyway
+        }
+    }
+
+    // ✅ METHOD BARU: Kirim broadcast langsung ke NewsActivity
+    private void sendUpdateBroadcastToNews(int promoId, String imageData, String title, String user) {
+        try {
+            Intent broadcastIntent = new Intent("REFRESH_NEWS_DATA");
+            broadcastIntent.putExtra("UPDATED_PROMO_ID", promoId);
+            broadcastIntent.putExtra("UPDATED_IMAGE", imageData);
+            broadcastIntent.putExtra("UPDATED_TITLE", title);
+            broadcastIntent.putExtra("UPDATED_USER", user);
+            broadcastIntent.putExtra("STATUS", "Diubah");
+
+            sendBroadcast(broadcastIntent);
+            Log.d("NewBeranda", "📢 Direct broadcast sent to NewsActivity - ID: " + promoId);
+        } catch (Exception e) {
+            Log.e("NewBeranda", "❌ Error sending broadcast: " + e.getMessage());
+        }
+    }
+
     // IMPLEMENTASI METHOD DARI INTERFACE - YANG INI SUDAH ADA DAN TIDAK DIUBAH
     @Override
     public void onPromoUpdated(int promoId, String updatedImage) {
-        Log.d("BerandaActivity", "Promo updated - ID: " + promoId);
+        Log.d("NewBeranda", "Promo updated - ID: " + promoId + ", Image: " + (updatedImage != null ? updatedImage.length() + " chars" : "null"));
 
         // Update item di adapter
         if (promoAdapter != null) {
@@ -654,21 +749,28 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
             Toast.makeText(this, "Promo berhasil diupdate", Toast.LENGTH_SHORT).show();
         }
 
-        // SIMPAN INFO UPDATE UNTUK NEWS ACTIVITY
+        // SIMPAN INFO UPDATE UNTUK NEWS ACTIVITY (versi lama untuk kompatibilitas)
         savePromoUpdateForNews(promoId, "Diubah", updatedImage);
     }
 
-    // IMPLEMENTASI METHOD BARU YANG DIBUTUHKAN
-    @Override
-    public void onPromoDeleted(String promoTitle, String penginput) {
-        Log.d("BerandaActivity", "Promo deleted: " + promoTitle);
-        Toast.makeText(this, "Promo '" + promoTitle + "' dihapus", Toast.LENGTH_SHORT).show();
+    private void savePromoUpdateForNews(int promoId, String status, String updatedImage, String title, String user) {
+        SharedPreferences.Editor editor = newsPrefs.edit();
+        editor.putInt("last_updated_promo_id", promoId);
+        editor.putString("last_updated_status", status);
+        editor.putString("last_updated_image", updatedImage != null ? updatedImage : "");
+        editor.putString("last_updated_title", title != null ? title : "");
+        editor.putString("last_updated_inputter", user != null ? user : "");
+        editor.putLong("last_update_time", System.currentTimeMillis());
+        editor.apply();
 
-        // SIMPAN INFO DELETE UNTUK NEWS ACTIVITY
-        savePromoDeleteForNews(promoTitle, penginput);
+        Log.d("NewBeranda", "Saved update info for NewsActivity - Promo ID: " + promoId + ", Title: " + title);
+
+        // PERBAIKAN: Kirim broadcast langsung ke NewsActivity
+        sendUpdateBroadcastToNews(promoId, updatedImage, title, user);
     }
 
-    // METHOD UNTUK SIMPAN INFO UPDATE PROMO - TIDAK DIUBAH
+
+    // METHOD UNTUK SIMPAN INFO UPDATE PROMO - VERSI LAMA (untuk kompatibilitas)
     private void savePromoUpdateForNews(int promoId, String status, String updatedImage) {
         SharedPreferences.Editor editor = newsPrefs.edit();
         editor.putInt("last_updated_promo_id", promoId);
@@ -677,7 +779,7 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         editor.putLong("last_update_time", System.currentTimeMillis());
         editor.apply();
 
-        Log.d("BerandaActivity", "Saved update info for NewsActivity - Promo ID: " + promoId);
+        Log.d("NewBeranda", "Saved update info for NewsActivity - Promo ID: " + promoId);
     }
 
     // METHOD UNTUK SIMPAN INFO DELETE PROMO - TIDAK DIUBAH
@@ -689,34 +791,7 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         editor.putLong("last_delete_time", System.currentTimeMillis());
         editor.apply();
 
-        Log.d("BerandaActivity", "Saved delete info for NewsActivity - Title: " + promoTitle);
-    }
-
-    // HANDLE ACTIVITY RESULT - TIDAK DIUBAH
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        Log.d("BerandaActivity", "onActivityResult - Request: " + requestCode + ", Result: " + resultCode);
-
-        if (requestCode == PromoAdapter.EDIT_PROMO_REQUEST && resultCode == RESULT_OK && data != null) {
-            handleEditPromoResult(data);
-        }
-    }
-
-    private void handleEditPromoResult(Intent data) {
-        int updatedPromoId = data.getIntExtra("UPDATED_PROMO_ID", -1);
-        String updatedImage = data.getStringExtra("UPDATED_IMAGE");
-
-        Log.d("BerandaActivity", "Handle edit result - ID: " + updatedPromoId);
-
-        if (updatedPromoId != -1) {
-            // Panggil method update melalui interface
-            onPromoUpdated(updatedPromoId, updatedImage);
-        } else {
-            Log.w("BerandaActivity", "Invalid update data, refreshing from server");
-            loadPromoData();
-        }
+        Log.d("NewBeranda", "Saved delete info for NewsActivity - Title: " + promoTitle);
     }
 
     private void setupClickListeners() {
@@ -938,32 +1013,527 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
             Toast.makeText(this, "Gagal membuka menu: " + menuTitle, Toast.LENGTH_SHORT).show();
         }
     }
-    // ✅ BACKGROUND SERVICE UNTUK AUTO DELETE REAL-TIME
-    private void startAutoDeleteBackgroundService() {
-        Log.d("NewBeranda", "🔄 Starting Auto Delete Background Service");
+
+    // ✅ PERBAIKAN: Enhanced Auto Delete Service yang benar-benar bekerja
+    private void startEnhancedAutoDeleteService() {
+        Log.d("NewBeranda", "🚀 Starting Enhanced Auto Delete Service");
+
+        // Hentikan service sebelumnya jika ada
+        stopAutoDeleteBackgroundService();
 
         autoDeleteHandler = new Handler(Looper.getMainLooper());
         autoDeleteRunnable = new Runnable() {
             @Override
             public void run() {
-                Log.d("NewBeranda", "⏰ Auto Delete Service Running - " + new Date());
-                executeAutoDeleteWithRetry();
-                autoDeleteHandler.postDelayed(this, AUTO_DELETE_INTERVAL);
+                Log.d("NewBeranda", "🔄 Enhanced Auto Delete Running - " + new Date());
+
+                // ✅ PERBAIKAN KRITIS: Panggil API auto delete yang benar
+                triggerEnhancedServerAutoDelete();
+
+                // ✅ PERBAIKAN: Pastikan handler tetap berjalan
+                if (autoDeleteHandler != null) {
+                    autoDeleteHandler.postDelayed(this, AUTO_DELETE_INTERVAL);
+                    Log.d("NewBeranda", "✅ Auto Delete Scheduled for next run");
+                }
             }
         };
 
-        // Start dengan delay initial
+        // Jalankan segera
         autoDeleteHandler.postDelayed(autoDeleteRunnable, INITIAL_DELAY);
-
-        Toast.makeText(this, "Auto delete service started", Toast.LENGTH_SHORT).show();
+        Log.d("NewBeranda", "✅ Enhanced auto delete service started");
     }
 
-    // ✅ EXECUTE AUTO DELETE DENGAN RETRY MECHANISM
-    private void executeAutoDeleteWithRetry() {
-        Log.d("NewBeranda", "🔄 Executing Auto Delete with Retry Mechanism");
+
+    // ✅ METHOD BARU: Kirim broadcast khusus untuk kadaluwarsa
+    private void sendEnhancedExpiredBroadcast(int expiredCount) {
+        Log.d("NewBeranda", "📢 Sending Enhanced EXPIRED Broadcast");
+
+        try {
+            Intent broadcast = new Intent("REFRESH_DELETED_NEWS_DATA");
+            broadcast.putExtra("ACTION", "PROMO_EXPIRED");
+            broadcast.putExtra("EXPIRED_COUNT", expiredCount);
+            broadcast.putExtra("TIMESTAMP", System.currentTimeMillis());
+            sendBroadcast(broadcast);
+
+            Log.d("NewBeranda", "✅ Enhanced expired broadcast sent");
+
+        } catch (Exception e) {
+            Log.e("NewBeranda", "❌ Enhanced expired broadcast failed: " + e.getMessage());
+        }
+    }
+
+    // ✅ METHOD BARU: Notifikasi auto delete untuk kadaluwarsa
+    private void showExpiredAutoDeleteNotification(int expiredCount) {
+        try {
+            String title = "🕒 Auto Delete Executed";
+            String message = expiredCount + " promo kadaluwarsa telah dipindahkan ke arsip";
+
+            NotificationHelper.showSimpleNotification(this, title, message);
+            Log.d("NewBeranda", "📢 Expired Auto Delete Notification: " + message);
+
+        } catch (Exception e) {
+            Log.e("NewBeranda", "❌ Error showing expired notification: " + e.getMessage());
+        }
+    }
+ 
+
+
+    // ✅ METHOD BARU: Manual check yang lebih detail
+    private void debugManualExpiryCheck() {
+        Log.d("NewBeranda", "=== MANUAL EXPIRY CHECK DEBUG ===");
+
+        String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        Log.d("NewBeranda", "Current Date: " + currentDate);
+
+        for (int i = 0; i < promoList.size(); i++) {
+            Promo promo = promoList.get(i);
+            String expiryDate = promo.getKadaluwarsa();
+
+            Log.d("NewBeranda", "Promo " + i + ": " + promo.getNamaPromo());
+            Log.d("NewBeranda", "  - ID: " + promo.getIdPromo());
+            Log.d("NewBeranda", "  - Kadaluwarsa: '" + expiryDate + "'");
+
+            if (expiryDate == null || expiryDate.isEmpty() || expiryDate.equals("null")) {
+                Log.d("NewBeranda", "  ❌ INVALID: Null or empty date");
+                continue;
+            }
+
+            try {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                Date promoExpiry = format.parse(expiryDate);
+                Date today = format.parse(currentDate);
+
+                boolean isExpired = promoExpiry.before(today);
+                Log.d("NewBeranda", "  - Is Expired: " + isExpired);
+                Log.d("NewBeranda", "  - Comparison: " + expiryDate + " < " + currentDate + " = " + isExpired);
+
+            } catch (ParseException e) {
+                Log.e("NewBeranda", "  ❌ PARSE ERROR: " + e.getMessage());
+            }
+        }
+        Log.d("NewBeranda", "=== END MANUAL DEBUG ===");
+    }
+
+    // ✅ METHOD BARU: Cek ketersediaan jaringan
+    private boolean isNetworkAvailable() {
+        try {
+            ConnectivityManager connectivityManager =
+                    (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        } catch (Exception e) {
+            Log.e("NewBeranda", "❌ Error checking network: " + e.getMessage());
+            return false;
+        }
+    }
+    // ✅ PERBAIKAN: Manual check dengan debugging yang lebih detail
+    private void checkAndProcessExpiredPromosManually() {
+        Log.d("NewBeranda", "🔍 Manual PROCESSING expired promos - ENHANCED DEBUG");
+
+        String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        List<Promo> expiredPromos = new ArrayList<>();
+
+        Log.d("NewBeranda", "📅 DEBUG - Current Date: " + currentDate);
+        Log.d("NewBeranda", "📊 DEBUG - Total Promos to Check: " + promoList.size());
+
+        // Debug semua promo dan tanggal kadaluwarsanya
+        for (int i = 0; i < promoList.size(); i++) {
+            Promo promo = promoList.get(i);
+            String expiryDate = promo.getKadaluwarsa();
+
+            Log.d("NewBeranda", "🔍 DEBUG Promo " + i + ": " + promo.getNamaPromo());
+            Log.d("NewBeranda", "   - Kadaluwarsa: " + expiryDate);
+            Log.d("NewBeranda", "   - ID: " + promo.getIdPromo());
+
+            if (expiryDate == null || expiryDate.isEmpty() || expiryDate.equals("null")) {
+                Log.d("NewBeranda", "   ❌ SKIP - Invalid expiry date");
+                continue;
+            }
+
+            // Pengecekan manual sederhana untuk debug
+            try {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                Date promoExpiry = format.parse(expiryDate);
+                Date today = format.parse(currentDate);
+
+                boolean isExpiredManual = promoExpiry.before(today);
+                Log.d("NewBeranda", "   - Manual Check: " + expiryDate + " < " + currentDate + " = " + isExpiredManual);
+
+            } catch (Exception e) {
+                Log.e("NewBeranda", "   ❌ Error in manual date check: " + e.getMessage());
+            }
+
+            // Gunakan method isPromoExpired
+            boolean isExpired = isPromoExpired(expiryDate, currentDate);
+
+            Log.d("NewBeranda", "   - Final Result: " + isExpired);
+
+            if (isExpired) {
+                expiredPromos.add(promo);
+                Log.d("NewBeranda", "   ⚠️ ✅ ADDED TO EXPIRED LIST");
+            } else {
+                Log.d("NewBeranda", "   ✅ NOT EXPIRED - Skip");
+            }
+            Log.d("NewBeranda", "   ---");
+        }
+
+        if (!expiredPromos.isEmpty()) {
+            Log.d("NewBeranda", "🚨 MANUAL PROCESS - Found " + expiredPromos.size() + " expired promos:");
+
+            for (Promo expired : expiredPromos) {
+                Log.d("NewBeranda", "   - " + expired.getNamaPromo() + " (Exp: " + expired.getKadaluwarsa() + ")");
+            }
+
+            // Process setiap promo yang expired
+            for (Promo expiredPromo : expiredPromos) {
+                processExpiredPromoManually(expiredPromo);
+            }
+
+            // Kirim broadcast
+            sendExpiredPromoBroadcastForManual(expiredPromos);
+
+            Log.d("NewBeranda", "✅ Manual processing completed for " + expiredPromos.size() + " expired promos");
+
+            // Tampilkan toast
+            runOnUiThread(() -> {
+                Toast.makeText(NewBeranda.this,
+                        "Ditemukan " + expiredPromos.size() + " promo kadaluwarsa",
+                        Toast.LENGTH_LONG).show();
+            });
+
+        } else {
+            Log.d("NewBeranda", "✅ MANUAL PROCESS - No expired promos found");
+
+            // Tampilkan toast info
+            runOnUiThread(() -> {
+                Toast.makeText(NewBeranda.this,
+                        "Tidak ada promo yang kadaluwarsa (Current: " + currentDate + ")",
+                        Toast.LENGTH_LONG).show();
+            });
+        }
+    }
+
+    // ✅ METHOD BARU: Process expired promo dengan error handling
+    private void processExpiredPromoManually(Promo expiredPromo) {
+        Log.d("NewBeranda", "🕒 Processing EXPIRED promo manually: " + expiredPromo.getNamaPromo());
+
+        try {
+            // Langsung simpan ke histori dengan status Kadaluwarsa
+            savePromoExpiredToHistori(expiredPromo);
+
+            // Refresh data untuk menghapus dari tampilan beranda
+            new Handler().postDelayed(() -> {
+                loadPromoData();
+            }, 1000);
+
+            Log.d("NewBeranda", "✅ Successfully processed expired promo: " + expiredPromo.getNamaPromo());
+
+        } catch (Exception e) {
+            Log.e("NewBeranda", "❌ Error processing expired promo: " + expiredPromo.getNamaPromo() + " - " + e.getMessage());
+        }
+    }
+
+
+    // ✅ METHOD BARU: Kirim broadcast untuk manual delete expired
+    private void sendExpiredPromoBroadcastForManual(List<Promo> expiredPromos) {
+        try {
+            for (Promo promo : expiredPromos) {
+                Intent broadcastIntent = new Intent("REFRESH_DELETED_NEWS_DATA");
+                broadcastIntent.putExtra("ACTION", "PROMO_EXPIRED");
+                broadcastIntent.putExtra("PROMO_TITLE", promo.getNamaPromo());
+                broadcastIntent.putExtra("PENGINPUT", promo.getNamaPenginput());
+                sendBroadcast(broadcastIntent);
+            }
+            Log.d("NewBeranda", "📢 Manual expired broadcast sent for " + expiredPromos.size() + " promos");
+        } catch (Exception e) {
+            Log.e("NewBeranda", "❌ Error sending manual expired broadcast: " + e.getMessage());
+        }
+    }
+
+    // ✅ PERBAIKAN: Enhanced server auto delete dengan response handling yang lebih baik
+    private void triggerEnhancedServerAutoDelete() {
+        Log.d("NewBeranda", "🎯 Enhanced Server Auto Delete Triggered - " + new Date());
+
+        if (!isNetworkAvailable()) {
+            Log.e("NewBeranda", "❌ No network connection - Auto delete skipped");
+            return;
+        }
 
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+
+        Log.d("NewBeranda", "📡 Calling autoDeleteExpiredPromos API...");
+
         Call<BasicResponse> call = apiService.autoDeleteExpiredPromos();
+
+        call.enqueue(new Callback<BasicResponse>() {
+            @Override
+            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                try {
+                    Log.d("NewBeranda", "📡 API Response Received - Code: " + response.code());
+
+                    if (response.isSuccessful() && response.body() != null) {
+                        BasicResponse basicResponse = response.body();
+
+                        // ✅ DEBUG DETAIL RESPONSE
+                        debugAutoDeleteResponse(basicResponse);
+
+                        if (basicResponse.isSuccess()) {
+                            int expiredCount = basicResponse.getExpiredCount();
+                            int deletedCount = basicResponse.getDeletedCount();
+
+                            Log.d("NewBeranda", "✅ Auto delete successful - Expired: " + expiredCount + ", Deleted: " + deletedCount);
+
+                            runOnUiThread(() -> {
+                                if (expiredCount > 0) {
+                                    if (deletedCount > 0) {
+                                        // ✅ ADA YANG BERHASIL DIHAPUS
+                                        String message = deletedCount + " promo kadaluwarsa telah dihapus";
+                                        Toast.makeText(NewBeranda.this, message, Toast.LENGTH_LONG).show();
+                                        showExpiredAutoDeleteNotification(deletedCount);
+
+                                        // ✅ REFRESH DATA
+                                        loadPromoDataForceRefresh();
+                                    } else {
+                                        // ✅ DITEMUKAN EXPIRED TAPI GAGAL DIHAPUS
+                                        String message = "Ditemukan " + expiredCount + " promo kadaluwarsa tetapi gagal dihapus. Periksa log server.";
+                                        Toast.makeText(NewBeranda.this, message, Toast.LENGTH_LONG).show();
+                                        Log.e("NewBeranda", "❌ Promo ditemukan kadaluwarsa tetapi tidak terhapus");
+
+                                        // ✅ COBA MANUAL DELETE SEBAGAI FALLBACK
+                                        checkAndProcessExpiredPromosManually();
+                                    }
+                                } else {
+                                    Log.d("NewBeranda", "✅ No expired promos found at this time");
+                                }
+                            });
+
+                            // ✅ KIRIM BROADCAST MESKI TIDAK ADA YANG DIHAPUS
+                            sendEnhancedExpiredBroadcast(expiredCount);
+
+                        } else {
+                            Log.e("NewBeranda", "❌ Auto delete failed: " + basicResponse.getMessage());
+                            // Fallback ke manual check
+                            runOnUiThread(() -> {
+                                Toast.makeText(NewBeranda.this,
+                                        "Auto delete gagal: " + basicResponse.getMessage(),
+                                        Toast.LENGTH_LONG).show();
+                            });
+                            checkAndProcessExpiredPromosManually();
+                        }
+                    } else {
+                        String errorBody = "No error body";
+                        try {
+                            if (response.errorBody() != null) {
+                                errorBody = response.errorBody().string();
+                            }
+                        } catch (Exception e) {
+                            errorBody = "Error reading error body: " + e.getMessage();
+                        }
+
+                        Log.e("NewBeranda", "❌ Server error in auto delete: " + response.code() + " - " + errorBody);
+
+                        runOnUiThread(() -> {
+                            Toast.makeText(NewBeranda.this,
+                                    "Server error: " + response.code(),
+                                    Toast.LENGTH_LONG).show();
+                        });
+
+                        checkAndProcessExpiredPromosManually();
+                    }
+                } catch (Exception e) {
+                    Log.e("NewBeranda", "❌ Enhanced auto delete error: " + e.getMessage());
+
+                    runOnUiThread(() -> {
+                        Toast.makeText(NewBeranda.this,
+                                "Error: " + e.getMessage(),
+                                Toast.LENGTH_LONG).show();
+                    });
+
+                    checkAndProcessExpiredPromosManually();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<BasicResponse> call, Throwable t) {
+                Log.e("NewBeranda", "❌ Enhanced auto delete NETWORK FAILURE: " + t.getMessage());
+
+                runOnUiThread(() -> {
+                    Toast.makeText(NewBeranda.this,
+                            "Network error: " + t.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                });
+
+                checkAndProcessExpiredPromosManually();
+            }
+        });
+    }
+
+    // ✅ METHOD BARU: Kirim broadcast untuk jumlah expired
+    private void sendExpiredPromoBroadcastForCount(int expiredCount) {
+        try {
+            Intent broadcastIntent = new Intent("REFRESH_DELETED_NEWS_DATA");
+            broadcastIntent.putExtra("ACTION", "PROMO_EXPIRED");
+            broadcastIntent.putExtra("EXPIRED_COUNT", expiredCount);
+            broadcastIntent.putExtra("TIMESTAMP", System.currentTimeMillis());
+            sendBroadcast(broadcastIntent);
+            Log.d("NewBeranda", "📢 Expired count broadcast sent: " + expiredCount);
+        } catch (Exception e) {
+            Log.e("NewBeranda", "❌ Error sending expired count broadcast: " + e.getMessage());
+        }
+    }
+
+
+    // ✅ PERBAIKAN: Method stop yang lebih comprehensive
+    private void stopAutoDeleteBackgroundService() {
+        Log.d("NewBeranda", "🛑 Stopping Auto Delete Background Service");
+
+        if (autoDeleteHandler != null && autoDeleteRunnable != null) {
+            autoDeleteHandler.removeCallbacks(autoDeleteRunnable);
+            Log.d("NewBeranda", "✅ Auto Delete Handler callbacks removed");
+        }
+
+        autoDeleteHandler = null;
+        autoDeleteRunnable = null;
+
+        Log.d("NewBeranda", "✅ Auto Delete Background Service Stopped");
+    }
+
+    // ✅ METHOD BARU: Debug detail untuk auto delete
+    private void debugAutoDeleteResponse(BasicResponse response) {
+        Log.d("NewBeranda", "=== AUTO DELETE DEBUG ===");
+        Log.d("NewBeranda", "Success: " + response.isSuccess());
+        Log.d("NewBeranda", "Message: " + response.getMessage());
+        Log.d("NewBeranda", "Expired Count: " + response.getExpiredCount());
+        Log.d("NewBeranda", "Deleted Count: " + response.getDeletedCount());
+        Log.d("NewBeranda", "Total Processed: " + response.getTotalProcessed());
+
+        if (response.hasExpiredPromos()) {
+            Log.d("NewBeranda", "Expired Promos List: " + response.getExpiredPromos().size());
+            for (Map<String, Object> promo : response.getExpiredPromos()) {
+                Log.d("NewBeranda", " - " + promo.get("Nama_Promo") + " (ID: " + promo.get("Id_promo") + ")");
+            }
+        }
+        Log.d("NewBeranda", "=== END DEBUG ===");
+    }
+
+
+    // ✅ METHOD BARU: Force refresh data dengan lebih agresif
+    private void loadPromoDataForceRefresh() {
+        Log.d("NewBeranda", "⚡ Force Refreshing Promo Data");
+
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<PromoResponse> call = apiService.getSemuaPromo();
+
+        call.enqueue(new Callback<PromoResponse>() {
+            @Override
+            public void onResponse(Call<PromoResponse> call, Response<PromoResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    PromoResponse promoResponse = response.body();
+                    if (promoResponse.isSuccess()) {
+                        List<Promo> newData = promoResponse.getData();
+
+                        runOnUiThread(() -> {
+                            int previousSize = promoList.size();
+                            promoList.clear();
+                            promoList.addAll(newData);
+
+                            if (promoAdapter != null) {
+                                promoAdapter.notifyDataSetChanged();
+                                Log.d("NewBeranda", "✅ Data force refreshed: " + previousSize + " → " + promoList.size());
+
+                                // Tampilkan toast jika ada perubahan
+                                if (previousSize != promoList.size()) {
+                                    Toast.makeText(NewBeranda.this,
+                                            "Data promo diperbarui: " + promoList.size() + " item",
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PromoResponse> call, Throwable t) {
+                Log.e("NewBeranda", "❌ Force refresh failed: " + t.getMessage());
+            }
+        });
+    }
+
+    // ✅ PERBAIKAN: Method isPromoExpired yang BENAR
+    private boolean isPromoExpired(String expiryDate, String currentDate) {
+        Log.d("NewBeranda", "🔍 DETAILED EXPIRY CHECK - FIXED LOGIC");
+        Log.d("NewBeranda", "  - Expiry Date: '" + expiryDate + "'");
+        Log.d("NewBeranda", "  - Current Date: '" + currentDate + "'");
+
+        if (expiryDate == null || expiryDate.isEmpty() || expiryDate.equals("null") || expiryDate.equals("0000-00-00")) {
+            Log.d("NewBeranda", "  ❌ INVALID expiry date");
+            return false;
+        }
+
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            dateFormat.setLenient(false);
+
+            Date promoDate = dateFormat.parse(expiryDate.trim());
+            Date today = dateFormat.parse(currentDate);
+
+            // ✅ PERBAIKAN KRITIS: Reset waktu untuk perbandingan yang akurat
+            Calendar calPromo = Calendar.getInstance();
+            calPromo.setTime(promoDate);
+            calPromo.set(Calendar.HOUR_OF_DAY, 0);
+            calPromo.set(Calendar.MINUTE, 0);
+            calPromo.set(Calendar.SECOND, 0);
+            calPromo.set(Calendar.MILLISECOND, 0);
+
+            Calendar calToday = Calendar.getInstance();
+            calToday.setTime(today);
+            calToday.set(Calendar.HOUR_OF_DAY, 0);
+            calToday.set(Calendar.MINUTE, 0);
+            calToday.set(Calendar.SECOND, 0);
+            calToday.set(Calendar.MILLISECOND, 0);
+
+            // ✅ PERBAIKAN LOGIKA: Promo expired jika tanggal kadaluwarsa SEBELUM hari ini
+            // Contoh: expiryDate = 2024-01-15, currentDate = 2024-01-16 → expired = true
+            boolean isExpired = calPromo.before(calToday);
+
+            Log.d("NewBeranda", "  - Promo Date (ms): " + calPromo.getTimeInMillis());
+            Log.d("NewBeranda", "  - Today Date (ms): " + calToday.getTimeInMillis());
+            Log.d("NewBeranda", "  - Is Expired: " + isExpired);
+            Log.d("NewBeranda", "  - Logic: promoDate (" + expiryDate + ") < today (" + currentDate + ") = " + isExpired);
+
+            return isExpired;
+
+        } catch (ParseException e) {
+            Log.e("NewBeranda", "❌ Error parsing date: '" + expiryDate + "' - " + e.getMessage());
+            return false;
+        } catch (Exception e) {
+            Log.e("NewBeranda", "❌ Unexpected error in expiry check: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // ✅ PERBAIKAN: Method untuk save promo expired ke histori dengan status yang BENAR
+    private void savePromoExpiredToHistori(Promo expiredPromo) {
+        Log.d("NewBeranda", "💾 Saving EXPIRED promo to histori: " + expiredPromo.getNamaPromo());
+
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("action", "add_promo_histori");
+        requestBody.put("promo_id", expiredPromo.getIdPromo());
+        requestBody.put("title", expiredPromo.getNamaPromo());
+        requestBody.put("penginput", expiredPromo.getNamaPenginput());
+
+        // ✅ PERBAIKAN KRITIS: GUNAKAN STATUS 'Kadaluwarsa'
+        requestBody.put("status", "Kadaluwarsa");
+
+        requestBody.put("image_data", expiredPromo.getGambarBase64());
+        requestBody.put("kadaluwarsa", expiredPromo.getKadaluwarsa());
+
+        Log.d("NewBeranda", "📤 Sending histori with CORRECT STATUS: Kadaluwarsa");
+
+        Call<BasicResponse> call = apiService.addPromoHistoriWithBody(requestBody);
 
         call.enqueue(new Callback<BasicResponse>() {
             @Override
@@ -971,105 +1541,120 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
                 if (response.isSuccessful() && response.body() != null) {
                     BasicResponse basicResponse = response.body();
                     if (basicResponse.isSuccess()) {
-                        Log.d("NewBeranda", "✅ Auto Delete Success: " + basicResponse.getMessage());
+                        Log.d("NewBeranda", "✅ Histori KADALUWARSA saved: " + expiredPromo.getNamaPromo());
 
-                        // Refresh data setelah auto delete berhasil
-                        new Handler().postDelayed(() -> {
-                            loadPromoData();
-                            showAutoDeleteNotification(basicResponse);
-                        }, 1500);
+                        // ✅ KIRIM BROADCAST KE DELETED NEWS ACTIVITY DENGAN STATUS YANG BENAR
+                        sendExpiredPromoBroadcast(expiredPromo);
+
+                        // ✅ TAMPILKAN NOTIFIKASI KADALUWARSA
+                        showExpiredNotification(expiredPromo.getNamaPromo());
 
                     } else {
-                        Log.e("NewBeranda", "❌ Auto Delete Failed: " + basicResponse.getMessage());
-                        retryAutoDelete(1); // Retry sekali
+                        Log.e("NewBeranda", "❌ Failed to save histori: " + basicResponse.getMessage());
                     }
                 } else {
-                    Log.e("NewBeranda", "❌ Server Error: " + response.code());
-                    retryAutoDelete(1);
+                    Log.e("NewBeranda", "❌ Error response histori: " + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
-                Log.e("NewBeranda", "❌ Network Error: " + t.getMessage());
-                retryAutoDelete(1);
+                Log.e("NewBeranda", "❌ Error saving histori: " + t.getMessage());
             }
         });
     }
 
-    // ✅ RETRY MECHANISM UNTUK AUTO DELETE
-    private void retryAutoDelete(int retryCount) {
-        if (retryCount <= 3) {
-            Log.d("NewBeranda", "🔄 Retry Auto Delete - Attempt " + retryCount);
-
-            new Handler().postDelayed(() -> {
-                executeAutoDeleteWithRetry();
-            }, 3000 * retryCount); // Exponential backoff
-        } else {
-            Log.e("NewBeranda", "❌ Auto Delete failed after 3 retries");
-        }
-    }
-
-    // ✅ NOTIFIKASI LOKAL SETELAH AUTO DELETE
-    private void showAutoDeleteNotification(BasicResponse response) {
+    // ✅ METHOD BARU: Kirim broadcast khusus untuk promo kadaluwarsa
+    private void sendExpiredPromoBroadcast(Promo expiredPromo) {
         try {
-            String title = "🔄 Auto Delete Executed";
-            String message = response.getMessage();
+            Intent broadcastIntent = new Intent("REFRESH_DELETED_NEWS_DATA");
+            broadcastIntent.putExtra("ACTION", "PROMO_EXPIRED");
+            broadcastIntent.putExtra("PROMO_TITLE", expiredPromo.getNamaPromo());
+            broadcastIntent.putExtra("PENGINPUT", expiredPromo.getNamaPenginput());
+            broadcastIntent.putExtra("IMAGE_DATA", expiredPromo.getGambarBase64());
+            broadcastIntent.putExtra("KADALUWARSA", expiredPromo.getKadaluwarsa());
+            broadcastIntent.putExtra("PROMO_ID", expiredPromo.getIdPromo());
 
-            NotificationHelper.showSimpleNotification(this, title, message);
-            Log.d("NewBeranda", "📢 Auto Delete Notification: " + message);
+            sendBroadcast(broadcastIntent);
+            Log.d("NewBeranda", "📢 Broadcast sent for EXPIRED promo: " + expiredPromo.getNamaPromo());
 
         } catch (Exception e) {
-            Log.e("NewBeranda", "❌ Error showing auto delete notification: " + e.getMessage());
+            Log.e("NewBeranda", "❌ Error sending expired broadcast: " + e.getMessage());
         }
     }
 
-    // ✅ CEK PROMO KADALUARSA SECARA MANUAL (BACKUP)
-    private void checkManualExpiredPromos() {
-        Log.d("NewBeranda", "🔍 Manual Check for Expired Promos");
 
-        String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        boolean foundExpired = false;
-
-        for (int i = promoList.size() - 1; i >= 0; i--) {
-            Promo promo = promoList.get(i);
-            if (isPromoExpired(promo.getKadaluwarsa(), currentDate)) {
-                Log.d("NewBeranda", "⚠️ Found Locally Expired Promo: " + promo.getNamaPromo());
-                showExpiredPromoAlert(promo.getNamaPromo());
-                foundExpired = true;
-            }
-        }
-
-        if (!foundExpired) {
-            Log.d("NewBeranda", "✅ No Expired Promos Found in Manual Check");
-        }
-    }
-
-    private boolean isPromoExpired(String expiryDate, String currentDate) {
-        if (expiryDate == null || expiryDate.isEmpty() || expiryDate.equals("null")) {
-            return false;
-        }
-
+    // ✅ METHOD BARU: Tampilkan notifikasi lokal
+    private void showLocalAutoDeleteNotification(int expiredCount, int deletedCount) {
         try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            Date promoDate = dateFormat.parse(expiryDate);
-            Date today = dateFormat.parse(currentDate);
+            String title = "🔄 Auto Delete Executed";
+            String message = expiredCount + " promo kadaluwarsa telah dipindahkan ke arsip";
 
-            return promoDate.before(today);
-        } catch (ParseException e) {
-            Log.e("NewBeranda", "❌ Error parsing date: " + e.getMessage());
-            return false;
+            NotificationHelper.showSimpleNotification(this, title, message);
+            Log.d("NewBeranda", "📢 Local Auto Delete Notification: " + message);
+
+            // ✅ TAMPILKAN TOAST JUGA
+            runOnUiThread(() -> {
+                Toast.makeText(NewBeranda.this, message, Toast.LENGTH_LONG).show();
+            });
+        } catch (Exception e) {
+            Log.e("NewBeranda", "❌ Error showing local notification: " + e.getMessage());
         }
     }
 
-    private void showExpiredPromoAlert(String promoName) {
-        // Notifikasi lokal untuk promo kadaluarsa
-        String title = "🕒 Promo Expired (Local)";
-        String message = "Promo '" + promoName + "' telah kadaluarsa";
 
-        NotificationHelper.showSimpleNotification(this, title, message);
-        Log.d("NewBeranda", "📢 Local Expired Alert: " + message);
+
+    // ✅ PERBAIKAN: Load promo data dengan force refresh
+    private void loadPromoData() {
+        Log.d("NewBeranda", "🔄 Loading Promo Data - FORCE REFRESH");
+
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<PromoResponse> call = apiService.getSemuaPromo();
+
+        call.enqueue(new Callback<PromoResponse>() {
+            @Override
+            public void onResponse(Call<PromoResponse> call, Response<PromoResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    PromoResponse promoResponse = response.body();
+                    if (promoResponse.isSuccess()) {
+                        promoList.clear();
+                        promoList.addAll(promoResponse.getData());
+                        promoAdapter.notifyDataSetChanged();
+
+                        Log.d("NewBeranda", "✅ Promo data refreshed: " + promoList.size() + " items");
+
+                        // ✅ PERBAIKAN: Update UI langsung
+                        updatePromoUI();
+
+                    } else {
+                        Log.e("NewBeranda", "❌ API Response not success: " + promoResponse.getMessage());
+                    }
+                } else {
+                    Log.e("NewBeranda", "❌ Server Error: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PromoResponse> call, Throwable t) {
+                Log.e("NewBeranda", "❌ Network Error: " + t.getMessage());
+            }
+        });
     }
+
+    // ✅ METHOD BARU: Update UI langsung setelah data berubah
+    private void updatePromoUI() {
+        runOnUiThread(() -> {
+            if (promoAdapter != null) {
+                promoAdapter.notifyDataSetChanged();
+
+                // Update empty state jika perlu
+                if (promoList.isEmpty()) {
+                    Toast.makeText(this, "Tidak ada promo aktif saat ini", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
 
     // ✅ HENTIKAN SERVICE SAAT ACTIVITY DESTROY
     @Override
@@ -1079,13 +1664,6 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         Log.d("NewBeranda", "🛑 Auto Delete Background Service Stopped");
     }
 
-    private void stopAutoDeleteBackgroundService() {
-        if (autoDeleteHandler != null && autoDeleteRunnable != null) {
-            autoDeleteHandler.removeCallbacks(autoDeleteRunnable);
-            autoDeleteHandler = null;
-            autoDeleteRunnable = null;
-        }
-    }
     private void logout() {
         stopAutoDeleteBackgroundService();
 
@@ -1104,6 +1682,19 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         finish();
     }
 
+    // ✅ METHOD YANG DIPERBAIKI - Hanya untuk NewsActivity saja
+    @Override
+    public void onPromoDeleted(String promoTitle, String penginput) {
+        Log.d("NewBeranda", "Manual promo deleted: " + promoTitle);
+        Toast.makeText(this, "Promo '" + promoTitle + "' dihapus", Toast.LENGTH_SHORT).show();
+
+        // ✅ Hanya simpan untuk NewsActivity
+        savePromoDeleteForNews(promoTitle, penginput);
+
+        // ❌ JANGAN panggil save histori dari sini
+        // Biarkan PHP yang handle status yang benar
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -1112,8 +1703,10 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         // Refresh access control setiap resume
         setupUserInfo();
         setupAccessBasedOnLevel();
+
+        // ✅ PERBAIKAN: Pastikan auto delete service berjalan
         if (autoDeleteHandler == null) {
-            startAutoDeleteBackgroundService();
+            startEnhancedAutoDeleteService();
         }
 
         Log.d("BerandaActivity", "onResume completed - Level: " + userLevel);

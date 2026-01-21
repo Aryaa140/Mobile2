@@ -46,62 +46,6 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cardEditProfil"
-                    android:layout_width="match_parent"
-                    android:layout_height="100dp"
-                    android:layout_marginBottom="16dp"
-                    app:cardCornerRadius="24dp"
-                    app:cardElevation="8dp"
-                    app:strokeColor="@color/teal_200"
-                    app:strokeWidth="1dp"
-                    android:foreground="?attr/selectableItemBackground">
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:padding="16dp">
-
-                        <FrameLayout
-                            android:id="@+id/icon_edit_profil"
-                            android:layout_width="64dp"
-                            android:layout_height="64dp"
-                            android:background="@drawable/circle_bg_blue"
-                            android:layout_alignParentStart="true"
-                            android:layout_centerVertical="true"
-                            android:gravity="center">
-
-                            <ImageView
-                                android:layout_width="62dp"
-                                android:layout_height="56dp"
-                                android:src="@drawable/ic_person2" />
-                        </FrameLayout>
-
-                        <!-- Text -->
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_toEndOf="@id/icon_edit_profil"
-                            android:layout_marginStart="20dp"
-                            android:layout_centerVertical="true"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_height="wrap_content"
-                                android:layout_width="wrap_content"
-                                android:text="Edit Profil"
-                                android:textStyle="bold"
-                                android:textColor="@color/black"/>
-
-                            <TextView
-                                android:layout_height="wrap_content"
-                                android:layout_width="wrap_content"
-                                android:textStyle="italic"
-                                android:text="Ubah data pribadi Anda"
-                                android:textColor="@color/black"/>
-                        </LinearLayout>
-                    </RelativeLayout>
-                </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardGantiPW"

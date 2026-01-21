@@ -1,6 +1,7 @@
 package com.example.mobile;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -132,7 +133,6 @@ public class TambahFasilitasProyekActivity extends AppCompatActivity {
             }
         }
     }
-
     private void tambahFasilitas() {
         String namaFasilitas = editNamaFasilitas.getText().toString().trim();
 
@@ -146,11 +146,17 @@ public class TambahFasilitasProyekActivity extends AppCompatActivity {
             return;
         }
 
-        // Validasi tambahan
-        if (namaFasilitas.length() < 2) {
-            editNamaFasilitas.setError("Nama fasilitas minimal 2 karakter");
-            return;
+        // ✅ DAPATKAN USER INFO DARI SHAREDPREFERENCES
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String username = sharedPreferences.getString("username", "");
+        String namaUser = sharedPreferences.getString("nama_user", username);
+
+        // Jika nama_user tidak ada, gunakan username
+        if (namaUser.isEmpty()) {
+            namaUser = username;
         }
+
+        Log.d(TAG, "User info - Username: " + username + ", Nama: " + namaUser);
 
         // Tampilkan loading
         btnSimpan.setEnabled(false);
@@ -159,14 +165,19 @@ public class TambahFasilitasProyekActivity extends AppCompatActivity {
         // Konversi bitmap ke base64
         String gambarBase64 = bitmapToBase64(selectedFasilitasBitmap);
 
-        Log.d(TAG, "Menambah fasilitas - Proyek: " + namaProyek + ", Fasilitas: " + namaFasilitas);
+        Log.d(TAG, "Menambah fasilitas - Proyek: " + namaProyek +
+                ", Fasilitas: " + namaFasilitas +
+                ", Username: " + username +
+                ", Created By: " + namaUser);
 
-        // Panggil API untuk tambah fasilitas
+        // ✅ PERBAIKAN: Gunakan API dengan parameter yang lengkap
         Call<BasicResponse> call = apiService.addFasilitas(
                 "addFasilitas",
                 namaFasilitas,
                 namaProyek,
-                gambarBase64
+                gambarBase64,
+                username,      // ✅ Parameter ke-5: username
+                namaUser       // ✅ Parameter ke-6: created_by
         );
 
         call.enqueue(new Callback<BasicResponse>() {
@@ -178,16 +189,35 @@ public class TambahFasilitasProyekActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     BasicResponse tambahResponse = response.body();
                     if (tambahResponse.isSuccess()) {
-                        Toast.makeText(TambahFasilitasProyekActivity.this, "Fasilitas berhasil ditambahkan", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(TambahFasilitasProyekActivity.this,
+                                "Fasilitas berhasil ditambahkan", Toast.LENGTH_SHORT).show();
+
+                        // ✅ TAMPILKAN INFO FCM JIKA ADA
+                        if (tambahResponse.getFcmNotification() != null) {
+                            Log.d(TAG, "FCM Notification Result: " +
+                                    tambahResponse.getFcmNotification());
+                        }
 
                         // Kembali ke activity sebelumnya dengan result OK
                         setResult(RESULT_OK);
                         finish();
                     } else {
-                        Toast.makeText(TambahFasilitasProyekActivity.this, "Gagal menambah fasilitas: " + tambahResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(TambahFasilitasProyekActivity.this,
+                                "Gagal menambah fasilitas: " + tambahResponse.getMessage(),
+                                Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(TambahFasilitasProyekActivity.this, "Error response: " + response.code(), Toast.LENGTH_SHORT).show();
+                    String errorMsg = "Error response: " + response.code();
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMsg += " - " + response.errorBody().string();
+                        } catch (IOException e) {
+                            Log.e(TAG, "Error reading error body", e);
+                        }
+                    }
+                    Toast.makeText(TambahFasilitasProyekActivity.this,
+                            errorMsg, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, errorMsg);
                 }
             }
 
@@ -195,7 +225,8 @@ public class TambahFasilitasProyekActivity extends AppCompatActivity {
             public void onFailure(Call<BasicResponse> call, Throwable t) {
                 btnSimpan.setEnabled(true);
                 btnSimpan.setText("Simpan");
-                Toast.makeText(TambahFasilitasProyekActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(TambahFasilitasProyekActivity.this,
+                        "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "Error adding fasilitas: " + t.getMessage());
             }
         });

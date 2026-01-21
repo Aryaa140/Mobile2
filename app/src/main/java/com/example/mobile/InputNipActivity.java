@@ -1,7 +1,9 @@
 package com.example.mobile;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.renderscript.ScriptGroup;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -20,6 +22,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,6 +37,7 @@ import retrofit2.Response;
 public class InputNipActivity extends AppCompatActivity {
 
     private MaterialToolbar topAppBar;
+    private BottomNavigationView BottomNavigationView;
     private Spinner spinnerDivisi;
     private EditText editTextNoNIP;
     private Button btnSimpan, btnBatal, btnDateOut;
@@ -56,6 +60,38 @@ public class InputNipActivity extends AppCompatActivity {
         setupDatePicker();
         loadLatestNipId();
 
+        BottomNavigationView.setSelectedItemId(R.id.nav_home);
+
+        // Navigation
+        topAppBar.setNavigationOnClickListener(v -> {
+            Intent intent = new Intent(InputNipActivity.this, NewBeranda.class);
+            startActivity(intent);
+            finish();
+        });
+
+        BottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.nav_home) {
+                startActivity(new Intent(this, NewBeranda.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_folder) {
+                startActivity(new Intent(this, LihatDataActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_news) {
+                startActivity(new Intent(this, NewsActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            }
+            return false;
+        });
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -65,6 +101,7 @@ public class InputNipActivity extends AppCompatActivity {
 
     private void initViews() {
         topAppBar = findViewById(R.id.topAppBar);
+        BottomNavigationView = findViewById(R.id.bottom_navigation);
         spinnerDivisi = findViewById(R.id.spinnerDivisi);
         editTextNoNIP = findViewById(R.id.editTextNoNIP);
         btnSimpan = findViewById(R.id.btnSimpan);

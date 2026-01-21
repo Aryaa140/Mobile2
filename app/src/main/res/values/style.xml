@@ -26,6 +26,13 @@
         <item name="android:insetBottom">8dp</item>
     </style>
 
+    <style name="TextShadowPromoTitle">
+        <item name="android:shadowColor">#80000000</item>
+        <item name="android:shadowDx">3</item>
+        <item name="android:shadowDy">3</item>
+        <item name="android:shadowRadius">6</item>
+    </style>
+
     <!-- Simpan CustomCardView di sini aja -->
     <style name="CustomCardView" parent="Widget.MaterialComponents.CardView">
         <item name="cardBackgroundColor">#FFFFFF</item> <!-- paksa putih -->

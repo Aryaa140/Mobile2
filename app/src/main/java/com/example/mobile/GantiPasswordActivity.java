@@ -30,7 +30,6 @@ public class GantiPasswordActivity extends AppCompatActivity {
     BottomNavigationView bottomNavigationView;
     EditText editTextUsername, editTextPassword, editTextConfirmPassword;
     Button btnSimpan, btnBatal;
-
     private ApiService apiService;
     private SharedPreferences sharedPreferences;
     private boolean isUsernameValid = false;

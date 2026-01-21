@@ -3,32 +3,22 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-    <!-- Permission untuk notifikasi (Android 13+) -->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-    <!-- Permissions untuk alarm dan background -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- Permission untuk notifikasi (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- Permissions untuk alarm dan background -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-
-    <!-- Permissions Firebase -->
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-
-    <!-- Permissions untuk storage (Android 13+) -->
+    <uses-permission android:name="android.permission.VIBRATE" /> <!-- Permissions Firebase -->
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" /> <!-- Permissions untuk storage (Android 13+) -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
-
-    <!-- Permissions untuk storage (Android 12 dan bawah) -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" /> <!-- Permissions untuk storage (Android 12 dan bawah) -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-
-    <!-- Permission untuk download manager -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" /> <!-- Permission untuk download manager -->
     <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
 
     <application
@@ -43,6 +33,9 @@
         android:theme="@style/Theme.Mobile"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".PromoDetailActivity"
+            android:exported="false" />
 
         <service
             android:name=".MyFirebaseMessagingService"
@@ -50,9 +43,7 @@
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
-        </service>
-
-        <!-- Firebase Instance ID Service (deprecated but may be needed) -->
+        </service> <!-- Firebase Instance ID Service (deprecated but may be needed) -->
         <service
             android:name="com.google.firebase.messaging.FirebaseMessagingService"
             android:exported="false">
@@ -60,27 +51,30 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
         <activity
             android:name=".SiteplanHarmonyActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-
-        <!-- ✅ PERBAIKAN: Tambahkan theme untuk SiteplanGardenActivity -->
+        <activity
+            android:name=".InputKavlingActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity
+            android:name=".DeletedNewsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.DeletedNews" />
         <activity
             android:name=".SiteplanGardenActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-
         <activity
             android:name=".SiteplanRiversideActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".FullscreenSiteplanActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-            android:screenOrientation="portrait" />
-
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".EditDataKavlingActivity"
             android:exported="false" />
@@ -96,9 +90,7 @@
         <activity
             android:name=".LihatDataRealisasiActivity"
             android:exported="false" />
-        <activity
-            android:name=".InputKavlingActivity"
-            android:exported="false" />
+
         <activity
             android:name=".InputHunianActivity"
             android:exported="false" />

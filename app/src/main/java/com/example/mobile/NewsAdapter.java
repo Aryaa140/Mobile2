@@ -36,144 +36,234 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
         return new NewsViewHolder(view);
     }
 
+    // DI NewsAdapter.java - perbaiki onBindViewHolder()
     @Override
     public void onBindViewHolder(@NonNull NewsViewHolder holder, int position) {
         NewsItem item = newsItems.get(position);
 
-        String displayTitle = item.getTitle();
-        if (displayTitle == null || displayTitle.isEmpty()) {
-            displayTitle = "Promo";
+        holder.tvTitle.setText(item.getTitle());
+        holder.tvStatus.setText(item.getStatus());
+        holder.tvPenginput.setText("Oleh: " + item.getPenginput());
+        holder.tvTime.setText(item.getFormattedTimestamp());
+
+        // Tampilkan badge untuk jenis item
+        String itemType = item.getItemType();
+        if (itemType != null) {
+            holder.tvItemType.setVisibility(View.VISIBLE);
+            switch (itemType) {
+                case "promo":
+                    holder.tvItemType.setText("PROMO");
+                    holder.tvItemType.setBackgroundResource(R.drawable.badge_promo);
+                    break;
+                case "hunian":
+                    holder.tvItemType.setText("HUNIAN");
+                    holder.tvItemType.setBackgroundResource(R.drawable.badge_hunian);
+                    break;
+                case "proyek":
+                    holder.tvItemType.setText("PROYEK");
+                    holder.tvItemType.setBackgroundResource(R.drawable.badge_proyek);
+                    break;
+                default:
+                    holder.tvItemType.setVisibility(View.GONE);
+            }
+        } else {
+            holder.tvItemType.setVisibility(View.GONE);
         }
 
-        holder.tvNewsTitle.setText(displayTitle);
-        holder.tvPenginput.setText("Oleh: " + item.getPenginput());
-        holder.tvStatus.setText("Status: " + item.getStatus());
+        // ✅ PERBAIKAN: Validasi gambar dengan cara yang lebih baik
+        if (item.getImageUrl() != null && !item.getImageUrl().isEmpty()) {
+            String imageData = item.getImageUrl().trim();
+            itemType = item.getItemType();
+            boolean shouldLoadImage = false;
 
-        // Tampilkan timestamp relatif
-        holder.tvTimestamp.setText(item.getFormattedTimestamp());
+            switch (itemType) {
+                case "hunian":
+                    // Untuk hunian: minimal 50 karakter (bukan 500)
+                    shouldLoadImage = imageData.length() >= 50 &&
+                            !imageData.equalsIgnoreCase("null") &&
+                            !imageData.startsWith("data:") &&
+                            !imageData.endsWith("...") &&
+                            !imageData.endsWith("..") &&
+                            !imageData.contains("undefined");
+                    break;
 
-        // ✅ PERBAIKAN: Tampilkan kadaluwarsa dengan format yang benar
-        String formattedKadaluwarsa = item.getFormattedKadaluwarsa();
-        if (formattedKadaluwarsa != null && !formattedKadaluwarsa.equals("Tidak ada kadaluwarsa")) {
-            holder.tvKadaluwarsa.setText("Kadaluwarsa: " + formattedKadaluwarsa);
-            holder.tvKadaluwarsa.setVisibility(View.VISIBLE);
+                // ✅ PERBAIKAN: Di method onBindViewHolder untuk proyek
+                case "proyek":
+                    // Untuk proyek: kriteria lebih longgar
+                    shouldLoadImage = imageData.length() >= 50 &&  // Minimal 50 karakter
+                            !imageData.equalsIgnoreCase("null") &&
+                            !imageData.equalsIgnoreCase("NULL") &&
+                            !imageData.startsWith("data:") &&
+                            !imageData.endsWith("...") &&
+                            !imageData.endsWith("..");
+                    break;
 
-            // ✅ TAMBAHKAN WARNA BERDASARKAN STATUS
-            if ("Kadaluwarsa".equals(item.getStatus())) {
-                holder.tvKadaluwarsa.setTextColor(ContextCompat.getColor(context, R.color.red));
-            } else {
-                holder.tvKadaluwarsa.setTextColor(ContextCompat.getColor(context, R.color.red));
+                case "promo":
+                    // Untuk promo: minimal 100 karakter
+                    shouldLoadImage = imageData.length() >= 100 &&
+                            !imageData.equalsIgnoreCase("null") &&
+                            !imageData.startsWith("data:") &&
+                            !imageData.endsWith("...") &&
+                            !imageData.endsWith("..") &&
+                            !imageData.contains("undefined") &&
+                            imageData.matches("^[A-Za-z0-9+/]*={0,2}$");
+                    break;
+
+                default:
+                    shouldLoadImage = imageData.length() >= 50 &&
+                            !imageData.equalsIgnoreCase("null");
             }
+
+            // ✅ DEBUG LOG untuk troubleshooting
+            Log.d("NewsAdapter", "🖼️ Image check - Type: " + itemType +
+                    ", Length: " + imageData.length() +
+                    ", Should load: " + shouldLoadImage +
+                    ", Title: " + item.getTitle());
+
+            if (shouldLoadImage) {
+                // ✅ PERBAIKAN: Gunakan background thread untuk decode
+                String finalItemType = itemType;
+                new Thread(() -> {
+                    try {
+                        // Validasi base64 sebelum decode
+                        if (!isValidBase64(imageData)) {
+                            Log.w("NewsAdapter", "❌ Invalid base64 for " + finalItemType + ": " + item.getTitle());
+                            holder.imgNews.post(() -> setDefaultImage(holder.imgNews, finalItemType));
+                            return;
+                        }
+
+                        byte[] decodedString = Base64.decode(imageData, Base64.DEFAULT);
+
+                        if (decodedString == null || decodedString.length == 0) {
+                            Log.w("NewsAdapter", "❌ Decoded bytes empty for " + finalItemType + ": " + item.getTitle());
+                            holder.imgNews.post(() -> setDefaultImage(holder.imgNews, finalItemType));
+                            return;
+                        }
+
+                        // Cek dimensi gambar tanpa decode penuh
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inJustDecodeBounds = true;
+                        BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length, options);
+
+                        if (options.outWidth <= 0 || options.outHeight <= 0) {
+                            Log.w("NewsAdapter", "❌ Invalid image dimensions for " + finalItemType + ": " + item.getTitle());
+                            holder.imgNews.post(() -> setDefaultImage(holder.imgNews, finalItemType));
+                            return;
+                        }
+
+                        // Decode dengan sample size untuk menghemat memory
+                        options.inJustDecodeBounds = false;
+                        options.inSampleSize = calculateOptimalSampleSize(options, 400, 300);
+
+                        Bitmap decodedBitmap = BitmapFactory.decodeByteArray(
+                                decodedString, 0, decodedString.length, options);
+
+                        if (decodedBitmap != null) {
+                            holder.imgNews.post(() -> {
+                                holder.imgNews.setImageBitmap(decodedBitmap);
+                                holder.imgNews.setVisibility(View.VISIBLE);
+                                Log.d("NewsAdapter", "✅ Image loaded for " + finalItemType + ": " + item.getTitle() +
+                                        " | Size: " + decodedBitmap.getWidth() + "x" + decodedBitmap.getHeight());
+                            });
+                        } else {
+                            holder.imgNews.post(() -> setDefaultImage(holder.imgNews, finalItemType));
+                            Log.w("NewsAdapter", "❌ Bitmap is null after decode for " + finalItemType + ": " + item.getTitle());
+                        }
+
+                    } catch (IllegalArgumentException e) {
+                        Log.e("NewsAdapter", "❌ Base64 decode error for " + finalItemType + ": " +
+                                item.getTitle() + " | Error: " + e.getMessage());
+                        holder.imgNews.post(() -> setDefaultImage(holder.imgNews, finalItemType));
+                    } catch (OutOfMemoryError e) {
+                        Log.e("NewsAdapter", "❌ Out of memory loading image for " + finalItemType + ": " + item.getTitle());
+                        holder.imgNews.post(() -> setDefaultImage(holder.imgNews, finalItemType));
+                    } catch (Exception e) {
+                        Log.e("NewsAdapter", "❌ Error loading image for " + finalItemType + ": " +
+                                item.getTitle() + " | Error: " + e.getMessage());
+                        holder.imgNews.post(() -> setDefaultImage(holder.imgNews, finalItemType));
+                    }
+                }).start();
+            } else {
+                // Gambar tidak valid
+                setDefaultImage(holder.imgNews, itemType);
+                Log.d("NewsAdapter", "📭 No valid image for " + itemType + ": " + item.getTitle() +
+                        " | Length: " + imageData.length() + " chars");
+            }
+        } else {
+            // Tidak ada gambar URL
+            setDefaultImage(holder.imgNews, item.getItemType());
+            Log.d("NewsAdapter", "📭 No image URL for " + item.getItemType() + ": " + item.getTitle());
+        }
+
+        // Tampilkan kadaluwarsa hanya untuk promo
+        if ("promo".equals(itemType) && item.getKadaluwarsa() != null && !item.getKadaluwarsa().isEmpty()) {
+            holder.tvKadaluwarsa.setVisibility(View.VISIBLE);
+            holder.tvKadaluwarsa.setText("Kadaluwarsa: " + item.getFormattedKadaluwarsa());
         } else {
             holder.tvKadaluwarsa.setVisibility(View.GONE);
         }
-
-        // Set background color berdasarkan status
-        setCardBackgroundBasedOnStatus(holder.cardView, item.getStatus());
-
-        // Load image
-        loadNewsImageWithEnhancedValidation(item.getImageUrl(), holder.imgNews, item.getTitle(), position);
     }
 
+    // ✅ TAMBAHKAN METHOD INI DI NewsAdapter
+    private boolean isValidBase64(String base64) {
+        if (base64 == null || base64.isEmpty()) return false;
 
-    // PERBAIKAN: Method load image yang lebih robust
-    private void loadNewsImageWithEnhancedValidation(String imageData, ImageView imageView, String title, int position) {
-        Log.d("NewsAdapter", "🖼️ Position " + position + " - Loading image for: " + title);
+        try {
+            // Cek format base64 dasar
+            String cleanBase64 = base64.trim();
 
-        // Reset image dulu
-        setDefaultImage(imageView);
+            // Jika string terlalu pendek
+            if (cleanBase64.length() < 50) return false;
 
-        if (isValidImageForNewsDisplay(imageData)) {
-            String cleanBase64 = imageData.trim();
-            Log.d("NewsAdapter", "📷 Loading valid image, length: " + cleanBase64.length() + " for: " + title);
+            // Jika mengandung karakter yang tidak valid
+            if (cleanBase64.contains("undefined") ||
+                    cleanBase64.contains("null") ||
+                    cleanBase64.contains("NULL")) {
+                return false;
+            }
 
-            // Load image di background thread dengan error handling
-            new Thread(() -> {
-                try {
-                    byte[] decodedBytes;
-                    try {
-                        decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
-                        Log.d("NewsAdapter", "✅ Base64 decoded successfully: " + decodedBytes.length + " bytes for: " + title);
-                    } catch (IllegalArgumentException e) {
-                        Log.e("NewsAdapter", "❌ Base64 decoding error for " + title + ": " + e.getMessage());
-                        new Handler(Looper.getMainLooper()).post(() -> setDefaultImage(imageView));
-                        return;
-                    }
+            // Coba decode untuk validasi
+            byte[] decoded = Base64.decode(cleanBase64, Base64.DEFAULT);
+            return decoded != null && decoded.length > 0;
 
-                    if (decodedBytes == null || decodedBytes.length == 0) {
-                        Log.e("NewsAdapter", "❌ Decoded bytes are empty for: " + title);
-                        new Handler(Looper.getMainLooper()).post(() -> setDefaultImage(imageView));
-                        return;
-                    }
-
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inJustDecodeBounds = true;
-                    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length, options);
-
-                    Log.d("NewsAdapter", "📐 Image dimensions for " + title + ": " + options.outWidth + "x" + options.outHeight);
-
-                    options.inJustDecodeBounds = false;
-                    options.inSampleSize = calculateOptimalSampleSize(options, 400, 400);
-                    options.inPreferredConfig = Bitmap.Config.RGB_565;
-                    options.inPurgeable = true;
-                    options.inInputShareable = true;
-
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length, options);
-
-                    if (bitmap != null) {
-                        Log.d("NewsAdapter", "✅ Successfully decoded bitmap: " + bitmap.getWidth() + "x" + bitmap.getHeight() + " for: " + title);
-
-                        final Bitmap finalBitmap = bitmap;
-                        new Handler(Looper.getMainLooper()).post(() -> {
-                            try {
-                                imageView.setImageBitmap(finalBitmap);
-                                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                                Log.d("NewsAdapter", "🎉 Image loaded successfully for: " + title);
-                            } catch (Exception e) {
-                                Log.e("NewsAdapter", "❌ Error setting bitmap: " + e.getMessage());
-                                setDefaultImage(imageView);
-                            }
-                        });
-                    } else {
-                        Log.e("NewsAdapter", "❌ Failed to decode bitmap for: " + title);
-                        new Handler(Looper.getMainLooper()).post(() -> setDefaultImage(imageView));
-                    }
-
-                } catch (OutOfMemoryError e) {
-                    Log.e("NewsAdapter", "💥 Out of memory for " + title + ": " + e.getMessage());
-                    new Handler(Looper.getMainLooper()).post(() -> setDefaultImage(imageView));
-                } catch (Exception e) {
-                    Log.e("NewsAdapter", "❌ Error loading image for " + title + ": " + e.getMessage());
-                    new Handler(Looper.getMainLooper()).post(() -> setDefaultImage(imageView));
-                }
-            }).start();
-        } else {
-            Log.w("NewsAdapter", "📷 No valid image data for: " + title);
-            setDefaultImage(imageView);
-        }
-    }
-
-    private boolean isValidImageForNewsDisplay(String imageData) {
-        if (imageData == null || imageData.isEmpty()) {
-            Log.d("NewsAdapter", "❌ Image data is null or empty");
+        } catch (IllegalArgumentException e) {
+            return false;
+        } catch (Exception e) {
             return false;
         }
-
-        String cleanData = imageData.trim();
-
-        boolean isValid = cleanData.length() >= 100 &&
-                !cleanData.equals("null") &&
-                !cleanData.equals("NULL") &&
-                !cleanData.endsWith("..") &&
-                !cleanData.endsWith("...");
-
-        Log.d("NewsAdapter", "🖼️ Image validation - Length: " + cleanData.length() +
-                ", Is 'null': " + cleanData.equals("null") +
-                ", Valid: " + isValid);
-
-        return isValid;
     }
 
+    // ✅ TAMBAHKAN METHOD setDefaultImage yang sederhana
+    private void setDefaultImage(ImageView imageView, String itemType) {
+        try {
+            // Gunakan placeholder yang sama untuk semua
+            imageView.setImageResource(R.drawable.ic_placeholder);
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            imageView.setVisibility(View.VISIBLE);
+
+            // Tambahkan warna latar berbeda berdasarkan tipe (opsional)
+            if (itemType != null) {
+                switch (itemType) {
+                    case "hunian":
+                        imageView.setBackgroundColor(0xFFF3E5F5); // Light purple
+                        break;
+                    case "proyek":
+                        imageView.setBackgroundColor(0xFFE0F2F1); // Light teal
+                        break;
+                    case "promo":
+                        imageView.setBackgroundColor(0xFFE8F5E8); // Light green
+                        break;
+                }
+            }
+
+        } catch (Exception e) {
+            // Fallback sederhana
+            imageView.setImageResource(R.drawable.ic_placeholder);
+            imageView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    // ✅ Method calculateOptimalSampleSize (harus sudah ada)
     private int calculateOptimalSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
         final int height = options.outHeight;
         final int width = options.outWidth;
@@ -189,43 +279,28 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
             }
         }
 
-        Log.d("NewsAdapter", "📏 Calculated sample size: " + inSampleSize + " for " + width + "x" + height);
         return inSampleSize;
     }
 
-    private void setDefaultImage(ImageView imageView) {
-        new Handler(Looper.getMainLooper()).post(() -> {
-            try {
-                imageView.setImageResource(R.drawable.ic_placeholder);
-                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                imageView.setVisibility(View.VISIBLE);
-                Log.d("NewsAdapter", "🔄 Set default placeholder image");
-            } catch (Exception e) {
-                Log.e("NewsAdapter", "❌ Error setting default image: " + e.getMessage());
-            }
-        });
-    }
 
-    // DI NewsAdapter.java - Perbaiki method setCardBackgroundBasedOnStatus
-    private void setCardBackgroundBasedOnStatus(CardView cardView, String status) {
+    // PERBAIKAN: Method setCardBackgroundBasedOnStatus dengan type
+    private void setCardBackgroundBasedOnStatus(CardView cardView, String status, String itemType) {
         try {
             int backgroundColor;
 
-            switch (status) {
-                case "Ditambahkan":
-                    backgroundColor = 0xFFE8F5E8; // Light green for added
+            // Warna dasar berdasarkan type
+            switch (itemType) {
+                case "promo":
+                    backgroundColor = getPromoBackgroundColor(status);
                     break;
-                case "Diubah":
-                    backgroundColor = 0xFFE3F2FD; // Light blue for updated
+                case "hunian":
+                    backgroundColor = getHunianBackgroundColor(status);
                     break;
-                case "Dihapus":
-                    backgroundColor = 0xFFFFEBEE; // Light red for deleted
-                    break;
-                case "Kadaluwarsa":
-                    backgroundColor = 0xFFFFF3CD; // Light yellow for expired
+                case "proyek":
+                    backgroundColor = getProyekBackgroundColor(status);
                     break;
                 default:
-                    backgroundColor = 0xFFF5F5F5; // Light gray for unknown
+                    backgroundColor = 0xFFF5F5F5; // Light gray
             }
 
             cardView.setCardBackgroundColor(backgroundColor);
@@ -234,6 +309,48 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
             cardView.setCardBackgroundColor(0xFFFFFFFF);
         }
     }
+
+    private int getPromoBackgroundColor(String status) {
+        switch (status) {
+            case "Ditambahkan":
+                return 0xFFE8F5E8; // Light green
+            case "Diubah":
+                return 0xFFE3F2FD; // Light blue
+            case "Dihapus":
+                return 0xFFFFEBEE; // Light red
+            case "Kadaluwarsa":
+                return 0xFFFFF3CD; // Light yellow
+            default:
+                return 0xFFF5F5F5;
+        }
+    }
+
+    private int getHunianBackgroundColor(String status) {
+        switch (status) {
+            case "Ditambahkan":
+                return 0xFFF3E5F5; // Light purple
+            case "Diubah":
+                return 0xFFE8EAF6; // Light indigo
+            case "Dihapus":
+                return 0xFFFFEBEE; // Light red
+            default:
+                return 0xFFF5F5F5;
+        }
+    }
+
+    private int getProyekBackgroundColor(String status) {
+        switch (status) {
+            case "Ditambahkan":
+                return 0xFFE0F2F1; // Light teal
+            case "Diubah":
+                return 0xFFE0F7FA; // Light cyan
+            case "Dihapus":
+                return 0xFFFFEBEE; // Light red
+            default:
+                return 0xFFF5F5F5;
+        }
+    }
+
 
     @Override
     public int getItemCount() {
@@ -252,20 +369,19 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
         }
     }
 
-    public static class NewsViewHolder extends RecyclerView.ViewHolder {
+    public class NewsViewHolder extends RecyclerView.ViewHolder {
+        TextView tvTitle, tvStatus, tvPenginput, tvTime, tvKadaluwarsa, tvItemType;
         ImageView imgNews;
-        TextView tvNewsTitle, tvPenginput, tvStatus, tvTimestamp, tvKadaluwarsa;
-        CardView cardView;
 
         public NewsViewHolder(@NonNull View itemView) {
             super(itemView);
-            imgNews = itemView.findViewById(R.id.imgNews);
-            tvNewsTitle = itemView.findViewById(R.id.tvNewsTitle);
-            tvPenginput = itemView.findViewById(R.id.tvPenginput);
+            tvTitle = itemView.findViewById(R.id.tvNewsTitle);
             tvStatus = itemView.findViewById(R.id.tvStatus);
-            tvTimestamp = itemView.findViewById(R.id.tvTimestamp);
+            tvPenginput = itemView.findViewById(R.id.tvPenginput);
+            tvTime = itemView.findViewById(R.id.tvTimestamp);
             tvKadaluwarsa = itemView.findViewById(R.id.tvKadaluwarsa);
-            cardView = itemView.findViewById(R.id.cardView);
+            tvItemType = itemView.findViewById(R.id.tvItemType); // Tambahkan ini
+            imgNews = itemView.findViewById(R.id.imgNews);
         }
     }
 }

@@ -25,7 +25,7 @@ import java.util.Locale;
 public class LihatDataActivity extends AppCompatActivity {
 
     MaterialToolbar TopAppBar;
-    MaterialCardView cardProspek, cardBooking, cardProyek, cardHunian, cardKavling;
+    MaterialCardView cardProspek, cardBooking, cardKavling, cardRealisasi;
     BottomNavigationView bottomNavigationView;
     private SharedPreferences sharedPreferences;
 
@@ -55,9 +55,9 @@ public class LihatDataActivity extends AppCompatActivity {
 
         cardProspek = findViewById(R.id.cardProspek);
         cardBooking = findViewById(R.id.cardBooking);
-        cardProyek = findViewById(R.id.cardProyek);
-        cardHunian = findViewById(R.id.cardHunian);
+
         cardKavling = findViewById(R.id.cardKavling);
+        cardRealisasi = findViewById(R.id.cardRealisasi);
 
         TopAppBar.setNavigationOnClickListener(v -> {
             Intent intent = new Intent(LihatDataActivity.this, NewBeranda.class);
@@ -75,25 +75,11 @@ public class LihatDataActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        cardProyek.setOnClickListener(v -> {
-            // Cek level user untuk akses lihat data proyek
-            if (!"Admin".equals(userLevel)) {
-                Toast.makeText(this, "Hanya Admin yang dapat mengakses Data Proyek", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            Intent intent = new Intent(LihatDataActivity.this, LihatDataProyekActivity.class);
+        cardRealisasi.setOnClickListener(v -> {
+            Intent intent = new Intent(LihatDataActivity.this, LihatDataRealisasiActivity.class);
             startActivity(intent);
         });
 
-        cardHunian.setOnClickListener(v -> {
-            // Cek level user untuk akses lihat data hunian
-            if (!"Admin".equals(userLevel)) {
-                Toast.makeText(this, "Hanya Admin yang dapat mengakses Data Hunian", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            Intent intent = new Intent(LihatDataActivity.this, LihatDataHunianActivity.class);
-            startActivity(intent);
-        });
 
         cardKavling.setOnClickListener(v -> {
             // Cek level user untuk akses lihat data kavling
@@ -104,6 +90,8 @@ public class LihatDataActivity extends AppCompatActivity {
             Intent intent = new Intent(LihatDataActivity.this, LihatDataKavlingActivity.class);
             startActivity(intent);
         });
+
+
 
         // Setup visibility berdasarkan level user
         setupAccessBasedOnLevel();
@@ -147,18 +135,6 @@ public class LihatDataActivity extends AppCompatActivity {
         if (!"Admin".equals(userLevel)) {
             Log.d("LihatDataActivity", "Hiding admin features for level: " + userLevel);
 
-            // Sembunyikan card proyek
-            if (cardProyek != null) {
-                cardProyek.setVisibility(View.GONE);
-                Log.d("LihatDataActivity", "Hidden cardProyek");
-            }
-
-            // Sembunyikan card hunian
-            if (cardHunian != null) {
-                cardHunian.setVisibility(View.GONE);
-                Log.d("LihatDataActivity", "Hidden cardHunian");
-            }
-
             // Sembunyikan card kavling
             if (cardKavling != null) {
                 cardKavling.setVisibility(View.GONE);
@@ -169,17 +145,6 @@ public class LihatDataActivity extends AppCompatActivity {
             // Untuk Admin, tampilkan semua menu
             Log.d("LihatDataActivity", "Showing all features for Admin level: " + userLevel);
 
-            // Tampilkan card proyek
-            if (cardProyek != null) {
-                cardProyek.setVisibility(View.VISIBLE);
-                Log.d("LihatDataActivity", "Shown cardProyek");
-            }
-
-            // Tampilkan card hunian
-            if (cardHunian != null) {
-                cardHunian.setVisibility(View.VISIBLE);
-                Log.d("LihatDataActivity", "Shown cardHunian");
-            }
 
             // Tampilkan card kavling
             if (cardKavling != null) {

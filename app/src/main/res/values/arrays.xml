@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources><string-array name="status_penjualan_array">
-    <item>On progress</item>
-    <item>Sold out</item>
-</string-array></resources>
+<resources>
+
+    <string-array name="status_penjualan_array">
+        <item>On progress</item>
+        <item>Sold out</item>
+    </string-array>
+
+    <string-array name="filter_options">
+        <item>Semua</item>
+        <item>Promo</item>
+        <item>Hunian</item>
+        <item>Proyek</item>
+    </string-array>
+
+</resources>
+

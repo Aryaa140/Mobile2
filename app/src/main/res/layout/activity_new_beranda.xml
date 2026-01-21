@@ -542,7 +542,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="10dp"
                                     android:text="Input Proyek"
-                                    android:textSize="13sp"
+                                    android:textSize="11sp"
                                     android:textStyle="bold"
                                     android:textColor="@color/black"
                                     android:letterSpacing="0.05"/>
@@ -590,7 +590,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="10dp"
                                     android:text="Input Hunian"
-                                    android:textSize="12sp"
+                                    android:textSize="11sp"
                                     android:textStyle="bold"
                                     android:textColor="@color/black"
                                     android:letterSpacing="0.05"/>
@@ -639,7 +639,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="10dp"
                                     android:text="Input Kavling"
-                                    android:textSize="12sp"
+                                    android:textSize="11sp"
                                     android:textStyle="bold"
                                     android:textColor="@color/black"
                                     android:letterSpacing="0.05"/>

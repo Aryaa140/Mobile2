@@ -1,5 +1,6 @@
 package com.example.mobile;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -17,10 +18,14 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
@@ -37,6 +42,7 @@ import retrofit2.Response;
 public class LihatDataRealisasiActivity extends AppCompatActivity {
 
     private MaterialToolbar topAppBar;
+    private BottomNavigationView BottomNavigationView;
     private RecyclerView recyclerView;
     private EditText searchEditText;
     private RealisasiAdapter adapter;
@@ -49,6 +55,7 @@ public class LihatDataRealisasiActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "LoginPrefs";
     private static final String KEY_LEVEL = "level";
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +68,7 @@ public class LihatDataRealisasiActivity extends AppCompatActivity {
         userLevel = prefs.getString(KEY_LEVEL, "");
 
         topAppBar = findViewById(R.id.topAppBar);
+        BottomNavigationView = findViewById(R.id.bottom_navigation);
         recyclerView = findViewById(R.id.recyclerRealisasi);
         searchEditText = findViewById(R.id.searchEditText);
 
@@ -91,6 +99,37 @@ public class LihatDataRealisasiActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {}
+        });
+
+        BottomNavigationView.setSelectedItemId(R.id.nav_folder);
+
+        BottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.nav_home) {
+                startActivity(new Intent(this, NewBeranda.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_folder) {
+                startActivity(new Intent(this, LihatDataActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_news) {
+                startActivity(new Intent(this, NewsActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            }
+            return false;
+        });
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
         });
     }
 

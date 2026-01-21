@@ -18,6 +18,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -72,6 +75,12 @@ public class UnitProyekActivity extends AppCompatActivity {
 
         // Load data hunian
         loadHunianData();
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
     }
 
     private void initViews() {
@@ -366,9 +375,19 @@ public class UnitProyekActivity extends AppCompatActivity {
     }
 
     private void deleteHunian(Hunian hunian) {
+
+        SharedPreferences sharedPreferences = getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
+        String username = sharedPreferences.getString("username", "");
+        String deletedBy = sharedPreferences.getString("nama_lengkap", username);
+
         Log.d(TAG, "Memulai proses penghapusan hunian: " + hunian.getNamaHunian() + " (ID: " + hunian.getIdHunian() + ")");
 
-        Call<BasicResponse> call = apiService.deleteHunian("deleteHunian", hunian.getIdHunian());
+        Call<BasicResponse> call = apiService.deleteHunian(
+                "deleteHunian",
+                hunian.getIdHunian(),
+                username,
+                deletedBy  // Tambahkan parameter ini
+        );
         call.enqueue(new Callback<BasicResponse>() {
             @Override
             public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {

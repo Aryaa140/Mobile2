@@ -145,8 +145,7 @@ public class TambahUserpActivity extends AppCompatActivity {
     private void useDummyProyekData() {
         Log.d(TAG, "Using dummy data");
         proyekList.clear();
-        proyekList.add(new Proyek(1, "The Quality Riverside"));
-        proyekList.add(new Proyek(2, "The Quality Harmony"));
+
 
         runOnUiThread(() -> {
             setupProyekSpinner();
