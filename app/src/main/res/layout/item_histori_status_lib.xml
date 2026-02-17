@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardHistori"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="4dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header dengan ID dan Tanggal -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/tvIdHistori"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="ID: -"
+                android:textStyle="bold"
+                android:textColor="@color/primary_color"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvTanggal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tanggal: -"
+                android:textColor="@color/gray_dark"
+                android:textSize="12sp"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+        </LinearLayout>
+
+        <!-- Garis pemisah -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/gray_light"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Perubahan Status -->
+        <TextView
+            android:id="@+id/tvPerubahan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Perubahan: -"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp"
+            android:maxLines="2"
+            android:ellipsize="end"/>
+
+        <!-- Nama Prospek -->
+        <TextView
+            android:id="@+id/tvNamaProspek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Prospek: -"
+            android:textColor="@color/gray_dark"
+            android:textSize="14sp"
+            android:layout_marginBottom="4dp"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
+        <!-- Nama Penginput -->
+        <TextView
+            android:id="@+id/tvPenginput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Penginput: -"
+            android:textColor="@color/gray_dark"
+            android:textSize="14sp"
+            android:layout_marginBottom="12dp"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
+        <!-- Tombol Hapus - GUNAKAN BUTTON BIASA -->
+        <Button
+            android:id="@+id/btnDeleteHistori"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="Hapus"
+            android:textColor="@android:color/white"
+            android:background="@color/red_error"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

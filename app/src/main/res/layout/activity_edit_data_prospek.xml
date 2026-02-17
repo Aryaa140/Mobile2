@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_scroll_gradient"
-    tools:context=".MainActivity"
+    tools:context=".EditDataProspekActivity"
     tools:ignore="ExtraText">
 
     <com.google.android.material.appbar.MaterialToolbar
@@ -23,17 +23,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/container"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@drawable/bg_scroll_gradient"
-        app:layout_constraintTop_toBottomOf="@id/topAppBar"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardForm"
@@ -81,19 +70,20 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
-                        android:hint="'"
+                        android:hint="Nama Penginput"
                         android:textColor="@android:color/black"
                         android:background="@android:drawable/edit_text"
                         android:drawableStart="@drawable/ic_pin_person"
                         android:drawablePadding="8dp"
-                        android:padding="12dp"/>
+                        android:padding="12dp"
+                        android:enabled="false"/>
 
                     <EditText
                         android:id="@+id/editTextNama"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
-                        android:hint="'"
+                        android:hint="Nama Prospek"
                         android:textColor="@android:color/black"
                         android:background="@android:drawable/edit_text"
                         android:drawableStart="@drawable/ic_username"
@@ -106,7 +96,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
-                        android:hint="'"
+                        android:hint="Alamat"
                         android:textColor="@android:color/black"
                         android:background="@android:drawable/edit_text"
                         android:drawableStart="@drawable/ic_home"
@@ -142,7 +132,24 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@android:drawable/edit_text"
-                        android:entries="@array/opsi_spinnerBPJS"/>
+                        android:entries="@array/opsi_spinnerBPJS"
+                        android:layout_marginBottom="12dp"/>
+
+                    <!-- Tambahkan Spinner untuk Status Lib di sini -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Status Lib"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginBottom="4dp"/>
+
+                    <Spinner
+                        android:id="@+id/spinnerStatusLib"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:drawable/edit_text"
+                        android:layout_marginBottom="8dp"/>
                 </LinearLayout>
 
                 <!-- 🔹 Section 2: Kontak -->
@@ -175,7 +182,7 @@
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:src="@drawable/ic_phonec"
-                            android:contentDescription="@string/app_name"
+                            android:contentDescription="Icon Phone"
                             android:layout_marginEnd="6dp"/>
 
                         <TextView
@@ -193,7 +200,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:background="@android:color/transparent"
-                            android:hint="'"
+                            android:hint="No HP"
                             android:inputType="phone"
                             android:minHeight="48dp"
                             android:textColor="@android:color/black"/>
@@ -204,7 +211,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
-                        android:hint=""
+                        android:hint="Email"
                         android:textColor="@android:color/black"
                         android:background="@android:drawable/edit_text"
                         android:drawableStart="@drawable/ic_request"
@@ -222,7 +229,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Refrensi"
+                        android:text="Referensi"
                         android:textStyle="bold"
                         android:textSize="16sp"
                         android:textColor="@android:color/black"
@@ -257,13 +264,13 @@
                         android:id="@+id/btnEdit"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Edit"
-                        android:textColor="@android:color/black"
-                        android:backgroundTint="@android:color/white"
-                        android:paddingLeft="24dp"
-                        android:paddingRight="24dp"
-                        android:paddingTop="10dp"
-                        android:paddingBottom="10dp"
+                        android:text="Simpan"
+                        android:textColor="@android:color/white"
+                        android:backgroundTint="@color/primary_color"
+                        android:paddingLeft="32dp"
+                        android:paddingRight="32dp"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
                         android:layout_marginEnd="12dp"/>
 
                     <Button
@@ -272,15 +279,14 @@
                         android:layout_height="wrap_content"
                         android:text="Batal"
                         android:textColor="@android:color/black"
-                        android:backgroundTint="@android:color/white"
-                        android:paddingLeft="24dp"
-                        android:paddingRight="24dp"
-                        android:paddingTop="10dp"
-                        android:paddingBottom="10dp"/>
+                        android:backgroundTint="@color/gray_light"
+                        android:paddingLeft="32dp"
+                        android:paddingRight="32dp"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"/>
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>
-
     </androidx.cardview.widget.CardView>
 
     <View
@@ -307,4 +313,3 @@
         app:itemActiveIndicatorStyle="@style/BottomNav" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

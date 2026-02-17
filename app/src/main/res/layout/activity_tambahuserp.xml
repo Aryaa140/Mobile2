@@ -181,7 +181,7 @@
                     android:background="@android:drawable/edit_text"
                     android:drawablePadding="8dp" />
 
-                <!-- Spinner Tipe Unit Hunian (BARU) -->
+                <!-- Spinner Tipe Unit Hunian -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -202,8 +202,18 @@
                     android:background="@android:drawable/edit_text"
                     android:drawablePadding="8dp" />
 
-                <EditText
-                    android:id="@+id/editTextUangPengadaan"
+                <!-- GANTI: EditText DP menjadi Spinner Status SPS -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="16dp"
+                    android:text="Status SPS"
+                    android:textColor="@android:color/black"
+                    android:textSize="15sp" />
+
+                <Spinner
+                    android:id="@+id/spinnerStatusSPS"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="15dp"
@@ -211,10 +221,7 @@
                     android:layout_marginRight="15dp"
                     android:textColor="@android:color/black"
                     android:background="@android:drawable/edit_text"
-                    android:drawableStart="@drawable/ic_money"
-                    android:drawablePadding="8dp"
-                    android:hint="Masukkan Jumlah Uang Tanda Jadi"
-                    android:padding="12dp"/>
+                    android:drawablePadding="8dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"

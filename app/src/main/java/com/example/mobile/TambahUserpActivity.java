@@ -29,8 +29,8 @@ public class TambahUserpActivity extends AppCompatActivity {
 
     private static final String TAG = "TambahUserpActivity";
 
-    private Spinner spinnerProspek, spinnerProyek, spinnerHunian, spinnerTipeUnit;
-    private EditText editTextPenginput, editTextNama, editTextEmail, editTextNoHp, editTextAlamat, editTextUangTandaJadi;
+    private Spinner spinnerProspek, spinnerProyek, spinnerHunian, spinnerTipeUnit, spinnerStatusSPS;
+    private EditText editTextPenginput, editTextNama, editTextEmail, editTextNoHp, editTextAlamat;
     private Button btnSimpan, btnBatal;
     private MaterialToolbar TopAppBar;
     private BottomNavigationView bottomNavigationView;
@@ -43,7 +43,7 @@ public class TambahUserpActivity extends AppCompatActivity {
 
     private int selectedProspekId = -1;
     private String selectedProspekNPWP = "", selectedProspekBPJS = "";
-    private String selectedProyek = "", selectedHunian = "", selectedTipeUnit = "";
+    private String selectedProyek = "", selectedHunian = "", selectedTipeUnit = "", selectedStatusSPS = "";
 
     private ApiService apiService;
     private SharedPreferences sharedPreferences;
@@ -80,18 +80,35 @@ public class TambahUserpActivity extends AppCompatActivity {
         spinnerProyek = findViewById(R.id.spinnerRoleRefrensiProyek);
         spinnerHunian = findViewById(R.id.hunian);
         spinnerTipeUnit = findViewById(R.id.spinnerTipeUnit);
+        spinnerStatusSPS = findViewById(R.id.spinnerStatusSPS); // TAMBAH: Spinner Status SPS
         editTextPenginput = findViewById(R.id.editTextPenginput);
         editTextNama = findViewById(R.id.editTextNama);
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextNoHp = findViewById(R.id.editTextNoHp);
         editTextAlamat = findViewById(R.id.editTextAlamat);
-        editTextUangTandaJadi = findViewById(R.id.editTextUangPengadaan);
         btnSimpan = findViewById(R.id.btnSimpan);
         btnBatal = findViewById(R.id.btnBatal);
 
         editTextPenginput.setEnabled(false);
         setHunianSpinnerEnabled(false);
         setTipeUnitSpinnerEnabled(false);
+
+        // Setup Spinner Status SPS
+        setupStatusSPSSpinner();
+    }
+
+    // === METHOD SETUP STATUS SPS SPINNER ===
+    private void setupStatusSPSSpinner() {
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                this,
+                R.array.status_sps_options,
+                android.R.layout.simple_spinner_item
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerStatusSPS.setAdapter(adapter);
+
+        // Set default value
+        spinnerStatusSPS.setSelection(0); // Default: "Pilih Status SPS"
     }
 
     // === METHOD PROYEK ===
@@ -116,8 +133,6 @@ public class TambahUserpActivity extends AppCompatActivity {
 
                             runOnUiThread(() -> {
                                 setupProyekSpinner();
-                                Toast.makeText(TambahUserpActivity.this,
-                                        "Proyek loaded: " + proyekList.size(), Toast.LENGTH_SHORT).show();
                             });
 
                         } else {
@@ -146,10 +161,8 @@ public class TambahUserpActivity extends AppCompatActivity {
         Log.d(TAG, "Using dummy data");
         proyekList.clear();
 
-
         runOnUiThread(() -> {
             setupProyekSpinner();
-            Toast.makeText(this, "Menggunakan data dummy", Toast.LENGTH_LONG).show();
         });
     }
 
@@ -704,6 +717,24 @@ public class TambahUserpActivity extends AppCompatActivity {
                 clearProspekData();
             }
         });
+
+        // TAMBAH: Listener untuk Status SPS
+        spinnerStatusSPS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position > 0) {
+                    selectedStatusSPS = parent.getItemAtPosition(position).toString();
+                    Log.d(TAG, "Status SPS selected: " + selectedStatusSPS);
+                } else {
+                    selectedStatusSPS = "";
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                selectedStatusSPS = "";
+            }
+        });
     }
 
     // === METHOD NAVIGASI ===
@@ -781,6 +812,12 @@ public class TambahUserpActivity extends AppCompatActivity {
             return;
         }
 
+        // TAMBAH: Validasi Status SPS
+        if (selectedStatusSPS.isEmpty() || selectedStatusSPS.equals("Pilih Status SPS")) {
+            Toast.makeText(this, "Pilih status SPS terlebih dahulu", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         // PERBAIKAN: Validasi tambahan untuk hunian dan tipe unit yang sold out
         if (selectedHunian.contains("(SOLD OUT)")) {
             Toast.makeText(this, "Hunian ini sudah terjual semua", Toast.LENGTH_SHORT).show();
@@ -795,7 +832,6 @@ public class TambahUserpActivity extends AppCompatActivity {
         String nama = editTextNama.getText().toString().trim();
         String noHp = editTextNoHp.getText().toString().trim();
         String alamat = editTextAlamat.getText().toString().trim();
-        String uangTandaJadiStr = editTextUangTandaJadi.getText().toString().trim();
 
         if (nama.isEmpty()) {
             Toast.makeText(this, "Nama harus diisi", Toast.LENGTH_SHORT).show();
@@ -809,40 +845,31 @@ public class TambahUserpActivity extends AppCompatActivity {
             Toast.makeText(this, "Alamat harus diisi", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (uangTandaJadiStr.isEmpty()) {
-            Toast.makeText(this, "Uang tanda jadi harus diisi", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
-        try {
-            int uangTandaJadi = Integer.parseInt(uangTandaJadiStr);
-            String email = editTextEmail.getText().toString().trim();
+        String email = editTextEmail.getText().toString().trim();
 
-            // PERBAIKAN: Bersihkan nama hunian dan tipe unit dari label "SOLD OUT"
-            String cleanHunian = selectedHunian.replace(" (SOLD OUT)", "").trim();
-            String cleanTipeUnit = selectedTipeUnit.replace(" (SOLD OUT)", "").trim();
+        // PERBAIKAN: Bersihkan nama hunian dan tipe unit dari label "SOLD OUT"
+        String cleanHunian = selectedHunian.replace(" (SOLD OUT)", "").trim();
+        String cleanTipeUnit = selectedTipeUnit.replace(" (SOLD OUT)", "").trim();
 
-            UserProspekData userData = new UserProspekData(
-                    selectedProspekId,
-                    nama,
-                    editTextPenginput.getText().toString(),
-                    email,
-                    noHp,
-                    alamat,
-                    selectedProyek,
-                    cleanHunian,
-                    cleanTipeUnit,
-                    uangTandaJadi,
-                    selectedProspekBPJS,
-                    selectedProspekNPWP
-            );
+        // TAMBAH: Update constructor tanpa DP, tambah Status SPS
+        UserProspekData userData = new UserProspekData(
+                selectedProspekId,
+                nama,
+                editTextPenginput.getText().toString(),
+                email,
+                noHp,
+                alamat,
+                selectedProyek,
+                cleanHunian,
+                cleanTipeUnit,
+                selectedProspekBPJS,
+                selectedProspekNPWP,
+                selectedStatusSPS  // TAMBAH: Status SPS
+        );
 
-            UserProspekRequest request = new UserProspekRequest("addUserProspek", userData);
-            sendDataToServer(request);
-
-        } catch (NumberFormatException e) {
-            Toast.makeText(this, "Format uang tanda jadi tidak valid", Toast.LENGTH_SHORT).show();
-        }
+        UserProspekRequest request = new UserProspekRequest("addUserProspek", userData);
+        sendDataToServer(request);
     }
 
     private void sendDataToServer(UserProspekRequest request) {

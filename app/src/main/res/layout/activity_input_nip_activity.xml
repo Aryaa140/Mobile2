@@ -24,114 +24,152 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/container"
+    <!-- ScrollView agar konten bisa digulir -->
+    <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/bg_scroll_gradient"
+        android:fillViewport="true"
+        android:scrollbars="vertical"
         app:layout_constraintTop_toBottomOf="@id/topAppBar"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardForm"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="150dp"
-        android:layout_marginRight="18dp"
-        android:layout_marginLeft="18dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="6dp"
-        app:layout_constraintTop_toBottomOf="@id/topAppBar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <LinearLayout
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardForm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <!-- Spinner Divisi -->
-            <Spinner
-                android:id="@+id/spinnerDivisi"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:background="@android:drawable/edit_text"
-                android:drawableStart="@drawable/ic_inputt2"
-                android:drawablePadding="8dp"
-                android:padding="12dp"
-                android:textColor="@android:color/black" />
-
-            <EditText
-                android:id="@+id/editTextNoNIP"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:textColor="@android:color/black"
-                android:background="@android:drawable/edit_text"
-                android:drawableStart="@drawable/ic_inputt2"
-                android:inputType="number"
-                android:drawablePadding="8dp"
-                android:hint="Masukkan No. NIP User"
-                android:padding="12dp" />
-
-            <Button
-                android:id="@+id/btnDateOut"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="15dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:textColor="@android:color/black"
-                android:backgroundTint="@android:color/white"
-                android:drawablePadding="8dp"
-                android:hint="Masukkan Tanggal Keluar"
-                android:padding="12dp" />
+            android:layout_margin="18dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginTop="16dp">
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Spinner Divisi -->
+                <Spinner
+                    android:id="@+id/spinnerDivisi"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawableStart="@drawable/ic_inputt2"
+                    android:drawablePadding="8dp"
+                    android:padding="12dp"
+                    android:textColor="@android:color/black" />
+
+                <EditText
+                    android:id="@+id/editTextNoNIP"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:drawableStart="@drawable/ic_inputt2"
+                    android:drawablePadding="8dp"
+                    android:hint="Masukkan No. NIP User"
+                    android:inputType="number"
+                    android:padding="12dp"
+                    android:textColor="@android:color/black" />
 
                 <Button
-                    android:id="@+id/btnSimpan"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/btnDateOut"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="24dp"
-                    android:paddingRight="24dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
-                    android:text="Simpan"
-                    android:textColor="@android:color/black"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="15dp"
                     android:backgroundTint="@android:color/white"
-                    android:layout_marginEnd="12dp"/>
+                    android:drawablePadding="8dp"
+                    android:hint="Masukkan Tanggal Keluar"
+                    android:padding="12dp"
+                    android:textColor="@android:color/black" />
 
-                <Button
-                    android:id="@+id/btnBatal"
-                    android:layout_width="wrap_content"
+                <!-- Container untuk field user (akan tampil jika Admin Operator / Admin Pembuat dipilih) -->
+                <LinearLayout
+                    android:id="@+id/layoutUserFields"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="24dp"
-                    android:paddingRight="24dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
-                    android:text="Batal"
-                    android:textColor="@android:color/black"
-                    android:backgroundTint="@android:color/white"/>
-            </LinearLayout>
+                    android:orientation="vertical"
+                    android:visibility="gone">
 
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
+                    <EditText
+                        android:id="@+id/editTextUsername"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:background="@android:drawable/edit_text"
+                        android:drawablePadding="8dp"
+                        android:hint="Username"
+                        android:inputType="text"
+                        android:padding="12dp"
+                        android:textColor="@android:color/black" />
+
+                    <EditText
+                        android:id="@+id/editTextPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:background="@android:drawable/edit_text"
+                        android:drawableStart="@drawable/ic_password"
+                        android:drawablePadding="8dp"
+                        android:hint="Password (min. 6 karakter)"
+                        android:inputType="textPassword"
+                        android:padding="12dp"
+                        android:textColor="@android:color/black" />
+
+                    <EditText
+                        android:id="@+id/editTextEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="15dp"
+                        android:background="@android:drawable/edit_text"
+                        android:drawablePadding="8dp"
+                        android:hint="Email"
+                        android:inputType="textEmailAddress"
+                        android:padding="12dp"
+                        android:textColor="@android:color/black" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnSimpan"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="12dp"
+                        android:backgroundTint="@android:color/white"
+                        android:paddingLeft="24dp"
+                        android:paddingTop="10dp"
+                        android:paddingRight="24dp"
+                        android:paddingBottom="10dp"
+                        android:text="Simpan"
+                        android:textColor="@android:color/black" />
+
+                    <Button
+                        android:id="@+id/btnBatal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="@android:color/white"
+                        android:paddingLeft="24dp"
+                        android:paddingTop="10dp"
+                        android:paddingRight="24dp"
+                        android:paddingBottom="10dp"
+                        android:text="Batal"
+                        android:textColor="@android:color/black" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </ScrollView>
 
     <View
         android:id="@+id/shadow_view"
@@ -147,13 +185,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        app:menu="@menu/bottom_nav_menu"
-        app:labelVisibilityMode="labeled"
+        app:itemActiveIndicatorStyle="@style/BottomNav"
         app:itemIconTint="@color/bottom_nav_selector"
         app:itemTextColor="@color/bottom_nav_selector"
+        app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:itemActiveIndicatorStyle="@style/BottomNav" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_nav_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

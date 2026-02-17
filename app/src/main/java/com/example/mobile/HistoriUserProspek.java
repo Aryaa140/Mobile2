@@ -33,8 +33,9 @@ public class HistoriUserProspek {
     @SerializedName("Tipe_Hunian")
     private String tipeHunian;
 
-    @SerializedName("DP")
-    private int dp;
+    // Ganti DP dengan Status_SPS
+    @SerializedName("Status_SPS")
+    private String statusSps;
 
     @SerializedName("Status_BPJS")
     private String statusBpjs;
@@ -48,7 +49,7 @@ public class HistoriUserProspek {
     @SerializedName("Tipe_Perubahan")
     private String tipePerubahan;
 
-    // Getters and setters
+    // Getter dan Setter
     public int getIdHistori() { return idHistori; }
     public void setIdHistori(int idHistori) { this.idHistori = idHistori; }
 
@@ -79,8 +80,8 @@ public class HistoriUserProspek {
     public String getTipeHunian() { return tipeHunian; }
     public void setTipeHunian(String tipeHunian) { this.tipeHunian = tipeHunian; }
 
-    public int getDp() { return dp; }
-    public void setDp(int dp) { this.dp = dp; }
+    public String getStatusSps() { return statusSps; }          // Getter baru
+    public void setStatusSps(String statusSps) { this.statusSps = statusSps; }
 
     public String getStatusBpjs() { return statusBpjs; }
     public void setStatusBpjs(String statusBpjs) { this.statusBpjs = statusBpjs; }

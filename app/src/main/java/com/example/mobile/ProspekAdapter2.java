@@ -3,6 +3,7 @@ package com.example.mobile;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
 
@@ -26,11 +28,67 @@ public class ProspekAdapter2 extends RecyclerView.Adapter<ProspekAdapter2.ViewHo
     private final Context context;
     private final ArrayList<Prospek2> prospekList;
     private final String userLevel;
+    private final ArrayList<Prospek2> prospekListFull;
+
+    private static final String TAG = "ProspekAdapter2";
+
+    // Warna untuk setiap status
+    private static final int COLOR_COLD = Color.parseColor("#E1F5FE");
+    private static final int COLOR_FOLLOW_UP = Color.parseColor("#FFF9C4");
+    private static final int COLOR_KUNJUNGAN = Color.parseColor("#E8F5E9");
+    private static final int COLOR_BATAL = Color.parseColor("#FFEBEE");
+    private static final int COLOR_DEFAULT = Color.WHITE;
 
     public ProspekAdapter2(Context context, ArrayList<Prospek2> prospekList, String userLevel) {
         this.context = context;
         this.prospekList = prospekList;
         this.userLevel = userLevel;
+        this.prospekListFull = new ArrayList<>(prospekList);
+    }
+
+    public void filterByStatus(String status) {
+        prospekList.clear();
+        if (status.equals("Semua")) {
+            prospekList.addAll(prospekListFull);
+        } else {
+            for (Prospek2 prospek : prospekListFull) {
+                if (prospek.getStatusLib() != null && prospek.getStatusLib().equalsIgnoreCase(status)) {
+                    prospekList.add(prospek);
+                }
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    public void filterBySearch(String query) {
+        String lowerCaseQuery = query.toLowerCase().trim();
+        prospekList.clear();
+
+        if (lowerCaseQuery.isEmpty()) {
+            prospekList.addAll(prospekListFull);
+        } else {
+            for (Prospek2 prospek : prospekListFull) {
+                boolean matches = (prospek.getNamaProspek() != null && prospek.getNamaProspek().toLowerCase().contains(lowerCaseQuery)) ||
+                        (prospek.getNamaPenginput() != null && prospek.getNamaPenginput().toLowerCase().contains(lowerCaseQuery)) ||
+                        (prospek.getEmail() != null && prospek.getEmail().toLowerCase().contains(lowerCaseQuery)) ||
+                        (prospek.getNoHp() != null && prospek.getNoHp().toLowerCase().contains(lowerCaseQuery)) ||
+                        (prospek.getAlamat() != null && prospek.getAlamat().toLowerCase().contains(lowerCaseQuery)) ||
+                        (prospek.getStatusLib() != null && prospek.getStatusLib().toLowerCase().contains(lowerCaseQuery));
+
+                if (matches) {
+                    prospekList.add(prospek);
+                }
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    public void updateData(ArrayList<Prospek2> newData) {
+        prospekList.clear();
+        prospekList.addAll(newData);
+        prospekListFull.clear();
+        prospekListFull.addAll(newData);
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -43,83 +101,55 @@ public class ProspekAdapter2 extends RecyclerView.Adapter<ProspekAdapter2.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Prospek2 prospek = prospekList.get(position);
+        String status = prospek.getStatusLib();
 
         // Binding data ke card
-        holder.tvNamaProspek.setText("Nama Prospek: " + safeString(prospek.getNamaProspek()));
-        holder.tvNamaPenginput.setText("Penginput: " + safeString(prospek.getNamaPenginput()));
-        holder.tvTanggalInput.setText("Tanggal: " + safeString(prospek.getTanggalInput()));
+        holder.tvPenginput.setText("Penginput: " + safeString(prospek.getNamaPenginput()));
+        holder.tvTanggal.setText("Tanggal: " + safeString(prospek.getTanggalInput()));
+        holder.tvNama.setText("Nama: " + safeString(prospek.getNamaProspek()));
+        holder.tvStatus.setText("Status: " + safeString(status));
         holder.tvEmail.setText("Email: " + safeString(prospek.getEmail()));
-        holder.tvNoHp.setText("No. HP (+62): " + safeString(prospek.getNoHp()));
+        holder.tvNoHp.setText("No. HP: " + safeString(prospek.getNoHp()));
         holder.tvAlamat.setText("Alamat: " + safeString(prospek.getAlamat()));
         holder.tvStatusNPWP.setText("NPWP: " + safeString(prospek.getStatusNpwp()));
         holder.tvStatusBPJS.setText("BPJS: " + safeString(prospek.getStatusBpjs()));
 
-        // PERBAIKAN: Logika tombol edit/delete untuk Admin dan Operator
+        // Atur warna background card berdasarkan status
+        setCardColorSimple(holder, status);
+
         SharedPreferences sharedPreferences = context.getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
         String currentUsername = sharedPreferences.getString("username", "");
-
-        // PERBAIKAN: Gunakan level dari parameter DAN dari SharedPreferences sebagai fallback
         String savedLevel = sharedPreferences.getString("level", "Operator");
-        String savedUserLevel = sharedPreferences.getString("user_level", "Operator");
 
-        // Debug logging yang lebih detail
-        Log.d("ProspekAdapter2", "=== DEBUG ADAPTER ===");
-        Log.d("ProspekAdapter2", "Current User: " + currentUsername);
-        Log.d("ProspekAdapter2", "User Level from param: " + userLevel);
-        Log.d("ProspekAdapter2", "User Level from prefs (level): " + savedLevel);
-        Log.d("ProspekAdapter2", "User Level from prefs (user_level): " + savedUserLevel);
-        Log.d("ProspekAdapter2", "Prospek Owner: " + prospek.getNamaPenginput());
-        Log.d("ProspekAdapter2", "Prospek ID: " + prospek.getIdProspek());
-        Log.d("ProspekAdapter2", "All SharedPrefs: " + sharedPreferences.getAll().toString());
-
-        // Tentukan level yang efektif - BUAT FINAL
-        final String effectiveUserLevel; // PERBAIKAN: Deklarasikan sebagai final
+        final String effectiveUserLevel;
         String tempUserLevel = userLevel;
         if (tempUserLevel == null || tempUserLevel.isEmpty()) {
             tempUserLevel = savedLevel;
-            if (tempUserLevel == null || tempUserLevel.isEmpty()) {
-                tempUserLevel = savedUserLevel;
-            }
         }
-        effectiveUserLevel = tempUserLevel; // PERBAIKAN: Assign ke final variable
+        effectiveUserLevel = tempUserLevel;
 
-        Log.d("ProspekAdapter2", "Effective User Level: " + effectiveUserLevel);
-
-        // FORCE ADMIN MODE UNTUK TESTING - HAPUS BARIS INI JIKA SUDAH BERHASIL
-        // effectiveUserLevel = "Admin"; // INI TIDAK BISA KARENA SUDAH FINAL
-        // Log.d("ProspekAdapter2", "FORCE ADMIN MODE ACTIVATED");
-
-        // Admin bisa edit/delete SEMUA data
-        // Operator hanya bisa edit/delete data miliknya sendiri
-        final boolean canEdit; // PERBAIKAN: Buat final
+        final boolean canEdit;
         if ("Admin".equals(effectiveUserLevel)) {
-            // Admin dapat mengelola semua data
             canEdit = true;
-            Log.d("ProspekAdapter2", "ADMIN MODE - Tombol akan ditampilkan untuk semua data");
         } else {
-            // Non-admin hanya bisa mengelola data miliknya sendiri
             canEdit = currentUsername.equals(prospek.getNamaPenginput());
-            Log.d("ProspekAdapter2", "OPERATOR MODE - can edit: " + canEdit);
         }
 
-        // Set visibility tombol
         holder.btnEdit.setVisibility(canEdit ? View.VISIBLE : View.GONE);
         holder.btnDelete.setVisibility(canEdit ? View.VISIBLE : View.GONE);
 
-        Log.d("ProspekAdapter2", "Button Visibility - Edit: " + (canEdit ? "VISIBLE" : "GONE") +
-                ", Delete: " + (canEdit ? "VISIBLE" : "GONE"));
-
-        // Tambahkan indicator untuk data milik operator (opsional)
-        if ("Admin".equals(effectiveUserLevel) && !currentUsername.equals(prospek.getNamaPenginput())) {
-            // Jika Admin melihat data orang lain, beri indicator
-            holder.tvNamaPenginput.setText("Penginput: " + safeString(prospek.getNamaPenginput()) );
+        // TOMBOL HISTORI - HANYA JIKA ADA ID_PROSPEK
+        if (prospek.getIdProspek() > 0) {
+            holder.btnHistoriStatus.setVisibility(View.VISIBLE);
+        } else {
+            holder.btnHistoriStatus.setVisibility(View.GONE);
         }
 
-        // PERBAIKAN: Gunakan final variables dalam lambda
-        final String finalNamaPenginput = prospek.getNamaPenginput();
-        final String finalNamaProspek = prospek.getNamaProspek();
-        final int finalPosition = position;
+        if ("Admin".equals(effectiveUserLevel) && !currentUsername.equals(prospek.getNamaPenginput())) {
+            holder.tvPenginput.setText("Penginput: " + safeString(prospek.getNamaPenginput()) + " (Orang Lain)");
+        }
 
+        // Tombol Edit
         holder.btnEdit.setOnClickListener(v -> {
             if (!canEdit) {
                 Toast.makeText(context, "Anda tidak memiliki akses untuk mengedit data ini", Toast.LENGTH_SHORT).show();
@@ -127,19 +157,17 @@ public class ProspekAdapter2 extends RecyclerView.Adapter<ProspekAdapter2.ViewHo
             }
 
             Intent intent = new Intent(context, EditDataProspekActivity.class);
-
-            // Kirim semua data ke EditDataProspekActivity
-            intent.putExtra("PROSPEK_ID", prospek.getIdProspek());
-            intent.putExtra("NAMA_PENGINPUT", finalNamaPenginput);
-            intent.putExtra("NAMA_PROSPEK", finalNamaProspek);
+            intent.putExtra("ID_PROSPEK", prospek.getIdProspek());
+            intent.putExtra("NAMA_PENGINPUT", prospek.getNamaPenginput());
+            intent.putExtra("NAMA_PROSPEK", prospek.getNamaProspek());
             intent.putExtra("EMAIL", prospek.getEmail());
             intent.putExtra("NO_HP", prospek.getNoHp());
             intent.putExtra("ALAMAT", prospek.getAlamat());
             intent.putExtra("REFERENSI_PROYEK", prospek.getReferensiProyek());
             intent.putExtra("STATUS_NPWP", prospek.getStatusNpwp());
             intent.putExtra("STATUS_BPJS", prospek.getStatusBpjs());
+            intent.putExtra("STATUS_LIB", prospek.getStatusLib());
 
-            // Tambahkan flag untuk menandai bahwa ini edit oleh Admin
             if ("Admin".equals(effectiveUserLevel)) {
                 intent.putExtra("IS_ADMIN_EDIT", true);
             }
@@ -147,43 +175,70 @@ public class ProspekAdapter2 extends RecyclerView.Adapter<ProspekAdapter2.ViewHo
             context.startActivity(intent);
         });
 
-        // Tombol Hapus
+        // Tombol Histori Status
+        holder.btnHistoriStatus.setOnClickListener(v -> {
+            if (prospek.getIdProspek() > 0) {
+                Intent intent = new Intent(context, HistoriStatusLibActivity.class);
+                intent.putExtra("ID_PROSPEK", prospek.getIdProspek());
+                intent.putExtra("NAMA_PROSPEK", prospek.getNamaProspek());
+                context.startActivity(intent);
+            } else {
+                Toast.makeText(context, "ID Prospek tidak tersedia", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Tombol Delete
         holder.btnDelete.setOnClickListener(v -> {
             if (!canEdit) {
                 Toast.makeText(context, "Anda tidak memiliki akses untuk menghapus data ini", Toast.LENGTH_SHORT).show();
                 return;
             }
-            deleteProspek(finalNamaPenginput, finalNamaProspek, finalPosition, effectiveUserLevel);
+            deleteProspek(prospek.getNamaPenginput(), prospek.getNamaProspek(), position, effectiveUserLevel);
         });
     }
 
+    private void setCardColorSimple(ViewHolder holder, String status) {
+        if (status == null) {
+            holder.cardProspek.setCardBackgroundColor(COLOR_DEFAULT);
+            return;
+        }
+
+        String statusLower = status.toLowerCase().trim();
+
+        switch (statusLower) {
+            case "cold":
+                holder.cardProspek.setCardBackgroundColor(COLOR_COLD);
+                break;
+            case "follow up":
+                holder.cardProspek.setCardBackgroundColor(COLOR_FOLLOW_UP);
+                break;
+            case "kunjungan":
+                holder.cardProspek.setCardBackgroundColor(COLOR_KUNJUNGAN);
+                break;
+            case "batal":
+                holder.cardProspek.setCardBackgroundColor(COLOR_BATAL);
+                break;
+            default:
+                holder.cardProspek.setCardBackgroundColor(COLOR_DEFAULT);
+                break;
+        }
+    }
+
     private void deleteProspek(String namaPenginput, String namaProspek, int position, String effectiveUserLevel) {
-        // Konfirmasi hapus
         androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(context);
         builder.setTitle("Konfirmasi Hapus");
         builder.setMessage("Apakah Anda yakin ingin menghapus data prospek '" + namaProspek + "'?");
 
-        // PERBAIKAN: Buat final variables untuk digunakan dalam lambda
-        final String finalNamaPenginput = namaPenginput;
-        final String finalNamaProspek = namaProspek;
-        final int finalPosition = position;
-        final String finalUserLevel = effectiveUserLevel;
-
         builder.setPositiveButton("Ya", (dialog, which) -> {
-            performDelete(finalNamaPenginput, finalNamaProspek, finalPosition, finalUserLevel);
+            performDelete(namaPenginput, namaProspek, position, effectiveUserLevel);
         });
 
-        builder.setNegativeButton("Tidak", (dialog, which) -> {
-            dialog.dismiss();
-        });
-
+        builder.setNegativeButton("Tidak", (dialog, which) -> dialog.dismiss());
         builder.show();
     }
 
     private void performDelete(String namaPenginput, String namaProspek, int position, String effectiveUserLevel) {
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
-
-        // PERBAIKAN: Kirim user_level ke API
         Call<BasicResponse> call = apiService.deleteProspekByData(namaPenginput, namaProspek, effectiveUserLevel);
 
         call.enqueue(new Callback<BasicResponse>() {
@@ -193,9 +248,9 @@ public class ProspekAdapter2 extends RecyclerView.Adapter<ProspekAdapter2.ViewHo
                     BasicResponse deleteResponse = response.body();
                     if (deleteResponse.isSuccess()) {
                         prospekList.remove(position);
+                        prospekListFull.remove(position);
                         notifyItemRemoved(position);
 
-                        // Tampilkan pesan berdasarkan level user
                         if ("Admin".equals(effectiveUserLevel)) {
                             Toast.makeText(context, "Data berhasil dihapus (Admin)", Toast.LENGTH_SHORT).show();
                         } else {
@@ -206,14 +261,12 @@ public class ProspekAdapter2 extends RecyclerView.Adapter<ProspekAdapter2.ViewHo
                     }
                 } else {
                     Toast.makeText(context, "Error response dari server", Toast.LENGTH_SHORT).show();
-                    Log.e("ProspekAdapter2", "Delete response failed: " + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
                 Toast.makeText(context, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e("ProspekAdapter2", "Delete failure", t);
             }
         });
     }
@@ -223,28 +276,39 @@ public class ProspekAdapter2 extends RecyclerView.Adapter<ProspekAdapter2.ViewHo
         return prospekList.size();
     }
 
-    // Helper untuk mencegah null
     private String safeString(String value) {
         return value != null ? value : "-";
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvNamaProspek, tvNamaPenginput, tvTanggalInput, tvEmail,
+        TextView tvPenginput, tvTanggal, tvNama, tvStatus, tvEmail,
                 tvNoHp, tvAlamat, tvStatusNPWP, tvStatusBPJS;
-        MaterialButton btnEdit, btnDelete;
+        MaterialButton btnEdit, btnDelete, btnHistoriStatus;
+        MaterialCardView cardProspek;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvNamaProspek = itemView.findViewById(R.id.tvNama);
-            tvNamaPenginput = itemView.findViewById(R.id.tvPenginput);
-            tvTanggalInput = itemView.findViewById(R.id.tvTanggal);
+
+            // Inisialisasi semua TextView sesuai dengan layout
+            tvPenginput = itemView.findViewById(R.id.tvPenginput);
+            tvTanggal = itemView.findViewById(R.id.tvTanggal);
+            tvNama = itemView.findViewById(R.id.tvNama);
+            tvStatus = itemView.findViewById(R.id.tvStatus);
             tvEmail = itemView.findViewById(R.id.tvEmail);
             tvNoHp = itemView.findViewById(R.id.tvNoHp);
             tvAlamat = itemView.findViewById(R.id.tvAlamat);
             tvStatusNPWP = itemView.findViewById(R.id.tvStatusNPWP);
             tvStatusBPJS = itemView.findViewById(R.id.tvStatusBPJS);
+
+            // Inisialisasi tombol
             btnEdit = itemView.findViewById(R.id.btnEdit);
             btnDelete = itemView.findViewById(R.id.btnDelete);
+            btnHistoriStatus = itemView.findViewById(R.id.btnHistoriStatus);
+
+            // Inisialisasi card view
+            cardProspek = itemView.findViewById(R.id.cardProspek);
+
+            // HAPUS SEMUA REFERENSI KE iconStatus karena tidak ada di layout
         }
     }
 }

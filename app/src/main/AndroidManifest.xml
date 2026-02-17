@@ -84,6 +84,7 @@
         <activity
             android:name=".VerifikasiKodeActivity"
             android:exported="false" />
+
         <activity
             android:name=".ResetPasswordActivity"
             android:exported="false" />
@@ -106,6 +107,10 @@
         <activity
             android:name=".EditDataProyekActivity"
             android:exported="false" />
+        <activity
+            android:name=".HistoriStatusLibActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".LihatDataKavlingActivity"
             android:exported="false" />

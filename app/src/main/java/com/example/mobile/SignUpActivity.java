@@ -30,6 +30,9 @@ public class SignUpActivity extends AppCompatActivity {
     private DatabaseHelper databaseHelper;
     private String selectedDivision = "";
 
+    // Tambahkan variabel untuk menyimpan daftar divisi
+    private List<String> divisiList = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +50,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         // Inisialisasi view
         editTextUsername = findViewById(R.id.username);
-        editTextEmail = findViewById(R.id.email); // Tambahkan ini
+        editTextEmail = findViewById(R.id.email);
         spinnerDivision = findViewById(R.id.spinnerOpsi);
         editTextNoNip = findViewById(R.id.noNip);
         editTextPassword = findViewById(R.id.password);
@@ -55,8 +58,8 @@ public class SignUpActivity extends AppCompatActivity {
         buttonBuatAkun = findViewById(R.id.btnBuatAkun);
         buttonKembali = findViewById(R.id.btnKembali);
 
-        // Setup spinner dengan divisi Marketing
-        setupDivisionSpinner();
+        // Setup spinner dengan divisi dari server
+        loadDivisiFromServer();
 
         // Pastikan EditText NIP bisa diketik
         setupEditTextNip();
@@ -69,7 +72,7 @@ public class SignUpActivity extends AppCompatActivity {
                 if (validateInput()) {
                     // Daftarkan pengguna baru
                     String username = editTextUsername.getText().toString().trim();
-                    String email = editTextEmail.getText().toString().trim(); // Tambahkan ini
+                    String email = editTextEmail.getText().toString().trim();
                     String nip = editTextNoNip.getText().toString().trim();
                     String password = editTextPassword.getText().toString().trim();
 
@@ -91,9 +94,101 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
-    // Method untuk setup spinner dengan divisi Marketing
+    // Method untuk mengambil data divisi dari server
+    private void loadDivisiFromServer() {
+        showLoadingDivisi(true);
+
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<DivisiResponse> call = apiService.getDivisiList();
+
+        call.enqueue(new Callback<DivisiResponse>() {
+            @Override
+            public void onResponse(Call<DivisiResponse> call, Response<DivisiResponse> response) {
+                showLoadingDivisi(false);
+
+                if (response.isSuccessful() && response.body() != null) {
+                    DivisiResponse divisiResponse = response.body();
+
+                    if (divisiResponse.isSuccess()) {
+                        List<String> serverDivisiList = divisiResponse.getDivisiList();
+                        if (serverDivisiList != null && !serverDivisiList.isEmpty()) {
+                            divisiList.clear();
+                            divisiList.addAll(serverDivisiList);
+                            setupDivisionSpinner();
+                        } else {
+                            // Jika data kosong, gunakan data default
+                            setupDefaultDivisionSpinner();
+                            Toast.makeText(SignUpActivity.this,
+                                    "Data divisi kosong, menggunakan data default",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        setupDefaultDivisionSpinner();
+                        Toast.makeText(SignUpActivity.this,
+                                "Gagal mengambil data divisi: " + divisiResponse.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    setupDefaultDivisionSpinner();
+                    Toast.makeText(SignUpActivity.this,
+                            "Error mengambil data divisi",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DivisiResponse> call, Throwable t) {
+                showLoadingDivisi(false);
+                setupDefaultDivisionSpinner();
+                Toast.makeText(SignUpActivity.this,
+                        "Koneksi gagal: " + t.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // Method untuk setup spinner dengan data dari server
     private void setupDivisionSpinner() {
-        // Buat List dengan opsi Marketing
+        // Buat List dengan data dari server
+        List<String> spinnerItems = new ArrayList<>();
+        spinnerItems.add("Pilih Divisi");
+        spinnerItems.addAll(divisiList);
+
+        // Create an ArrayAdapter menggunakan List<String>
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, spinnerItems);
+
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // Apply the adapter to the spinner
+        spinnerDivision.setAdapter(adapter);
+
+        // Set listener untuk spinner
+        spinnerDivision.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position > 0) {
+                    selectedDivision = parent.getItemAtPosition(position).toString();
+                    // Update hint berdasarkan divisi yang dipilih
+                    updateNipHint();
+                } else {
+                    selectedDivision = "";
+                    editTextNoNip.setHint("Masukkan No. NIP");
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                selectedDivision = "";
+                editTextNoNip.setHint("Masukkan No. NIP");
+            }
+        });
+    }
+
+    // Method untuk setup spinner default jika gagal mengambil dari server
+    private void setupDefaultDivisionSpinner() {
+        // Buat List dengan opsi default Marketing
         List<String> spinnerItems = new ArrayList<>();
         spinnerItems.add("Pilih Divisi");
         spinnerItems.add("Marketing Inhouse");
@@ -151,19 +246,21 @@ public class SignUpActivity extends AppCompatActivity {
 
     // Method untuk update hint NIP berdasarkan divisi
     private void updateNipHint() {
-        if (selectedDivision.equals("Marketing Inhouse")) {
-            editTextNoNip.setHint("Contoh: MI4123 (harus diawali MI)");
-        } else if (selectedDivision.equals("Marketing Freelance")) {
-            editTextNoNip.setHint("Contoh: MF4123 (harus diawali MF)");
-        } else {
-            editTextNoNip.setHint("Masukkan No. NIP");
+        if (selectedDivision != null) {
+            if (selectedDivision.toLowerCase().contains("inhouse")) {
+                editTextNoNip.setHint("Contoh: MI4123 (harus diawali MI)");
+            } else if (selectedDivision.toLowerCase().contains("freelance")) {
+                editTextNoNip.setHint("Contoh: MF4123 (harus diawali MF)");
+            } else {
+                editTextNoNip.setHint("Masukkan No. NIP");
+            }
         }
     }
 
     // Method untuk validasi input
     private boolean validateInput() {
         String username = editTextUsername.getText().toString().trim();
-        String email = editTextEmail.getText().toString().trim(); // Tambahkan ini
+        String email = editTextEmail.getText().toString().trim();
         String nip = editTextNoNip.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
         String password2 = editTextPassword2.getText().toString().trim();
@@ -264,10 +361,10 @@ public class SignUpActivity extends AppCompatActivity {
         String nipCode = nip.length() >= 2 ? nip.substring(0, 2).toUpperCase() : "";
 
         // Validasi berdasarkan divisi yang dipilih
-        if (division.equals("Marketing Inhouse")) {
+        if (division.toLowerCase().contains("inhouse")) {
             // Untuk Marketing Inhouse, kode NIP harus "MI"
             return nipCode.equals("MI");
-        } else if (division.equals("Marketing Freelance")) {
+        } else if (division.toLowerCase().contains("freelance")) {
             // Untuk Marketing Freelance, kode NIP harus "MF"
             return nipCode.equals("MF");
         }
@@ -315,7 +412,7 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
-    // Method untuk menampilkan/menyembunyikan loading
+    // Method untuk menampilkan/menyembunyikan loading registrasi
     private void showLoading(boolean isLoading) {
         if (isLoading) {
             // Tampilkan loading dan disable sementara
@@ -324,7 +421,7 @@ public class SignUpActivity extends AppCompatActivity {
             buttonKembali.setEnabled(false);
             spinnerDivision.setEnabled(false);
             editTextUsername.setEnabled(false);
-            editTextEmail.setEnabled(false); // Tambahkan ini
+            editTextEmail.setEnabled(false);
             editTextNoNip.setEnabled(false);
             editTextPassword.setEnabled(false);
             editTextPassword2.setEnabled(false);
@@ -335,10 +432,22 @@ public class SignUpActivity extends AppCompatActivity {
             buttonKembali.setEnabled(true);
             spinnerDivision.setEnabled(true);
             editTextUsername.setEnabled(true);
-            editTextEmail.setEnabled(true); // Tambahkan ini
+            editTextEmail.setEnabled(true);
             editTextNoNip.setEnabled(true);
             editTextPassword.setEnabled(true);
             editTextPassword2.setEnabled(true);
+        }
+    }
+
+    // Method baru untuk loading saat mengambil data divisi
+    private void showLoadingDivisi(boolean isLoading) {
+        if (isLoading) {
+            // Sementara disable spinner dan tombol
+            spinnerDivision.setEnabled(false);
+            buttonBuatAkun.setEnabled(false);
+        } else {
+            spinnerDivision.setEnabled(true);
+            buttonBuatAkun.setEnabled(true);
         }
     }
 }

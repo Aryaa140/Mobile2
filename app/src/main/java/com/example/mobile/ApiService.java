@@ -20,7 +20,8 @@
                 @Field("ussername") String ussername,
                 @Field("Password") String password
         );
-
+        @GET("get_divisi.php")
+        Call<DivisiResponse> getDivisiList();
         @FormUrlEncoded
         @POST("register.php")
         Call<RegisterResponse> registerUser(
@@ -106,6 +107,8 @@
                 @Field("email") String email,
                 @Field("kode_verifikasi") int kodeVerifikasi
         );
+        @GET("get_status_lib.php")
+        Call<StatusLibResponse> getStatusLib();
         @FormUrlEncoded
         @POST("tambah_prospek.php")
         Call<BasicResponse> tambahProspek(
@@ -117,7 +120,8 @@
                 @Field("referensi_proyek") String referensiProyek,
                 @Field("status_npwp") String statusNpwp,
                 @Field("status_bpjs") String statusBpjs,
-                @Field("Tanggal_Input") String tanggalInput
+                @Field("tanggal_input") String tanggalInput,
+                @Field("status_lib") String statusLib  // Tambahkan parameter status_lib
         );
         @GET("get_prospek_by_penginput.php")
         Call<ProspekResponse> getProspekByPenginput(@Query("penginput") String penginput);
@@ -141,7 +145,8 @@
                 @Field("alamat") String alamat,
                 @Field("referensi_proyek") String referensiProyek,
                 @Field("status_npwp") String statusNpwp,
-                @Field("status_bpjs") String statusBpjs
+                @Field("status_bpjs") String statusBpjs,
+                @Field("status_lib") String statusLib
         );
 
         @DELETE("delete_prospek.php")
@@ -256,7 +261,7 @@
         @GET("get_hunian_by_proyek.php")
         Call<HunianResponse> getHunianByProyek(@Query("id_proyek") int idProyek);
         @FormUrlEncoded
-        @POST("update_userprospek_with_histori.php") // PASTIKAN NAMA FILE BENAR
+        @POST("update_userprospek_with_histori.php")
         Call<ResponseBody> updateUserProspekWithHistori(
                 @Field("action") String action,
                 @Field("id_userprospek") int idUserProspek,
@@ -268,10 +273,15 @@
                 @Field("proyek") String proyek,
                 @Field("hunian") String hunian,
                 @Field("tipe_hunian") String tipeHunian,
-                @Field("dp") int dp,
                 @Field("status_bpjs") String statusBpjs,
-                @Field("status_npwp") String statusNpwp
+                @Field("status_npwp") String statusNpwp,
+                @Field("status_sps") String statusSps
         );
+        @GET("get_levels.php")
+        Call<LevelResponse> getLevels();
+
+        @GET("get_latest_nip_suffix.php")
+        Call<LatestSuffixResponse> getLatestNipSuffix(@Query("prefix") String prefix);
         @FormUrlEncoded
         @POST("get_histori_userprospek.php")
         Call<HistoriUserProspekResponse> getHistoriUserProspek(
@@ -745,5 +755,26 @@
                 @Query("type") String type // Optional: filter by type
         );
 
+        // Histori Status Lib
+        // Histori Status Lib Methods
+        @FormUrlEncoded
+        @POST("simpan_histori_status_lib.php")
+        Call<BasicResponse> simpanHistoriStatusLib(
+                @Field("id_prospek") int idProspek,
+                @Field("perubahan_status") String perubahanStatus,
+                @Field("tanggal_perubahan") String tanggalPerubahan
+        );
 
+        @GET("get_histori_status_lib.php")
+        Call<HistoriStatusLibResponse> getAllHistoriStatusLib();
+
+        @GET("get_histori_status_lib_by_prospek.php")
+        Call<HistoriStatusLibResponse> getHistoriStatusLibByProspek(@Query("id_prospek") int idProspek);
+
+        @FormUrlEncoded
+        @POST("delete_histori_status_lib.php")
+        Call<BasicResponse> deleteHistoriStatusLib(@Field("id_histori") int idHistori);
+
+        @POST("delete_all_histori_status_lib.php")
+        Call<BasicResponse> deleteAllHistoriStatusLib();
     }

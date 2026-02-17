@@ -6,7 +6,11 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,8 +34,8 @@ public class LihatDataProspekActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ProspekAdapter2 adapter;
     private ArrayList<Prospek2> prospekList;
-    private ArrayList<Prospek2> prospekListFull;
     private EditText searchEditText;
+    private Spinner filterStatusSpinner;
     private SharedPreferences sharedPreferences;
     private String userLevel;
 
@@ -51,24 +55,18 @@ public class LihatDataProspekActivity extends AppCompatActivity {
 
         // Inisialisasi SharedPreferences
         sharedPreferences = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
-
-        // Ambil user level dari SharedPreferences
         userLevel = sharedPreferences.getString("level", "Operator");
 
-        // Debug logging di Activity
-        Log.d("LihatDataProspek", "=== ACTIVITY DEBUG ===");
         Log.d("LihatDataProspek", "User Level: " + userLevel);
-        Log.d("LihatDataProspek", "All SharedPrefs: " + sharedPreferences.getAll().toString());
 
         TopAppBar = findViewById(R.id.topAppBar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         searchEditText = findViewById(R.id.searchEditText);
+        filterStatusSpinner = findViewById(R.id.filterStatusSpinner);
         recyclerView = findViewById(R.id.recyclerProspek);
 
         prospekList = new ArrayList<>();
-        prospekListFull = new ArrayList<>();
 
-        // Pastikan userLevel tidak null
         if (userLevel == null) {
             userLevel = "Operator";
         }
@@ -76,6 +74,9 @@ public class LihatDataProspekActivity extends AppCompatActivity {
         adapter = new ProspekAdapter2(this, prospekList, userLevel);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
+
+        // Setup filter status spinner
+        setupFilterSpinner();
 
         // Load data dari MySQL
         loadDataFromMySQL();
@@ -87,7 +88,7 @@ public class LihatDataProspekActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterData(s.toString());
+                adapter.filterBySearch(s.toString());
             }
 
             @Override
@@ -134,6 +135,38 @@ public class LihatDataProspekActivity extends AppCompatActivity {
         });
     }
 
+    private void setupFilterSpinner() {
+        // Buat array untuk opsi filter
+        String[] statusOptions = {"Semua", "Cold", "Follow up", "Kunjungan", "Batal"};
+
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, statusOptions);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        filterStatusSpinner.setAdapter(spinnerAdapter);
+
+        filterStatusSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedStatus = parent.getItemAtPosition(position).toString();
+                adapter.filterByStatus(selectedStatus);
+
+                // Tampilkan jumlah data
+                int itemCount = adapter.getItemCount();
+                String filterText = selectedStatus.equals("Semua") ?
+                        "Menampilkan semua data (" + itemCount + " item)" :
+                        "Menampilkan status: " + selectedStatus + " (" + itemCount + " item)";
+
+                Toast.makeText(LihatDataProspekActivity.this, filterText, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Default filter "Semua"
+                adapter.filterByStatus("Semua");
+            }
+        });
+    }
+
     private void updateAppBarTitle() {
         if ("Admin".equals(userLevel)) {
             TopAppBar.setTitle("Semua Data Prospek");
@@ -157,41 +190,42 @@ public class LihatDataProspekActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     ProspekResponse prospekResponse = response.body();
                     Log.d("LihatDataProspek", "Success: " + prospekResponse.isSuccess());
-                    Log.d("LihatDataProspek", "Message: " + prospekResponse.getMessage());
 
                     if (prospekResponse.isSuccess()) {
                         List<Prospek2> data = prospekResponse.getData();
                         Log.d("LihatDataProspek", "Data count: " + (data != null ? data.size() : "null"));
 
-                        prospekList.clear();
-                        prospekListFull.clear();
-
                         if (data != null) {
-                            prospekList.addAll(data);
-                            prospekListFull.addAll(data);
-                        }
+                            // Update adapter dengan data baru
+                            adapter.updateData(new ArrayList<>(data));
 
-                        adapter.notifyDataSetChanged();
+                            // Reset filter ke "Semua"
+                            filterStatusSpinner.setSelection(0);
 
-                        // Tampilkan pesan berdasarkan level
-                        if (data == null || data.isEmpty()) {
-                            if ("Admin".equals(userLevel)) {
-                                Toast.makeText(LihatDataProspekActivity.this, "Tidak ada data prospek di sistem", Toast.LENGTH_SHORT).show();
+                            // Tampilkan toast berdasarkan level
+                            if (data.isEmpty()) {
+                                if ("Admin".equals(userLevel)) {
+                                    Toast.makeText(LihatDataProspekActivity.this,
+                                            "Tidak ada data prospek di sistem", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(LihatDataProspekActivity.this,
+                                            "Tidak ada data prospek milik Anda", Toast.LENGTH_SHORT).show();
+                                }
                             } else {
-                                Toast.makeText(LihatDataProspekActivity.this, "Tidak ada data prospek milik Anda", Toast.LENGTH_SHORT).show();
-                            }
-                        } else {
-                            if ("Admin".equals(userLevel)) {
-                                Toast.makeText(LihatDataProspekActivity.this, "Menampilkan semua data (" + data.size() + " items)", Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(LihatDataProspekActivity.this, "Menampilkan data milik Anda (" + data.size() + " items)", Toast.LENGTH_SHORT).show();
+                                String message = "Menampilkan ";
+                                if ("Admin".equals(userLevel)) {
+                                    message += "semua data (" + data.size() + " item)";
+                                } else {
+                                    message += "data milik Anda (" + data.size() + " item)";
+                                }
+                                Toast.makeText(LihatDataProspekActivity.this, message, Toast.LENGTH_SHORT).show();
                             }
                         }
                     } else {
-                        Toast.makeText(LihatDataProspekActivity.this, "Gagal memuat data: " + prospekResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LihatDataProspekActivity.this,
+                                "Gagal memuat data: " + prospekResponse.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Log.e("LihatDataProspek", "Response not successful");
                     Toast.makeText(LihatDataProspekActivity.this, "Error response dari server", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -202,29 +236,6 @@ public class LihatDataProspekActivity extends AppCompatActivity {
                 Toast.makeText(LihatDataProspekActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void filterData(String query) {
-        ArrayList<Prospek2> filteredList = new ArrayList<>();
-        if (query.isEmpty()) {
-            filteredList.addAll(prospekListFull);
-        } else {
-            String lowerCaseQuery = query.toLowerCase();
-            for (Prospek2 prospek : prospekListFull) {
-                if ((prospek.getNamaProspek() != null && prospek.getNamaProspek().toLowerCase().contains(lowerCaseQuery)) ||
-                        (prospek.getNamaPenginput() != null && prospek.getNamaPenginput().toLowerCase().contains(lowerCaseQuery)) ||
-                        (prospek.getEmail() != null && prospek.getEmail().toLowerCase().contains(lowerCaseQuery)) ||
-                        (prospek.getNoHp() != null && prospek.getNoHp().toLowerCase().contains(lowerCaseQuery)) ||
-                        (prospek.getTanggalInput() != null && prospek.getTanggalInput().toLowerCase().contains(lowerCaseQuery)) ||
-                        (prospek.getStatusNpwp() != null && prospek.getStatusNpwp().toLowerCase().contains(lowerCaseQuery)) ||
-                        (prospek.getStatusBpjs() != null && prospek.getStatusBpjs().toLowerCase().contains(lowerCaseQuery))) {
-                    filteredList.add(prospek);
-                }
-            }
-        }
-        prospekList.clear();
-        prospekList.addAll(filteredList);
-        adapter.notifyDataSetChanged();
     }
 
     @Override

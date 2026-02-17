@@ -19,7 +19,11 @@
         <item>Sold Out</item>
         <item>On Progress</item>
     </string-array>
-
+    <string-array name="status_sps_options">
+        <item>Pilih Status SPS</item>
+        <item>Belum Dibuat</item>
+        <item>Sudah Dibuat</item>
+    </string-array>
     <string-array name="opsi_spinnerNPWP">
         <item>Punya</item>
         <item>Tidak Punya</item>

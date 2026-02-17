@@ -7,6 +7,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -24,7 +25,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class TambahProspekActivity extends AppCompatActivity {
@@ -33,9 +36,13 @@ public class TambahProspekActivity extends AppCompatActivity {
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
     private EditText editTextPenginput, editTextNama, editTextEmail, editTextNoHp, editTextAlamat;
-    private Spinner spinnerReferensi, spinnerNPWP, spinnerBPJS;
+    private Spinner spinnerReferensi, spinnerNPWP, spinnerBPJS, spinnerStatusLib;
     private Button btnSimpan, btnBatal;
     private SharedPreferences sharedPreferences;
+
+    // Variabel untuk menyimpan data status_lib
+    private List<String> statusList = new ArrayList<>();
+    private String selectedStatus = "Cold"; // Default value
 
     // Keys untuk SharedPreferences
     private static final String PREFS_NAME = "LoginPrefs";
@@ -107,12 +114,10 @@ public class TambahProspekActivity extends AppCompatActivity {
         spinnerReferensi = findViewById(R.id.spinnerRole);
         spinnerNPWP = findViewById(R.id.spinnerNPWP);
         spinnerBPJS = findViewById(R.id.spinnerBPJS);
+        spinnerStatusLib = findViewById(R.id.spinnerStatusLib);
 
         btnSimpan = findViewById(R.id.btnSimpan);
         btnBatal = findViewById(R.id.btnBatal);
-
-        // Setup spinner referensi dari database
-       // setupReferensiSpinner();
 
         // OTOMATIS ISI NAMA PENGINPUT BERDASARKAN USER YANG LOGIN
         String username = sharedPreferences.getString(KEY_USERNAME, "");
@@ -120,6 +125,9 @@ public class TambahProspekActivity extends AppCompatActivity {
             editTextPenginput.setText(username);
             editTextPenginput.setEnabled(false);
         }
+
+        // Setup spinner untuk status_lib dari database
+        loadStatusLibFromServer();
 
         // Filtering karakter khusus untuk nomor HP
         editTextNoHp.addTextChangedListener(new TextWatcher() {
@@ -164,15 +172,112 @@ public class TambahProspekActivity extends AppCompatActivity {
         });
     }
 
-   /* private void setupReferensiSpinner() {
-        // Ambil data referensi dari database (contoh)
-        String[] referensiOptions = {"Website", "Media Sosial", "Rekomendasi", "Iklan", "Lainnya"};
+    // Method untuk mengambil data status_lib dari server
+    private void loadStatusLibFromServer() {
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        Call<StatusLibResponse> call = apiService.getStatusLib();
+
+        call.enqueue(new Callback<StatusLibResponse>() {
+            @Override
+            public void onResponse(Call<StatusLibResponse> call, Response<StatusLibResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    StatusLibResponse statusLibResponse = response.body();
+
+                    if (statusLibResponse.isSuccess()) {
+                        List<String> serverStatusList = statusLibResponse.getStatusList();
+                        if (serverStatusList != null && !serverStatusList.isEmpty()) {
+                            statusList.clear();
+                            statusList.addAll(serverStatusList);
+                            setupStatusLibSpinner();
+                        } else {
+                            // Jika data kosong, gunakan default
+                            setupDefaultStatusSpinner();
+                            Toast.makeText(TambahProspekActivity.this,
+                                    "Data status kosong, menggunakan default",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        setupDefaultStatusSpinner();
+                        Toast.makeText(TambahProspekActivity.this,
+                                "Gagal mengambil data status: " + statusLibResponse.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    setupDefaultStatusSpinner();
+                    Toast.makeText(TambahProspekActivity.this,
+                            "Error mengambil data status",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<StatusLibResponse> call, Throwable t) {
+                setupDefaultStatusSpinner();
+                Toast.makeText(TambahProspekActivity.this,
+                        "Koneksi gagal: " + t.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // Method untuk setup spinner dengan data dari server
+    private void setupStatusLibSpinner() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, statusList);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerStatusLib.setAdapter(adapter);
+
+        // Set default ke "Cold" jika ada
+        int coldPosition = statusList.indexOf("Cold");
+        if (coldPosition >= 0) {
+            spinnerStatusLib.setSelection(coldPosition);
+            selectedStatus = "Cold";
+        } else if (!statusList.isEmpty()) {
+            spinnerStatusLib.setSelection(0);
+            selectedStatus = statusList.get(0);
+        }
+
+        // Listener untuk spinner status
+        spinnerStatusLib.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                selectedStatus = parent.getItemAtPosition(position).toString();
+            }
+
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {
+                selectedStatus = "Cold";
+            }
+        });
+    }
+
+    // Method untuk setup spinner default jika gagal mengambil dari server
+    private void setupDefaultStatusSpinner() {
+        List<String> defaultStatus = new ArrayList<>();
+        defaultStatus.add("Cold");
+        defaultStatus.add("Warm");
+        defaultStatus.add("Hot");
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, referensiOptions);
+                android.R.layout.simple_spinner_item, defaultStatus);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerReferensi.setAdapter(adapter);
-    }*/
+        spinnerStatusLib.setAdapter(adapter);
+
+        spinnerStatusLib.setSelection(0); // Default ke "Cold"
+        selectedStatus = "Cold";
+
+        spinnerStatusLib.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                selectedStatus = parent.getItemAtPosition(position).toString();
+            }
+
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {
+                selectedStatus = "Cold";
+            }
+        });
+    }
 
     private void simpanDataProspek() {
         String penginput = editTextPenginput.getText().toString().trim();
@@ -183,6 +288,7 @@ public class TambahProspekActivity extends AppCompatActivity {
         String referensi = spinnerReferensi.getSelectedItem().toString();
         String statusNpwp = spinnerNPWP.getSelectedItem().toString();
         String statusBpjs = spinnerBPJS.getSelectedItem().toString();
+        String statusLib = selectedStatus; // Ambil dari spinner status_lib
         String tanggalInput = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
 
         // Validasi input
@@ -222,16 +328,25 @@ public class TambahProspekActivity extends AppCompatActivity {
             return;
         }
 
+        // Validasi status_lib
+        if (TextUtils.isEmpty(statusLib)) {
+            Toast.makeText(this, "Status harus dipilih", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         // Simpan data ke MySQL melalui API
-        simpanProspekKeMySQL(penginput, nama, email, noHp, alamat, referensi, statusNpwp, statusBpjs,tanggalInput);
+        simpanProspekKeMySQL(penginput, nama, email, noHp, alamat, referensi,
+                statusNpwp, statusBpjs, tanggalInput, statusLib);
     }
 
     private void simpanProspekKeMySQL(String penginput, String nama, String email, String noHp,
-                                      String alamat, String referensi, String statusNpwp, String statusBpjs, String tanggalInput) {
+                                      String alamat, String referensi, String statusNpwp,
+                                      String statusBpjs, String tanggalInput, String statusLib) {
 
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
         Call<BasicResponse> call = apiService.tambahProspek(
-                penginput, nama, email, noHp, alamat, referensi, statusNpwp, statusBpjs, tanggalInput
+                penginput, nama, email, noHp, alamat, referensi,
+                statusNpwp, statusBpjs, tanggalInput, statusLib  // Tambah parameter statusLib
         );
 
         call.enqueue(new Callback<BasicResponse>() {
@@ -241,23 +356,28 @@ public class TambahProspekActivity extends AppCompatActivity {
                     BasicResponse prospekResponse = response.body();
 
                     if (prospekResponse.isSuccess()) {
-                        Toast.makeText(TambahProspekActivity.this, "Data prospek berhasil disimpan", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(TambahProspekActivity.this,
+                                "Data prospek berhasil disimpan dengan status: " + statusLib,
+                                Toast.LENGTH_SHORT).show();
                         clearForm();
 
                         Intent intent = new Intent(TambahProspekActivity.this, NewBeranda.class);
                         startActivity(intent);
                         finish();
                     } else {
-                        Toast.makeText(TambahProspekActivity.this, "Gagal: " + prospekResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(TambahProspekActivity.this,
+                                "Gagal: " + prospekResponse.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(TambahProspekActivity.this, "Error response dari server", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(TambahProspekActivity.this,
+                            "Error response dari server", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
-                Toast.makeText(TambahProspekActivity.this, "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(TambahProspekActivity.this,
+                        "Koneksi gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -270,5 +390,12 @@ public class TambahProspekActivity extends AppCompatActivity {
         spinnerReferensi.setSelection(0);
         spinnerNPWP.setSelection(0);
         spinnerBPJS.setSelection(0);
+
+        // Reset status ke default "Cold"
+        if (spinnerStatusLib != null && statusList.contains("Cold")) {
+            int coldPosition = statusList.indexOf("Cold");
+            spinnerStatusLib.setSelection(coldPosition);
+            selectedStatus = "Cold";
+        }
     }
 }

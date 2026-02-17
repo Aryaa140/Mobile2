@@ -42,6 +42,10 @@ public class UserProspekSimple {
     @SerializedName("tanggal")
     private String tanggal;
 
+    // Tambahan field untuk Status SPS
+    @SerializedName("status_sps")
+    private String statusSps;
+
     // Getter methods
     public int getId() { return id; }
     public String getNama() { return nama; }
@@ -56,8 +60,9 @@ public class UserProspekSimple {
     public String getBpjs() { return bpjs; }
     public String getNpwp() { return npwp; }
     public String getTanggal() { return tanggal; }
+    public String getStatusSps() { return statusSps; }  // Getter baru
 
-    // Setter methods (jika diperlukan)
+    // Setter methods
     public void setId(int id) { this.id = id; }
     public void setNama(String nama) { this.nama = nama; }
     public void setPenginput(String penginput) { this.penginput = penginput; }
@@ -71,4 +76,5 @@ public class UserProspekSimple {
     public void setBpjs(String bpjs) { this.bpjs = bpjs; }
     public void setNpwp(String npwp) { this.npwp = npwp; }
     public void setTanggal(String tanggal) { this.tanggal = tanggal; }
+    public void setStatusSps(String statusSps) { this.statusSps = statusSps; } // Setter baru
 }

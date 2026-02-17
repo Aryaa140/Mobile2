@@ -8,7 +8,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -34,27 +33,27 @@ public class HistoriUserProspekAdapter extends RecyclerView.Adapter<HistoriUserP
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         HistoriUserProspek histori = historiList.get(position);
 
-        // Set data ke view dengan null safety dan formatting
+        // Set data ke view dengan null safety
         holder.tvPenginput.setText("Penginput: " + safeString(histori.getNamaPenginput()));
         holder.tvTanggal.setText("Tanggal: " + formatDate(histori.getTanggalPerubahan()));
         holder.tvNama.setText("Nama: " + safeString(histori.getNamaUser()));
         holder.tvStatusNPWP.setText("Status NPWP: " + safeString(histori.getStatusNpwp()));
         holder.tvStatusBPJS.setText("Status BPJS: " + safeString(histori.getStatusBpjs()));
+        holder.tvStatusSPS.setText("Status SPS: " + safeString(histori.getStatusSps())); // Ganti DP
         holder.tvEmail.setText("Email: " + safeString(histori.getEmail()));
         holder.tvNoHp.setText("No. HP: " + safeString(histori.getNoHp()));
         holder.tvProyek.setText("Proyek: " + safeString(histori.getProyek()));
         holder.tvHunian.setText("Hunian: " + safeString(histori.getHunian()));
         holder.tvTipeHunian.setText("Tipe Hunian: " + safeString(histori.getTipeHunian()));
         holder.tvAlamat.setText("Alamat: " + safeString(histori.getAlamat()));
-        holder.tvJumlahUangTandaJadi.setText("DP: Rp " + formatCurrency(histori.getDp()));
 
         // Set background color based on change type
         if ("UPDATE".equals(histori.getTipePerubahan())) {
-            holder.itemView.setBackgroundColor(0x30FFA500); // Orange with transparency
+            holder.itemView.setBackgroundColor(0x30FFA500); // Orange transparan
         } else if ("DELETE".equals(histori.getTipePerubahan())) {
-            holder.itemView.setBackgroundColor(0x30FF0000); // Red with transparency
+            holder.itemView.setBackgroundColor(0x30FF0000); // Merah transparan
         } else {
-            holder.itemView.setBackgroundColor(0x00000000); // Transparent
+            holder.itemView.setBackgroundColor(0x00000000); // Transparan
         }
     }
 
@@ -63,18 +62,9 @@ public class HistoriUserProspekAdapter extends RecyclerView.Adapter<HistoriUserP
         return historiList != null ? historiList.size() : 0;
     }
 
-    // Helper methods for formatting
+    // Helper methods
     private String safeString(String value) {
-        return value != null ? value : "-";
-    }
-
-    private String formatCurrency(int amount) {
-        try {
-            DecimalFormat formatter = new DecimalFormat("#,###");
-            return formatter.format(amount);
-        } catch (Exception e) {
-            return String.valueOf(amount);
-        }
+        return value != null && !value.isEmpty() ? value : "-";
     }
 
     private String formatDate(String dateString) {
@@ -89,8 +79,8 @@ public class HistoriUserProspekAdapter extends RecyclerView.Adapter<HistoriUserP
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvPenginput, tvTanggal, tvNama, tvStatusNPWP, tvStatusBPJS,
-                tvEmail, tvNoHp, tvProyek, tvHunian, tvTipeHunian, tvAlamat, tvJumlahUangTandaJadi;
+        TextView tvPenginput, tvTanggal, tvNama, tvStatusNPWP, tvStatusBPJS, tvStatusSPS,
+                tvEmail, tvNoHp, tvProyek, tvHunian, tvTipeHunian, tvAlamat;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -100,17 +90,16 @@ public class HistoriUserProspekAdapter extends RecyclerView.Adapter<HistoriUserP
             tvNama = itemView.findViewById(R.id.tvNama);
             tvStatusNPWP = itemView.findViewById(R.id.tvStatusNPWP);
             tvStatusBPJS = itemView.findViewById(R.id.tvStatusBPJS);
+            tvStatusSPS = itemView.findViewById(R.id.tvStatusSPS);      // TextView baru untuk Status SPS
             tvEmail = itemView.findViewById(R.id.tvEmail);
             tvNoHp = itemView.findViewById(R.id.tvNoHp);
             tvProyek = itemView.findViewById(R.id.tvProyek);
             tvHunian = itemView.findViewById(R.id.tvHunian);
             tvTipeHunian = itemView.findViewById(R.id.tvTipeHunian);
             tvAlamat = itemView.findViewById(R.id.tvAlamat);
-            tvJumlahUangTandaJadi = itemView.findViewById(R.id.tvJumlahUangTandaJadi);
         }
     }
 
-    // Method untuk update data
     public void updateData(List<HistoriUserProspek> newData) {
         this.historiList = newData;
         notifyDataSetChanged();

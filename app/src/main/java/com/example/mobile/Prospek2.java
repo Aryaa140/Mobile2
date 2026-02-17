@@ -33,6 +33,9 @@ public class Prospek2 {
     @SerializedName("tanggal_input")
     private String tanggalInput;
 
+    @SerializedName("status_lib")  // Tambahkan ini
+    private String statusLib;
+
     // Getter methods
     public int getIdProspek() { return idProspek; }
     public String getNamaProspek() { return namaProspek; }
@@ -44,8 +47,9 @@ public class Prospek2 {
     public String getStatusNpwp() { return statusNpwp; }
     public String getStatusBpjs() { return statusBpjs; }
     public String getTanggalInput() { return tanggalInput; }
+    public String getStatusLib() { return statusLib; }  // Getter untuk status_lib
 
-    // Setter methods (jika diperlukan)
+    // Setter methods
     public void setIdProspek(int idProspek) { this.idProspek = idProspek; }
     public void setNamaProspek(String namaProspek) { this.namaProspek = namaProspek; }
     public void setNamaPenginput(String namaPenginput) { this.namaPenginput = namaPenginput; }
@@ -56,4 +60,5 @@ public class Prospek2 {
     public void setStatusNpwp(String statusNpwp) { this.statusNpwp = statusNpwp; }
     public void setStatusBpjs(String statusBpjs) { this.statusBpjs = statusBpjs; }
     public void setTanggalInput(String tanggalInput) { this.tanggalInput = tanggalInput; }
+    public void setStatusLib(String statusLib) { this.statusLib = statusLib; }  // Setter untuk status_lib
 }

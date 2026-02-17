@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardProspek"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    android:backgroundTint="@android:color/white"
     app:cardCornerRadius="12dp"
-    app:cardElevation="4dp">
+    app:cardElevation="4dp"
+    app:cardUseCompatPadding="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,10 +17,12 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Header dengan Penginput dan Tanggal -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:gravity="center_vertical"
             android:layout_marginBottom="8dp">
 
             <TextView
@@ -30,7 +35,7 @@
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
                 android:ellipsize="end"
-                android:singleLine="true" />
+                android:maxLines="1" />
 
             <TextView
                 android:id="@+id/tvTanggal"
@@ -40,9 +45,15 @@
                 android:textColor="@android:color/black"
                 android:textSize="12sp"
                 android:ellipsize="end"
-                android:singleLine="true" />
-
+                android:maxLines="1" />
         </LinearLayout>
+
+        <!-- Garis pemisah -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/gray_light"
+            android:layout_marginBottom="8dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -50,6 +61,7 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
+            <!-- Data Prospek -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -66,60 +78,98 @@
                     android:textColor="@android:color/black"
                     android:textSize="16sp"
                     android:ellipsize="end"
-                    android:singleLine="true" />
+                    android:maxLines="1" />
 
+                <!-- Status Lib -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:id="@+id/tvStatusLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Status:"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tvStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="-"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary_color"
+                        android:textSize="14sp"
+                        android:ellipsize="end"
+                        android:maxLines="1" />
+                </LinearLayout>
+
+                <!-- Informasi Kontak -->
                 <TextView
                     android:id="@+id/tvEmail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
                     android:text="Email: -"
                     android:textColor="@android:color/darker_gray"
                     android:textSize="14sp"
                     android:ellipsize="end"
-                    android:singleLine="true" />
+                    android:maxLines="1" />
 
                 <TextView
                     android:id="@+id/tvNoHp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="No. Handphone (+62): -"
+                    android:layout_marginBottom="4dp"
+                    android:text="No. HP: -"
                     android:textColor="@android:color/darker_gray"
                     android:textSize="14sp"
                     android:ellipsize="end"
-                    android:singleLine="true" />
+                    android:maxLines="1" />
 
                 <TextView
                     android:id="@+id/tvAlamat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
                     android:text="Alamat: -"
                     android:textColor="@android:color/darker_gray"
                     android:textSize="14sp"
                     android:ellipsize="end"
                     android:maxLines="2" />
 
+                <!-- Status Dokumen -->
                 <TextView
                     android:id="@+id/tvStatusNPWP"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Status Kepemilikan NPWM : -"
+                    android:layout_marginBottom="4dp"
+                    android:text="NPWP: -"
                     android:textColor="@android:color/darker_gray"
                     android:textSize="14sp"
                     android:ellipsize="end"
-                    android:singleLine="true" />
+                    android:maxLines="1" />
 
                 <TextView
                     android:id="@+id/tvStatusBPJS"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Status Kepemilikan BPJS : -"
+                    android:text="BPJS: -"
                     android:textColor="@android:color/darker_gray"
                     android:textSize="14sp"
                     android:ellipsize="end"
-                    android:singleLine="true" />
+                    android:maxLines="1" />
 
             </LinearLayout>
 
+            <!-- Tombol Aksi -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -127,28 +177,46 @@
                 android:gravity="center"
                 android:layout_marginStart="8dp">
 
+                <!-- Tombol Edit -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnEdit"
-                    android:layout_width="96dp"
-                    android:layout_height="48dp"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
                     android:layout_marginBottom="8dp"
                     android:text="Edit"
                     android:textAllCaps="false"
-                    android:textColor="@android:color/white"
-                    android:textSize="14sp"
-                    app:cornerRadius="8dp"
-                    app:backgroundTint="@android:color/holo_blue_dark" />
+                    android:textSize="12sp"
+                    app:cornerRadius="6dp"
+                    app:backgroundTint="@color/primary_color"
+                    android:drawableStart="@drawable/ic_edit"
+                    android:drawablePadding="4dp"/>
 
+                <!-- Tombol Histori Status -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnHistoriStatus"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Histori"
+                    android:textAllCaps="false"
+                    android:textSize="12sp"
+                    app:cornerRadius="6dp"
+                    app:backgroundTint="@color/secondary_color"
+
+                    android:drawablePadding="4dp"/>
+
+                <!-- Tombol Hapus -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnDelete"
-                    android:layout_width="96dp"
-                    android:layout_height="48dp"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
                     android:text="Hapus"
                     android:textAllCaps="false"
-                    android:textColor="@android:color/white"
-                    android:textSize="14sp"
-                    app:cornerRadius="8dp"
-                    app:backgroundTint="@android:color/holo_red_dark" />
+                    android:textSize="12sp"
+                    app:cornerRadius="6dp"
+                    app:backgroundTint="@color/red_error"
+                    android:drawableStart="@drawable/ic_delete"
+                    android:drawablePadding="4dp"/>
 
             </LinearLayout>
         </LinearLayout>

@@ -80,6 +80,21 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
     private Runnable autoDeleteRunnable;
     private static final long AUTO_DELETE_INTERVAL = 2 * 60 * 1000; // 2 menit (dari 5 menit)
     private static final long INITIAL_DELAY = 5000; // 5 detik (dari 10 detik)
+
+    // ✅ PERUBAHAN: Method helper untuk mengecek apakah user termasuk admin (Admin, Admin Operator, atau Admin Pembuat)
+    private boolean isAdminUser() {
+        return "Admin".equals(userLevel) ||
+                "Admin Operator".equals(userLevel) ||
+                "Admin Pembuat".equals(userLevel);
+    }
+
+    // ✅ PERUBAHAN: Method helper untuk mengecek apakah user termasuk operator
+    private boolean isOperatorUser() {
+        return "Operator".equals(userLevel) ||
+                "Operator Inhouse".equals(userLevel) ||
+                "Operator Freelance".equals(userLevel);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,6 +127,7 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
             return insets;
         });
     }
+
     private void checkAccountExpiryRealTime() {
         String username = sharedPreferences.getString(KEY_USERNAME, "");
 
@@ -296,167 +312,98 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
     private void setupAccessBasedOnLevel() {
         Log.d("BerandaActivity", "=== SETUP ACCESS FOR LEVEL: " + userLevel + " ===");
 
-        // Jika user adalah Operator, Operator Inhouse, atau Operator Freelance, sembunyikan menu tertentu
-        if ("Operator".equals(userLevel) || "Operator Inhouse".equals(userLevel) || "Operator Freelance".equals(userLevel)) {
-            Log.d("BerandaActivity", "Hiding admin features for Operator level: " + userLevel);
+        // ✅ PERUBAHAN: Gunakan method helper isAdminUser() untuk mencakup semua jenis admin
+        boolean isAdmin = isAdminUser();
+        boolean isOperator = isOperatorUser();
 
-            // Sembunyikan button tambah promo
-            if (cardInputPromoM != null) {
-                cardInputPromoM.setVisibility(View.GONE);
-                Log.d("BerandaActivity", "Hidden cardInputPromoM");
-            }
+        Log.d("BerandaActivity", "isAdmin: " + isAdmin + ", isOperator: " + isOperator);
 
-            // Sembunyikan menu pengelolaan akun
-            if (tvMenu2 != null) {
-                tvMenu2.setVisibility(View.GONE);
-                Log.d("BerandaActivity", "Hidden tvMenu2");
-            }
-
-            // Sembunyikan card input NIP
-            if (cardInputNIP != null) {
-                cardInputNIP.setVisibility(View.GONE);
-                Log.d("BerandaActivity", "Hidden cardInputNIP");
-            }
-
-            // Sembunyikan card status akun
-            if (cardStatusAkun != null) {
-                cardStatusAkun.setVisibility(View.GONE);
-                Log.d("BerandaActivity", "Hidden cardStatusAkun");
-            }
-
-            // Sembunyikan icon book akun
-            if (icbookakun != null) {
-                icbookakun.setVisibility(View.GONE);
-                Log.d("BerandaActivity", "Hidden icbookakun");
-            }
-
-            // Sembunyikan menu pengelolaan proyek (admin only)
-            if (tvMenuData != null) {
-                tvMenuData.setVisibility(View.GONE);
-                Log.d("BerandaActivity", "Hidden tvMenuData (Menu Pengelolaan Proyek)");
-            }
-
-            // Sembunyikan icon book proyek
-            if (icbookproyek != null) {
-                icbookproyek.setVisibility(View.GONE);
-                Log.d("BerandaActivity", "Hidden icbookproyek");
-            }
-
-            // Sembunyikan card input proyek, hunian, kavling
-            if (cardInputProyek != null) {
-                cardInputProyek.setVisibility(View.GONE);
-                Log.d("BerandaActivity", "Hidden cardInputProyek");
-            }
-
-            if (cardInputHunian != null) {
-                cardInputHunian.setVisibility(View.GONE);
-                Log.d("BerandaActivity", "Hidden cardInputHunian");
-            }
-
-            if (cardInputKavling != null) {
-                cardInputKavling.setVisibility(View.GONE);
-                Log.d("BerandaActivity", "Hidden cardInputKavling");
-            }
-
-            // Sembunyikan menu admin di navigation drawer
-            hideAdminNavigationMenus();
-
-        } else {
-            // Untuk Admin atau level lainnya, tampilkan semua menu
-            Log.d("BerandaActivity", "Showing all features for Admin/Other level: " + userLevel);
-
-            // Tampilkan button tambah promo
-            if (cardInputPromoM != null) {
-                cardInputPromoM.setVisibility(View.VISIBLE);
-                Log.d("BerandaActivity", "Shown cardInputPromoM");
-            }
-
-            // Tampilkan menu pengelolaan akun
-            if (tvMenu2 != null) {
-                tvMenu2.setVisibility(View.VISIBLE);
-                Log.d("BerandaActivity", "Shown tvMenu2");
-            }
-
-            // Tampilkan card input NIP
-            if (cardInputNIP != null) {
-                cardInputNIP.setVisibility(View.VISIBLE);
-                Log.d("BerandaActivity", "Shown cardInputNIP");
-            }
-
-            // Tampilkan card status akun
-            if (cardStatusAkun != null) {
-                cardStatusAkun.setVisibility(View.VISIBLE);
-                Log.d("BerandaActivity", "Shown cardStatusAkun");
-            }
-
-            // Tampilkan icon book akun
-            if (icbookakun != null) {
-                icbookakun.setVisibility(View.VISIBLE);
-                Log.d("BerandaActivity", "Shown icbookakun");
-            }
-
-            // Tampilkan menu pengelolaan proyek (admin only)
-            if (tvMenuData != null) {
-                tvMenuData.setVisibility(View.VISIBLE);
-                Log.d("BerandaActivity", "Shown tvMenuData (Menu Pengelolaan Proyek)");
-            }
-
-            // Tampilkan icon book proyek
-            if (icbookproyek != null) {
-                icbookproyek.setVisibility(View.VISIBLE);
-                Log.d("BerandaActivity", "Shown icbookproyek");
-            }
-
-            // Tampilkan card input proyek, hunian, kavling
-            if (cardInputProyek != null) {
-                cardInputProyek.setVisibility(View.VISIBLE);
-                Log.d("BerandaActivity", "Shown cardInputProyek");
-            }
-
-            if (cardInputHunian != null) {
-                cardInputHunian.setVisibility(View.VISIBLE);
-                Log.d("BerandaActivity", "Shown cardInputHunian");
-            }
-
-            if (cardInputKavling != null) {
-                cardInputKavling.setVisibility(View.VISIBLE);
-                Log.d("BerandaActivity", "Shown cardInputKavling");
-            }
-
-            // Tampilkan menu admin di navigation drawer
-            showAdminNavigationMenus();
+        // Menu yang hanya untuk Admin (bukan Operator)
+        if (cardInputPromoM != null) {
+            cardInputPromoM.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+            Log.d("BerandaActivity", "cardInputPromoM: " + (isAdmin ? "Shown" : "Hidden"));
         }
 
-        // PASTIKAN SEMUA TEXTVIEW DAN RECYCLERVIEW TAMPIL UNTUK SEMUA LEVEL
+        if (tvMenu2 != null) {
+            tvMenu2.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+            Log.d("BerandaActivity", "tvMenu2: " + (isAdmin ? "Shown" : "Hidden"));
+        }
+
+        if (cardInputNIP != null) {
+            cardInputNIP.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+            Log.d("BerandaActivity", "cardInputNIP: " + (isAdmin ? "Shown" : "Hidden"));
+        }
+
+        if (cardStatusAkun != null) {
+            cardStatusAkun.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+            Log.d("BerandaActivity", "cardStatusAkun: " + (isAdmin ? "Shown" : "Hidden"));
+        }
+
+        if (icbookakun != null) {
+            icbookakun.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+            Log.d("BerandaActivity", "icbookakun: " + (isAdmin ? "Shown" : "Hidden"));
+        }
+
+        if (tvMenuData != null) {
+            tvMenuData.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+            Log.d("BerandaActivity", "tvMenuData: " + (isAdmin ? "Shown" : "Hidden"));
+        }
+
+        if (icbookproyek != null) {
+            icbookproyek.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+            Log.d("BerandaActivity", "icbookproyek: " + (isAdmin ? "Shown" : "Hidden"));
+        }
+
+        if (cardInputProyek != null) {
+            cardInputProyek.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+            Log.d("BerandaActivity", "cardInputProyek: " + (isAdmin ? "Shown" : "Hidden"));
+        }
+
+        if (cardInputHunian != null) {
+            cardInputHunian.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+            Log.d("BerandaActivity", "cardInputHunian: " + (isAdmin ? "Shown" : "Hidden"));
+        }
+
+        if (cardInputKavling != null) {
+            cardInputKavling.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+            Log.d("BerandaActivity", "cardInputKavling: " + (isAdmin ? "Shown" : "Hidden"));
+        }
+
+        // Atur navigation drawer berdasarkan level
+        if (isAdmin) {
+            showAdminNavigationMenus();
+        } else {
+            hideAdminNavigationMenus();
+        }
+
+        // Menu yang tetap tampil untuk semua level
+        ensureCommonMenuVisibility();
+    }
+
+    // Method baru untuk memastikan menu umum tetap tampil
+    private void ensureCommonMenuVisibility() {
         if (tvMenu != null) {
-            tvMenu.setVisibility(View.VISIBLE); // Menu Informasi tetap tampil
-            Log.d("BerandaActivity", "tvMenu remains visible for all levels");
+            tvMenu.setVisibility(View.VISIBLE);
         }
 
         if (tvPromo != null) {
-            tvPromo.setVisibility(View.VISIBLE); // Promo Terbaru tetap tampil
-            Log.d("BerandaActivity", "tvPromo remains visible for all levels");
+            tvPromo.setVisibility(View.VISIBLE);
         }
 
         if (tvMenuData2 != null) {
-            tvMenuData2.setVisibility(View.VISIBLE); // Menu Input Data tetap tampil untuk semua level
-            Log.d("BerandaActivity", "tvMenuData2 remains visible for all levels");
+            tvMenuData2.setVisibility(View.VISIBLE);
         }
 
         if (recyclerPromo != null) {
             recyclerPromo.setVisibility(View.VISIBLE);
-            Log.d("BerandaActivity", "RecyclerView is visible for all levels");
         }
 
-        // Card Prospek dan Booking tetap tampil untuk semua level
         if (cardProspekM != null) {
             cardProspekM.setVisibility(View.VISIBLE);
-            Log.d("BerandaActivity", "cardProspekM remains visible for all levels");
         }
 
         if (cardUserpM != null) {
             cardUserpM.setVisibility(View.VISIBLE);
-            Log.d("BerandaActivity", "cardUserpM remains visible for all levels");
         }
     }
 
@@ -514,6 +461,7 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         recyclerPromo.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
         promoAdapter = new PromoAdapter(this, promoList);
+        // ✅ PERUBAHAN: Set user level ke adapter, admin semua jenis dapat akses penuh
         promoAdapter.setUserLevel(userLevel);
         promoAdapter.setOnPromoActionListener(this);
         recyclerPromo.setAdapter(promoAdapter);
@@ -822,8 +770,8 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         });
 
         cardInputPromoM.setOnClickListener(v -> {
-            // Cek level user untuk akses input promo - Operator, Operator Inhouse, dan Operator Freelance tidak bisa akses
-            if ("Operator".equals(userLevel) || "Operator Inhouse".equals(userLevel) || "Operator Freelance".equals(userLevel)) {
+            // ✅ PERUBAHAN: Gunakan method helper isAdminUser()
+            if (!isAdminUser()) {
                 Toast.makeText(this, "Hanya Admin yang dapat menambah promo", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -834,8 +782,8 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         // TAMBAHKAN CLICK LISTENER UNTUK MENU ADMIN - DENGAN INTENT YANG BENAR
         if (cardInputNIP != null) {
             cardInputNIP.setOnClickListener(v -> {
-                // Operator, Operator Inhouse, dan Operator Freelance tidak bisa akses
-                if ("Operator".equals(userLevel) || "Operator Inhouse".equals(userLevel) || "Operator Freelance".equals(userLevel)) {
+                // ✅ PERUBAHAN: Gunakan method helper isOperatorUser()
+                if (isOperatorUser()) {
                     Toast.makeText(this, "Hanya Admin yang dapat mengakses Input NIP", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -853,8 +801,8 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
 
         if (cardStatusAkun != null) {
             cardStatusAkun.setOnClickListener(v -> {
-                // Operator, Operator Inhouse, dan Operator Freelance tidak bisa akses
-                if ("Operator".equals(userLevel) || "Operator Inhouse".equals(userLevel) || "Operator Freelance".equals(userLevel)) {
+                // ✅ PERUBAHAN: Gunakan method helper isOperatorUser()
+                if (isOperatorUser()) {
                     Toast.makeText(this, "Hanya Admin yang dapat mengakses Aktivasi Akun", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -873,8 +821,8 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         // TAMBAHKAN CLICK LISTENER UNTUK CARD INPUT PROYEK, HUNIAN, KAVLING
         if (cardInputProyek != null) {
             cardInputProyek.setOnClickListener(v -> {
-                // Operator, Operator Inhouse, dan Operator Freelance tidak bisa akses
-                if ("Operator".equals(userLevel) || "Operator Inhouse".equals(userLevel) || "Operator Freelance".equals(userLevel)) {
+                // ✅ PERUBAHAN: Gunakan method helper isOperatorUser()
+                if (isOperatorUser()) {
                     Toast.makeText(this, "Hanya Admin yang dapat mengakses Input Proyek", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -892,8 +840,8 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
 
         if (cardInputHunian != null) {
             cardInputHunian.setOnClickListener(v -> {
-                // PERBAIKAN: Tambahkan pengecekan level user
-                if ("Operator".equals(userLevel) || "Operator Inhouse".equals(userLevel) || "Operator Freelance".equals(userLevel)) {
+                // ✅ PERUBAHAN: Gunakan method helper isOperatorUser()
+                if (isOperatorUser()) {
                     Toast.makeText(this, "Hanya Admin yang dapat mengakses Input Hunian", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -911,8 +859,8 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
 
         if (cardInputKavling != null) {
             cardInputKavling.setOnClickListener(v -> {
-                // Operator, Operator Inhouse, dan Operator Freelance tidak bisa akses
-                if ("Operator".equals(userLevel) || "Operator Inhouse".equals(userLevel) || "Operator Freelance".equals(userLevel)) {
+                // ✅ PERUBAHAN: Gunakan method helper isOperatorUser()
+                if (isOperatorUser()) {
                     Toast.makeText(this, "Hanya Admin yang dapat mengakses Input Kavling", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -961,8 +909,8 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
             } else if (title.equalsIgnoreCase("Input NIP") ||
                     title.equalsIgnoreCase("Aktivasi Akun") ||
                     title.contains("Pengelolaan Akun")) {
-                // Menu admin - cek level user (Operator, Operator Inhouse, dan Operator Freelance tidak bisa akses)
-                if ("Operator".equals(userLevel) || "Operator Inhouse".equals(userLevel) || "Operator Freelance".equals(userLevel)) {
+                // ✅ PERUBAHAN: Gunakan method helper isOperatorUser()
+                if (isOperatorUser()) {
                     Toast.makeText(this, "Hanya Admin yang dapat mengakses menu ini", Toast.LENGTH_SHORT).show();
                     return false;
                 }
@@ -1075,7 +1023,7 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
             Log.e("NewBeranda", "❌ Error showing expired notification: " + e.getMessage());
         }
     }
- 
+
 
 
     // ✅ METHOD BARU: Manual check yang lebih detail
@@ -1126,6 +1074,7 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
             return false;
         }
     }
+
     // ✅ PERBAIKAN: Manual check dengan debugging yang lebih detail
     private void checkAndProcessExpiredPromosManually() {
         Log.d("NewBeranda", "🔍 Manual PROCESSING expired promos - ENHANCED DEBUG");
