@@ -247,6 +247,19 @@ public class ProspekAdapter2 extends RecyclerView.Adapter<ProspekAdapter2.ViewHo
                 if (response.isSuccessful() && response.body() != null) {
                     BasicResponse deleteResponse = response.body();
                     if (deleteResponse.isSuccess()) {
+
+                        // ✅ BARU: Log DELETE prospek ke tabel log_aktivitas
+                        ActivityLogger.log(
+                                context,
+                                ActivityLogger.AKSI_DELETE,
+                                ActivityLogger.FITUR_PROSPEK,
+                                "Hapus prospek: " + namaProspek + " | Penginput: " + namaPenginput,
+                                "LihatDataProspekActivity",
+                                null,
+                                namaProspek
+                        );
+                        // ==================================================
+
                         prospekList.remove(position);
                         prospekListFull.remove(position);
                         notifyItemRemoved(position);
@@ -307,8 +320,6 @@ public class ProspekAdapter2 extends RecyclerView.Adapter<ProspekAdapter2.ViewHo
 
             // Inisialisasi card view
             cardProspek = itemView.findViewById(R.id.cardProspek);
-
-            // HAPUS SEMUA REFERENSI KE iconStatus karena tidak ada di layout
         }
     }
 }

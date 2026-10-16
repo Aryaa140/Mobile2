@@ -10,13 +10,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
-
+import android.text.Editable;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
+import android.text.TextWatcher;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -63,7 +63,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         // Pastikan EditText NIP bisa diketik
         setupEditTextNip();
-
+        setupNipTextWatcher();
         // Menangani klik tombol buat akun
         buttonBuatAkun.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -146,31 +146,121 @@ public class SignUpActivity extends AppCompatActivity {
             }
         });
     }
+    private void setupNipTextWatcher() {
+        editTextNoNip.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String nip = s.toString().trim().toUpperCase();
+
+                if (nip.startsWith("MI")) {
+                    // Marketing Inhouse
+                    applyAutoDivision("Marketing Inhouse");
+                } else if (nip.startsWith("MF")) {
+                    // Marketing Freelance
+                    applyAutoDivision("Marketing Freelance");
+                } else if (nip.startsWith("AO")) {
+                    // Admin Operator
+                    applyAutoDivision("Admin Operator");
+                } else {
+                    // Prefix tidak dikenali → buka lock, biarkan user pilih manual
+                    spinnerDivision.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
+    }
+    // Pilih divisi otomatis & kunci spinner supaya tidak bisa diubah user
+    private void applyAutoDivision(String divisionName) {
+        if (spinnerDivision.getAdapter() == null || spinnerDivision.getAdapter().getCount() == 0) {
+            return;
+        }
+
+        // Cari index divisi yang cocok
+        int foundIndex = -1;
+        String targetLower = divisionName.toLowerCase();
+        for (int i = 0; i < spinnerDivision.getAdapter().getCount(); i++) {
+            Object item = spinnerDivision.getAdapter().getItem(i);
+            if (item == null) continue;
+            String itemLower = item.toString().toLowerCase();
+
+            // Cocokkan ketat dulu (exact contains), lalu fallback kata kunci
+            if (itemLower.contains(targetLower)
+                    || (targetLower.contains("freelance") && itemLower.contains("freelance"))
+                    || (targetLower.contains("inhouse")   && itemLower.contains("inhouse"))
+                    || (targetLower.contains("admin")     && itemLower.contains("admin"))) {
+                foundIndex = i;
+                break;
+            }
+        }
+
+        if (foundIndex >= 0) {
+            if (spinnerDivision.getSelectedItemPosition() != foundIndex) {
+                spinnerDivision.setSelection(foundIndex);
+            }
+            // === KUNCI SPINNER ===
+            spinnerDivision.setEnabled(false);
+
+            // Set selectedDivision langsung (karena listener mungkin tidak fire saat disabled)
+            selectedDivision = spinnerDivision.getItemAtPosition(foundIndex).toString();
+            updateNipHint();
+        }
+    }
+    private void selectDivisionByName(String name) {
+        if (spinnerDivision.getAdapter() == null || spinnerDivision.getAdapter().getCount() == 0) {
+            return;
+        }
+        String targetLower = name.toLowerCase();
+        for (int i = 0; i < spinnerDivision.getAdapter().getCount(); i++) {
+            Object item = spinnerDivision.getAdapter().getItem(i);
+            if (item == null) continue;
+            String itemStr = item.toString().toLowerCase();
+
+            // Cocok kalau mengandung nama target,
+            // atau sama-sama mengandung "admin" (untuk toleransi penamaan server)
+            if (itemStr.contains(targetLower)
+                    || (targetLower.contains("admin") && itemStr.contains("admin"))) {
+                if (spinnerDivision.getSelectedItemPosition() != i) {
+                    spinnerDivision.setSelection(i);
+                }
+                return;
+            }
+        }
+    }
 
     // Method untuk setup spinner dengan data dari server
     private void setupDivisionSpinner() {
-        // Buat List dengan data dari server
         List<String> spinnerItems = new ArrayList<>();
         spinnerItems.add("Pilih Divisi");
         spinnerItems.addAll(divisiList);
 
-        // Create an ArrayAdapter menggunakan List<String>
+        // === BARU: pastikan Admin Operator selalu ada ===
+        boolean hasAdminOperator = false;
+        for (String d : spinnerItems) {
+            String dl = d.toLowerCase();
+            if (dl.contains("admin") && dl.contains("operator")) {
+                hasAdminOperator = true;
+                break;
+            }
+        }
+        if (!hasAdminOperator) {
+            spinnerItems.add("Admin Operator");
+        }
+
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, spinnerItems);
-
-        // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        // Apply the adapter to the spinner
         spinnerDivision.setAdapter(adapter);
 
-        // Set listener untuk spinner
         spinnerDivision.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position > 0) {
                     selectedDivision = parent.getItemAtPosition(position).toString();
-                    // Update hint berdasarkan divisi yang dipilih
                     updateNipHint();
                 } else {
                     selectedDivision = "";
@@ -184,33 +274,35 @@ public class SignUpActivity extends AppCompatActivity {
                 editTextNoNip.setHint("Masukkan No. NIP");
             }
         });
-    }
 
+        // === BARU: kalau user sudah mengetik NIP (diawali AO) sebelum server merespon
+        String currentNip = editTextNoNip.getText().toString().trim().toUpperCase();
+        if (currentNip.startsWith("MI")) {
+            applyAutoDivision("Marketing Inhouse");
+        } else if (currentNip.startsWith("MF")) {
+            applyAutoDivision("Marketing Freelance");
+        } else if (currentNip.startsWith("AO")) {
+            applyAutoDivision("Admin Operator");
+        }
+    }
     // Method untuk setup spinner default jika gagal mengambil dari server
     private void setupDefaultDivisionSpinner() {
-        // Buat List dengan opsi default Marketing
         List<String> spinnerItems = new ArrayList<>();
         spinnerItems.add("Pilih Divisi");
         spinnerItems.add("Marketing Inhouse");
         spinnerItems.add("Marketing Freelance");
+        spinnerItems.add("Admin Operator");   // === BARU ===
 
-        // Create an ArrayAdapter menggunakan List<String>
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, spinnerItems);
-
-        // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        // Apply the adapter to the spinner
         spinnerDivision.setAdapter(adapter);
 
-        // Set listener untuk spinner
         spinnerDivision.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position > 0) {
                     selectedDivision = parent.getItemAtPosition(position).toString();
-                    // Update hint berdasarkan divisi yang dipilih
                     updateNipHint();
                 } else {
                     selectedDivision = "";
@@ -224,6 +316,12 @@ public class SignUpActivity extends AppCompatActivity {
                 editTextNoNip.setHint("Masukkan No. NIP");
             }
         });
+
+        // === BARU ===
+        String currentNip = editTextNoNip.getText().toString().trim().toUpperCase();
+        if (currentNip.startsWith("AO")) {
+            selectDivisionByName("Admin Operator");
+        }
     }
 
     // Method untuk setup EditText NIP agar bisa diketik
@@ -357,18 +455,16 @@ public class SignUpActivity extends AppCompatActivity {
 
     // METHOD BARU: Validasi kecocokan divisi dengan kode NIP
     private boolean validateDivisionWithNIP(String division, String nip) {
-        // Ambil 2 karakter pertama dari NIP (kode divisi)
         String nipCode = nip.length() >= 2 ? nip.substring(0, 2).toUpperCase() : "";
+        String divLower = division.toLowerCase();
 
-        // Validasi berdasarkan divisi yang dipilih
-        if (division.toLowerCase().contains("inhouse")) {
-            // Untuk Marketing Inhouse, kode NIP harus "MI"
+        if (divLower.contains("inhouse")) {
             return nipCode.equals("MI");
-        } else if (division.toLowerCase().contains("freelance")) {
-            // Untuk Marketing Freelance, kode NIP harus "MF"
+        } else if (divLower.contains("freelance")) {
             return nipCode.equals("MF");
+        } else if (divLower.contains("admin") || divLower.contains("operator")) {
+            return nipCode.equals("AO");
         }
-
         return false;
     }
 
@@ -425,17 +521,22 @@ public class SignUpActivity extends AppCompatActivity {
             editTextNoNip.setEnabled(false);
             editTextPassword.setEnabled(false);
             editTextPassword2.setEnabled(false);
-        } else {
-            // Enable kembali semua input
+        }else {
             buttonBuatAkun.setText("Buat Akun");
             buttonBuatAkun.setEnabled(true);
             buttonKembali.setEnabled(true);
-            spinnerDivision.setEnabled(true);
             editTextUsername.setEnabled(true);
             editTextEmail.setEnabled(true);
             editTextNoNip.setEnabled(true);
             editTextPassword.setEnabled(true);
             editTextPassword2.setEnabled(true);
+
+            // === BARU: spinner hanya enable kalau NIP tidak punya prefix MI/MF/AO ===
+            String nipNow = editTextNoNip.getText().toString().trim().toUpperCase();
+            boolean autoLock = nipNow.startsWith("MI")
+                    || nipNow.startsWith("MF")
+                    || nipNow.startsWith("AO");
+            spinnerDivision.setEnabled(!autoLock);
         }
     }
 

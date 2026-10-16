@@ -6,7 +6,8 @@
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".NewBeranda">
+    tools:context=".NewBeranda"
+    tools:ignore="UseAppTint,TouchTargetSizeCheck">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
@@ -50,7 +51,6 @@
                 android:padding="20dp"
                 android:gravity="center_vertical">
 
-                <!-- Icon dalam background bulat -->
                 <FrameLayout
                     android:layout_width="60dp"
                     android:layout_height="60dp"
@@ -68,7 +68,6 @@
                         android:tint="@android:color/white"/>
                 </FrameLayout>
 
-                <!-- Teks welcome -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -120,6 +119,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -151,7 +151,6 @@
                         android:shadowDy="2"
                         android:shadowRadius="6"/>
 
-                    <!-- Card dengan icon dan text -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/cardInputPromoM"
                         android:layout_width="wrap_content"
@@ -234,7 +233,6 @@
                         android:shadowRadius="6"/>
                 </LinearLayout>
 
-                <!-- Card Fasilitas -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardFasilitasM"
                     android:layout_width="match_parent"
@@ -273,7 +271,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Card Proyek -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardProyekM"
                     android:layout_width="match_parent"
@@ -377,7 +374,6 @@
                                 android:gravity="center"
                                 android:padding="10dp">
 
-                                <!-- Icon dengan background bulat -->
                                 <FrameLayout
                                     android:layout_width="52dp"
                                     android:layout_height="52dp"
@@ -425,7 +421,6 @@
                                 android:gravity="center"
                                 android:padding="10dp">
 
-                                <!-- Icon dengan background bulat -->
                                 <FrameLayout
                                     android:layout_width="52dp"
                                     android:layout_height="52dp"
@@ -452,9 +447,60 @@
                                     android:letterSpacing="0.05"/>
                             </LinearLayout>
                         </com.google.android.material.card.MaterialCardView>
+
+                        <!-- ============================================================ -->
+                        <!-- ✅ Card Log Aktivitas                                         -->
+                        <!-- ============================================================ -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardLogAktivitas"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:layout_margin="8dp"
+                            app:cardCornerRadius="20dp"
+                            app:cardElevation="8dp"
+                            app:strokeColor="@color/light_blue_500"
+                            app:strokeWidth="1dp"
+                            android:foreground="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:padding="10dp">
+
+                                <FrameLayout
+                                    android:layout_width="52dp"
+                                    android:layout_height="52dp"
+                                    android:background="@drawable/bg_circle_gradient"
+                                    android:elevation="4dp">
+
+                                    <ImageView
+                                        android:layout_width="28dp"
+                                        android:layout_height="28dp"
+                                        android:layout_gravity="center"
+                                        android:src="@drawable/ic_history"
+                                        android:tint="@android:color/white"
+                                        android:contentDescription="Log Aktivitas"/>
+                                </FrameLayout>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="10dp"
+                                    android:text="Log Aktivitas"
+                                    android:textSize="11sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/black"
+                                    android:letterSpacing="0.05"/>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+                        <!-- ======================= AKHIR CARD ======================== -->
+
                     </LinearLayout>
                 </HorizontalScrollView>
-
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -521,7 +567,6 @@
                                 android:gravity="center"
                                 android:padding="10dp">
 
-                                <!-- Icon dengan background bulat -->
                                 <FrameLayout
                                     android:layout_width="52dp"
                                     android:layout_height="52dp"
@@ -569,7 +614,6 @@
                                 android:gravity="center"
                                 android:padding="10dp">
 
-                                <!-- Icon dengan background bulat -->
                                 <FrameLayout
                                     android:layout_width="52dp"
                                     android:layout_height="52dp"
@@ -597,7 +641,6 @@
                             </LinearLayout>
                         </com.google.android.material.card.MaterialCardView>
 
-
                         <com.google.android.material.card.MaterialCardView
                             android:id="@+id/cardInputKavling"
                             android:layout_width="100dp"
@@ -618,7 +661,6 @@
                                 android:gravity="center"
                                 android:padding="10dp">
 
-                                <!-- Icon dengan background bulat -->
                                 <FrameLayout
                                     android:layout_width="52dp"
                                     android:layout_height="52dp"
@@ -678,120 +720,119 @@
                         android:shadowRadius="6"/>
                 </LinearLayout>
 
-            <HorizontalScrollView
-                android:id="@+id/scrollMenu3"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:scrollbars="none"
-                app:layout_constraintTop_toBottomOf="@id/recyclerPromo">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="8dp">
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cardProspekM"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_margin="8dp"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="8dp"
-                    app:strokeColor="@color/light_blue_500"
-                    app:strokeWidth="1dp"
-                    android:foreground="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
+                <HorizontalScrollView
+                    android:id="@+id/scrollMenu3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:scrollbars="none"
+                    app:layout_constraintTop_toBottomOf="@id/recyclerPromo">
 
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="10dp">
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="8dp">
 
-                        <!-- Icon dengan background bulat -->
-                        <FrameLayout
-                            android:layout_width="52dp"
-                            android:layout_height="52dp"
-                            android:background="@drawable/bg_circle_gradient"
-                            android:elevation="4dp">
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardProspekM"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:layout_margin="8dp"
+                            app:cardCornerRadius="20dp"
+                            app:cardElevation="8dp"
+                            app:strokeColor="@color/light_blue_500"
+                            app:strokeWidth="1dp"
+                            android:foreground="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:focusable="true">
 
-                            <ImageView
-                                android:layout_width="28dp"
-                                android:layout_height="28dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_pemohon"
-                                android:tint="@android:color/white"
-                                android:contentDescription="Prospek"/>
-                        </FrameLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:padding="10dp">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="Prospek"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/black"
-                            android:letterSpacing="0.05"/>
+                                <FrameLayout
+                                    android:layout_width="52dp"
+                                    android:layout_height="52dp"
+                                    android:background="@drawable/bg_circle_gradient"
+                                    android:elevation="4dp">
+
+                                    <ImageView
+                                        android:layout_width="28dp"
+                                        android:layout_height="28dp"
+                                        android:layout_gravity="center"
+                                        android:src="@drawable/ic_pemohon"
+                                        android:tint="@android:color/white"
+                                        android:contentDescription="Prospek"/>
+                                </FrameLayout>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="10dp"
+                                    android:text="Prospek"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/black"
+                                    android:letterSpacing="0.05"/>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardUserpM"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:layout_margin="8dp"
+                            app:cardCornerRadius="20dp"
+                            app:cardElevation="8dp"
+                            app:strokeColor="@color/light_blue_500"
+                            app:strokeWidth="1dp"
+                            android:foreground="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:padding="10dp">
+
+                                <FrameLayout
+                                    android:layout_width="52dp"
+                                    android:layout_height="52dp"
+                                    android:background="@drawable/bg_circle_gradient"
+                                    android:elevation="4dp">
+
+                                    <ImageView
+                                        android:layout_width="28dp"
+                                        android:layout_height="28dp"
+                                        android:layout_gravity="center"
+                                        android:src="@drawable/ic_prospek"
+                                        android:tint="@android:color/white"
+                                        android:contentDescription="Booking"/>
+                                </FrameLayout>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="10dp"
+                                    android:text="Booking"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/black"
+                                    android:letterSpacing="0.05"/>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
                     </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cardUserpM"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_margin="8dp"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="8dp"
-                    app:strokeColor="@color/light_blue_500"
-                    app:strokeWidth="1dp"
-                    android:foreground="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="10dp">
-
-                        <!-- Icon dengan background bulat -->
-                        <FrameLayout
-                            android:layout_width="52dp"
-                            android:layout_height="52dp"
-                            android:background="@drawable/bg_circle_gradient"
-                            android:elevation="4dp">
-
-                            <ImageView
-                                android:layout_width="28dp"
-                                android:layout_height="28dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_prospek"
-                                android:tint="@android:color/white"
-                                android:contentDescription="Booking"/>
-                        </FrameLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="Booking"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/black"
-                            android:letterSpacing="0.05"/>
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
-            </HorizontalScrollView>
+                </HorizontalScrollView>
 
             </LinearLayout>
         </ScrollView>
+
         <View
             android:id="@+id/shadow_view"
             android:layout_width="match_parent"

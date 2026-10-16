@@ -30,7 +30,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class TambahProspekActivity extends AppCompatActivity {
+public class TambahProspekActivity extends BaseActivity {
 
     Button Simpan, Batal;
     MaterialToolbar TopAppBar;
@@ -360,7 +360,15 @@ public class TambahProspekActivity extends AppCompatActivity {
                                 "Data prospek berhasil disimpan dengan status: " + statusLib,
                                 Toast.LENGTH_SHORT).show();
                         clearForm();
-
+                        ActivityLogger.log(
+                                TambahProspekActivity.this,
+                                ActivityLogger.AKSI_CREATE,
+                                ActivityLogger.FITUR_PROSPEK,
+                                "Menambah prospek: " + nama + " | HP: " + noHp + " | Status: " + statusLib,
+                                "TambahProspekActivity",
+                                null,
+                                nama
+                        );
                         Intent intent = new Intent(TambahProspekActivity.this, NewBeranda.class);
                         startActivity(intent);
                         finish();

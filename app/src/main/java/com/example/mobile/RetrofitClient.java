@@ -9,7 +9,7 @@ import com.google.gson.GsonBuilder;
 import java.util.concurrent.TimeUnit;
 
 public class RetrofitClient {
-    private static final String BASE_URL = "http://192.168.1.9/quality_mobile_api2/";
+    private static final String BASE_URL = "http://192.168.0.10/quality_mobile_api2/";
     private static Retrofit retrofit;
 
     public static Retrofit getClient() {

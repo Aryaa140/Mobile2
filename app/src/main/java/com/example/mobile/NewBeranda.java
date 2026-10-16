@@ -53,9 +53,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnPromoActionListener {
+public class NewBeranda extends BaseActivity implements PromoAdapter.OnPromoActionListener {
     MaterialCardView cardWelcome, cardProspekM, cardFasilitasM, cardProyekM, cardUserpM, cardInputPromoM;
     MaterialCardView cardInputNIP, cardStatusAkun, cardInputProyek, cardInputHunian, cardInputKavling;
+    MaterialCardView cardLogAktivitas;
     private BottomNavigationView bottomNavigationView;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
@@ -256,7 +257,7 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         cardProyekM = findViewById(R.id.cardProyekM);
         cardUserpM = findViewById(R.id.cardUserpM);
         cardInputPromoM = findViewById(R.id.cardInputPromoM);
-
+        cardLogAktivitas = findViewById(R.id.cardLogAktivitas);
         // INISIALISASI ELEMEN BARU
         cardInputNIP = findViewById(R.id.cardInputNIP);
         cardStatusAkun = findViewById(R.id.cardStatusAkun);
@@ -323,7 +324,10 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
             cardInputPromoM.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
             Log.d("BerandaActivity", "cardInputPromoM: " + (isAdmin ? "Shown" : "Hidden"));
         }
-
+        if (cardLogAktivitas != null) {
+            cardLogAktivitas.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+            Log.d("BerandaActivity", "cardLogAktivitas: " + (isAdmin ? "Shown" : "Hidden"));
+        }
         if (tvMenu2 != null) {
             tvMenu2.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
             Log.d("BerandaActivity", "tvMenu2: " + (isAdmin ? "Shown" : "Hidden"));
@@ -461,12 +465,19 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         recyclerPromo.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
         promoAdapter = new PromoAdapter(this, promoList);
-        // ✅ PERUBAHAN: Set user level ke adapter, admin semua jenis dapat akses penuh
-        promoAdapter.setUserLevel(userLevel);
+
+        // ✅ PERBAIKAN: Normalisasi level untuk adapter
+        // Adapter hanya mengenal "Admin" (bukan "Admin Operator"/"Admin Pembuat"),
+        // jadi kalau user adalah salah satu jenis admin, kirim "Admin" ke adapter
+        // supaya fitur titik tiga (edit/delete) muncul.
+        String adapterLevel = isAdminUser() ? "Admin" : userLevel;
+        promoAdapter.setUserLevel(adapterLevel);
+
         promoAdapter.setOnPromoActionListener(this);
         recyclerPromo.setAdapter(promoAdapter);
 
-        Log.d("BerandaActivity", "RecyclerView setup completed with level: " + userLevel);
+        Log.d("BerandaActivity", "RecyclerView setup - Real level: "
+                + userLevel + ", Adapter level: " + adapterLevel);
     }
 
     private void checkAndRequestPermissions() {
@@ -798,7 +809,28 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
                 }
             });
         }
-
+// ✅ BARU: Click listener untuk cardLogAktivitas
+        if (cardLogAktivitas != null) {
+            cardLogAktivitas.setOnClickListener(v -> {
+                // Cek hak akses: hanya admin (bukan operator/marketing)
+                if (isOperatorUser()) {
+                    Toast.makeText(this,
+                            "Hanya Admin yang dapat mengakses Log Aktivitas",
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                // Buka LogAktivitasActivity
+                try {
+                    Intent intent = new Intent(NewBeranda.this, LogAktivitasActivity.class);
+                    startActivity(intent);
+                    Log.d("BerandaActivity", "Opening LogAktivitasActivity");
+                } catch (Exception e) {
+                    Log.e("BerandaActivity", "Error opening LogAktivitasActivity: " + e.getMessage());
+                    Toast.makeText(NewBeranda.this,
+                            "Gagal membuka Log Aktivitas", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
         if (cardStatusAkun != null) {
             cardStatusAkun.setOnClickListener(v -> {
                 // ✅ PERUBAHAN: Gunakan method helper isOperatorUser()
@@ -945,7 +977,11 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
             if (menuTitle.equalsIgnoreCase("Input NIP")) {
                 Intent intent = new Intent(this, InputNipActivity.class);
                 startActivity(intent);
-            } else if (menuTitle.equalsIgnoreCase("Aktivasi Akun")) {
+            }else if (menuTitle.equalsIgnoreCase("Log Aktivitas")) {
+                Intent intent = new Intent(this, LogAktivitasActivity.class);
+                startActivity(intent);
+            }
+            else if (menuTitle.equalsIgnoreCase("Aktivasi Akun")) {
                 Intent intent = new Intent(this, StatusAkunActivity.class);
                 startActivity(intent);
             } else if (menuTitle.equalsIgnoreCase("Tambah User Prospek") ||
@@ -1625,6 +1661,13 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         editor.apply();
 
         Toast.makeText(NewBeranda.this, "Logout berhasil", Toast.LENGTH_SHORT).show();
+        ActivityLogger.log(
+                NewBeranda.this,
+                ActivityLogger.AKSI_LOGOUT,
+                ActivityLogger.FITUR_AUTH,
+                "User logout"
+        );
+
         Intent intent = new Intent(NewBeranda.this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
@@ -1653,7 +1696,15 @@ public class NewBeranda extends AppCompatActivity implements PromoAdapter.OnProm
         setupUserInfo();
         setupAccessBasedOnLevel();
 
-        // ✅ PERBAIKAN: Pastikan auto delete service berjalan
+        // ✅ PERBAIKAN: Refresh level di adapter juga, kalau tidak
+        // adapter masih pakai level lama setelah setupUserInfo()
+        if (promoAdapter != null) {
+            String adapterLevel = isAdminUser() ? "Admin" : userLevel;
+            promoAdapter.setUserLevel(adapterLevel);
+            Log.d("BerandaActivity", "onResume - Adapter level refreshed: " + adapterLevel);
+        }
+
+        // ✅ Pastikan auto delete service berjalan
         if (autoDeleteHandler == null) {
             startEnhancedAutoDeleteService();
         }

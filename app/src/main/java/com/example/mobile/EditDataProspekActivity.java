@@ -31,7 +31,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class EditDataProspekActivity extends AppCompatActivity {
+public class EditDataProspekActivity extends BaseActivity {
     MaterialToolbar topAppBar;
     BottomNavigationView bottomNavigationView;
 
@@ -310,6 +310,22 @@ public class EditDataProspekActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     BasicResponse basicResponse = response.body();
                     if (basicResponse.isSuccess()) {
+
+                        // ============ LOG UPDATE PROSPEK ============
+                        // ✅ DIPERBAIKI: pakai variabel yang benar + panggil SEBELUM finish()
+                        ActivityLogger.log(
+                                EditDataProspekActivity.this,
+                                ActivityLogger.AKSI_UPDATE,
+                                ActivityLogger.FITUR_PROSPEK,
+                                "Update prospek: " + namaProspek
+                                        + " | Status: " + newStatusLib
+                                        + " | HP: " + noHp,
+                                "EditDataProspekActivity",
+                                idProspek,          // ✅ ganti dari prospekId
+                                namaProspek         // ✅ ganti dari namaBaru
+                        );
+                        // ============================================
+
                         // Jika status lib berubah, simpan histori
                         if (statusLibChanged && idProspek != -1) {
                             simpanHistoriStatusLib(oldStatusLib, newStatusLib);
@@ -317,7 +333,7 @@ public class EditDataProspekActivity extends AppCompatActivity {
 
                         showToast("Data berhasil diupdate");
                         setResult(RESULT_OK);
-                        finish();
+                        finish();   // ← finish() di paling akhir
                     } else {
                         showToast("Gagal: " + basicResponse.getMessage());
                     }

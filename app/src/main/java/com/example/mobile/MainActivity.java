@@ -299,6 +299,12 @@ public class MainActivity extends AppCompatActivity {
                                     loginResponse.getLevel(),
                                     loginResponse.getDate_out()
                             );
+                            ActivityLogger.log(
+                                    MainActivity.this,
+                                    ActivityLogger.AKSI_LOGIN,
+                                    ActivityLogger.FITUR_AUTH,
+                                    "User login: " + username + " (" + loginResponse.getLevel() + ")"
+                            );
 
                             redirectToBeranda();
 

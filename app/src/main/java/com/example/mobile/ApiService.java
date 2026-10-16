@@ -1,5 +1,7 @@
     package com.example.mobile;
 
+
+
     import java.util.List;
     import java.util.Map;
 
@@ -777,4 +779,36 @@
 
         @POST("delete_all_histori_status_lib.php")
         Call<BasicResponse> deleteAllHistoriStatusLib();
+        @FormUrlEncoded
+        @POST("log_aktivitas.php")
+        Call<LogResponse> addLog(
+                @Field("action")             String action,
+                @Field("username")           String username,
+                @Field("nip")                String nip,
+                @Field("divisi")             String divisi,
+                @Field("level")              String level,
+                @Field("aksi")               String aksi,
+                @Field("fitur")              String fitur,
+                @Field("deskripsi")          String deskripsi,
+                @Field("activity_name")      String activityName,
+                @Field("device_info")        String deviceInfo,
+                @Field("id_target")          Integer idTarget,
+                @Field("nama_target")        String namaTarget,
+
+                // ===== PARAMETER WAKTU BARU =====
+                @Field("device_time_millis") Long deviceTimeMillis,
+                @Field("device_time_string") String deviceTimeString,
+                @Field("timezone")           String timezone,
+                @Field("timezone_offset")    String timezoneOffset,
+                @Field("hari")               String hari
+        );
+
+        @GET("log_aktivitas.php")
+        Call<LogListResponse> getLog(
+                @Query("action")   String action,   // "get_log"
+                @Query("fitur")    String fitur,
+                @Query("aksi")     String aksi,
+                @Query("username") String username,
+                @Query("limit")    int limit
+        );
     }

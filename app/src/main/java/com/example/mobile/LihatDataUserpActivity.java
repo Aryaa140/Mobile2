@@ -19,12 +19,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.Manifest;
-import android.content.DialogInterface;
-import android.content.Intent;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.Insets;
@@ -60,7 +57,7 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.property.TextAlignment;
 import com.itextpdf.layout.property.UnitValue;
 
-public class LihatDataUserpActivity extends AppCompatActivity {
+public class LihatDataUserpActivity extends BaseActivity {
 
     private RecyclerView recyclerView;
     private EditText searchEditText;
@@ -322,6 +319,22 @@ public class LihatDataUserpActivity extends AppCompatActivity {
                     if (response.isSuccessful() && response.body() != null) {
                         BasicResponse apiResponse = response.body();
                         if (apiResponse.isSuccess()) {
+
+                            // ✅ BARU: Log aksi BOOKING/Realisasi
+                            ActivityLogger.log(
+                                    LihatDataUserpActivity.this,
+                                    ActivityLogger.AKSI_BOOKING,
+                                    ActivityLogger.FITUR_BOOKING,
+                                    "Realisasi booking: " + userProspek.getNama()
+                                            + " | Proyek: " + userProspek.getProyek()
+                                            + " | Hunian: " + userProspek.getHunian()
+                                            + " | DP: " + userProspek.getDp(),
+                                    "LihatDataUserpActivity",
+                                    userProspek.getId(),
+                                    userProspek.getNama()
+                            );
+                            // =============================================
+
                             Toast.makeText(LihatDataUserpActivity.this,
                                     "✅ Data berhasil direalisasikan!", Toast.LENGTH_LONG).show();
                             loadUserProspekData();
@@ -437,10 +450,8 @@ public class LihatDataUserpActivity extends AppCompatActivity {
                 }
             } else {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    // User menolak tapi tidak centang "Never ask again"
                     requestStoragePermissionWithExplanation();
                 } else {
-                    // User menolak dan centang "Never ask again"
                     showPermissionSettingsDialog();
                 }
             }
@@ -451,6 +462,18 @@ public class LihatDataUserpActivity extends AppCompatActivity {
         Log.d(TAG, "🎯 Handle print untuk: " + userProspek.getNama());
 
         pendingPrintProspek = userProspek;
+
+        // ✅ BARU: Log aksi CETAK (VIEW)
+        ActivityLogger.log(
+                LihatDataUserpActivity.this,
+                ActivityLogger.AKSI_VIEW,
+                ActivityLogger.FITUR_BOOKING,
+                "Cetak PDF Penerimaan Kas: " + userProspek.getNama()
+                        + " | Hunian: " + userProspek.getHunian(),
+                "LihatDataUserpActivity",
+                userProspek.getId(),
+                userProspek.getNama()
+        );
 
         if (hasStoragePermission()) {
             Log.d(TAG, "Permission SUDAH diberikan, langsung generate PDF");
@@ -703,6 +726,17 @@ public class LihatDataUserpActivity extends AppCompatActivity {
             return;
         }
 
+        // ✅ BARU: Log VIEW menuju Edit Data User Prospek
+        ActivityLogger.log(
+                LihatDataUserpActivity.this,
+                ActivityLogger.AKSI_VIEW,
+                ActivityLogger.FITUR_USERP,
+                "Membuka form edit user prospek: " + userProspek.getNama(),
+                "LihatDataUserpActivity",
+                userProspek.getId(),
+                userProspek.getNama()
+        );
+
         Intent intent = new Intent(LihatDataUserpActivity.this, EditDataUserpActivity.class);
         intent.putExtra("USER_PROSPEK_ID", userProspek.getId());
         intent.putExtra("PENGINPUT", userProspek.getPenginput());
@@ -716,10 +750,10 @@ public class LihatDataUserpActivity extends AppCompatActivity {
         intent.putExtra("DP", userProspek.getDp());
         intent.putExtra("STATUS_BPJS", userProspek.getBpjs());
         intent.putExtra("STATUS_NPWP", userProspek.getNpwp());
-        // Tambahkan extra STATUS_SPS
         intent.putExtra("STATUS_SPS", userProspek.getStatusSps());
         startActivityForResult(intent, 1);
     }
+
     private void showDeleteConfirmation(UserProspekSimple userProspek) {
         if (!"Admin Pembuat".equals(userLevel) && !"Admin".equals(userLevel)) {
             Toast.makeText(this, "Hanya Admin Pembuat yang dapat menghapus data", Toast.LENGTH_SHORT).show();
@@ -786,7 +820,6 @@ public class LihatDataUserpActivity extends AppCompatActivity {
             holder.tvTipeHunian.setText("Tipe Hunian: " + (userProspek.getTipeHunian() != null ? userProspek.getTipeHunian() : "-"));
 
             // --- Atur visibilitas tombol berdasarkan role ---
-            // Tombol Edit & Delete: hanya Admin Pembuat
             if (holder.btnEdit != null) {
                 holder.btnEdit.setVisibility(isAdminPembuat ? View.VISIBLE : View.GONE);
                 if (isAdminPembuat) {
@@ -800,12 +833,8 @@ public class LihatDataUserpActivity extends AppCompatActivity {
                 }
             }
 
-            // Tombol aksi (Realisasi, Cetak, Histori):
-            // - Admin Pembuat: boleh untuk semua data
-            // - User biasa: hanya untuk data miliknya sendiri
             boolean isDataMilikSendiri = userProspek.getPenginput() != null && userProspek.getPenginput().equals(currentUser);
             boolean showActionButtons = isAdminPembuat || (isUserBiasa && isDataMilikSendiri);
-            // Admin Operator tidak boleh melihat tombol aksi sama sekali
 
             if (holder.btnRealisasi != null) {
                 holder.btnRealisasi.setVisibility(showActionButtons ? View.VISIBLE : View.GONE);
@@ -823,6 +852,17 @@ public class LihatDataUserpActivity extends AppCompatActivity {
                 holder.btnHistori.setVisibility(showActionButtons ? View.VISIBLE : View.GONE);
                 if (showActionButtons) {
                     holder.btnHistori.setOnClickListener(v -> {
+                        // ✅ BARU: Log VIEW menuju Histori User Prospek
+                        ActivityLogger.log(
+                                LihatDataUserpActivity.this,
+                                ActivityLogger.AKSI_VIEW,
+                                ActivityLogger.FITUR_USERP,
+                                "Membuka histori user prospek: " + userProspek.getNama(),
+                                "LihatDataUserpActivity",
+                                userProspek.getId(),
+                                userProspek.getNama()
+                        );
+
                         Intent intent = new Intent(LihatDataUserpActivity.this, LihatDataHistoriUserProspek.class);
                         intent.putExtra("USER_PROSPEK_ID", userProspek.getId());
                         intent.putExtra("NAMA", userProspek.getNama());

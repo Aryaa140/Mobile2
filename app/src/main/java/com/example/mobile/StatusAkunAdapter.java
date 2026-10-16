@@ -1,6 +1,7 @@
 package com.example.mobile;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
@@ -18,6 +20,9 @@ public class StatusAkunAdapter extends RecyclerView.Adapter<StatusAkunAdapter.St
     private List<User> userList;
     private OnStatusAkunActionListener actionListener;
 
+    // ✅ level user yang sedang login (dikirim dari Activity)
+    private String currentUserLevel = "";
+
     public interface OnStatusAkunActionListener {
         void onAktifkanUser(int userId, String username);
         void onNonaktifkanUser(int userId, String username);
@@ -27,6 +32,11 @@ public class StatusAkunAdapter extends RecyclerView.Adapter<StatusAkunAdapter.St
         this.context = context;
         this.userList = userList;
         this.actionListener = listener;
+    }
+
+    // ✅ setter supaya Activity bisa kirim level user login
+    public void setCurrentUserLevel(String level) {
+        this.currentUserLevel = (level != null) ? level : "";
     }
 
     @NonNull
@@ -44,7 +54,7 @@ public class StatusAkunAdapter extends RecyclerView.Adapter<StatusAkunAdapter.St
 
     @Override
     public int getItemCount() {
-        return userList.size();
+        return userList != null ? userList.size() : 0;
     }
 
     public class StatusAkunViewHolder extends RecyclerView.ViewHolder {
@@ -69,17 +79,44 @@ public class StatusAkunAdapter extends RecyclerView.Adapter<StatusAkunAdapter.St
             tvLevelAkun.setText("Akun Level : " + (user.getLevel() != null ? user.getLevel() : "-"));
             tvStatusAkun.setText("Status Akun : " + (user.getStatusAkun() != null ? user.getStatusAkun() : "-"));
 
-            // Atur warna status
+            // ✅ Atur warna status (pakai ContextCompat agar tidak deprecated)
             if ("Aktif".equals(user.getStatusAkun())) {
-                tvStatusAkun.setTextColor(context.getResources().getColor(android.R.color.holo_green_dark));
+                tvStatusAkun.setTextColor(ContextCompat.getColor(context, android.R.color.holo_green_dark));
             } else {
-                tvStatusAkun.setTextColor(context.getResources().getColor(android.R.color.holo_red_dark));
+                tvStatusAkun.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
+            }
+
+            // ✅ cek apakah user ini adalah Admin Operator
+            String userLevel = (user.getLevel() != null)
+                    ? user.getLevel().toLowerCase().trim()
+                    : "";
+            boolean isAdminOperator = userLevel.equals("admin operator");
+
+            // ✅ cek apakah yang login adalah Admin Pembuat
+            boolean isCurrentAdminPembuat =
+                    "admin pembuat".equalsIgnoreCase(currentUserLevel);
+
+            // ✅ hak akses toggle
+            // - Admin Operator → HANYA Admin Pembuat
+            // - Selain itu (Marketing Inhouse/Freelance) → semua admin boleh
+            boolean canToggle;
+            if (isAdminOperator) {
+                canToggle = isCurrentAdminPembuat;
+            } else {
+                canToggle = true;
             }
 
             // Handle button aktif
             btnAktif.setOnClickListener(v -> {
+                if (isAdminOperator && !isCurrentAdminPembuat) {
+                    Toast.makeText(context,
+                            "Hanya Admin Pembuat yang dapat mengubah status Admin Operator",
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 if ("Aktif".equals(user.getStatusAkun())) {
-                    Toast.makeText(context, "Status " + user.getUsername() + " masih Aktif", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Status " + user.getUsername() + " masih Aktif",
+                            Toast.LENGTH_SHORT).show();
                 } else {
                     if (actionListener != null) {
                         actionListener.onAktifkanUser(user.getId(), user.getUsername());
@@ -89,8 +126,15 @@ public class StatusAkunAdapter extends RecyclerView.Adapter<StatusAkunAdapter.St
 
             // Handle button nonaktif
             btnDelete.setOnClickListener(v -> {
+                if (isAdminOperator && !isCurrentAdminPembuat) {
+                    Toast.makeText(context,
+                            "Hanya Admin Pembuat yang dapat mengubah status Admin Operator",
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 if ("Nonaktif".equals(user.getStatusAkun())) {
-                    Toast.makeText(context, "Status " + user.getUsername() + " sudah Nonaktif", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Status " + user.getUsername() + " sudah Nonaktif",
+                            Toast.LENGTH_SHORT).show();
                 } else {
                     if (actionListener != null) {
                         actionListener.onNonaktifkanUser(user.getId(), user.getUsername());
@@ -98,17 +142,37 @@ public class StatusAkunAdapter extends RecyclerView.Adapter<StatusAkunAdapter.St
                 }
             });
 
-            // Update teks button berdasarkan status
+            // ✅ Update teks + warna tombol berdasarkan status
+            //    Pakai setBackgroundTintList (bukan setBackgroundColor) untuk MaterialButton
             if ("Aktif".equals(user.getStatusAkun())) {
                 btnAktif.setText("Aktif");
-                btnAktif.setBackgroundColor(context.getResources().getColor(android.R.color.darker_gray));
+                btnAktif.setBackgroundTintList(ColorStateList.valueOf(
+                        ContextCompat.getColor(context, android.R.color.darker_gray)));
+
                 btnDelete.setText("Nonaktifkan");
-                btnDelete.setBackgroundColor(context.getResources().getColor(android.R.color.holo_red_dark));
+                btnDelete.setBackgroundTintList(ColorStateList.valueOf(
+                        ContextCompat.getColor(context, android.R.color.holo_red_dark)));
             } else {
                 btnAktif.setText("Aktifkan");
-                btnAktif.setBackgroundColor(context.getResources().getColor(android.R.color.holo_blue_light));
+                btnAktif.setBackgroundTintList(ColorStateList.valueOf(
+                        ContextCompat.getColor(context, android.R.color.holo_blue_light)));
+
                 btnDelete.setText("Nonaktif");
-                btnDelete.setBackgroundColor(context.getResources().getColor(android.R.color.darker_gray));
+                btnDelete.setBackgroundTintList(ColorStateList.valueOf(
+                        ContextCompat.getColor(context, android.R.color.darker_gray)));
+            }
+
+            // ✅ Visual feedback kalau tombol dikunci
+            if (!canToggle) {
+                btnAktif.setEnabled(false);
+                btnDelete.setEnabled(false);
+                btnAktif.setAlpha(0.4f);
+                btnDelete.setAlpha(0.4f);
+            } else {
+                btnAktif.setEnabled(true);
+                btnDelete.setEnabled(true);
+                btnAktif.setAlpha(1f);
+                btnDelete.setAlpha(1f);
             }
         }
     }

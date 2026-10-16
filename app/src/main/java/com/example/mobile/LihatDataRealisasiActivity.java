@@ -17,7 +17,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -39,7 +38,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class LihatDataRealisasiActivity extends AppCompatActivity {
+public class LihatDataRealisasiActivity extends BaseActivity {
 
     private MaterialToolbar topAppBar;
     private BottomNavigationView BottomNavigationView;
@@ -141,7 +140,6 @@ public class LihatDataRealisasiActivity extends AppCompatActivity {
         if ("Admin".equals(userLevel)) {
             penginputParam = "all";
         } else {
-            // Ambil username dari SharedPreferences
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
             String userName = prefs.getString("username", "");
             penginputParam = userName;
@@ -232,6 +230,7 @@ public class LihatDataRealisasiActivity extends AppCompatActivity {
 
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
+
     private void filterData(String query) {
         filteredList.clear();
         if (query.isEmpty()) {
@@ -245,6 +244,7 @@ public class LihatDataRealisasiActivity extends AppCompatActivity {
         }
         adapter.notifyDataSetChanged();
     }
+
     // Di LihatDataRealisasiActivity.java - UBAH DARI PRIVATE KE PUBLIC
     public void showEditRealisasiDialog(Realisasi realisasi) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -280,7 +280,6 @@ public class LihatDataRealisasiActivity extends AppCompatActivity {
                 );
             } catch (Exception e) {
                 Log.e(TAG, "Error parsing previous date: " + e.getMessage());
-                // Jika gagal, gunakan tanggal hari ini
                 Calendar cal = Calendar.getInstance();
                 datePicker.updateDate(
                         cal.get(Calendar.YEAR),
@@ -313,9 +312,6 @@ public class LihatDataRealisasiActivity extends AppCompatActivity {
         btnBatalEdit.setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
-
-
-
     }
 
     private void updateRealisasi(int idRealisasi, String tanggalRealisasiBaru) {
@@ -331,6 +327,20 @@ public class LihatDataRealisasiActivity extends AppCompatActivity {
                         if (response.isSuccessful() && response.body() != null) {
                             BasicResponse apiResponse = response.body();
                             if (apiResponse.isSuccess()) {
+
+                                // ✅ BARU: Log aksi UPDATE realisasi
+                                ActivityLogger.log(
+                                        LihatDataRealisasiActivity.this,
+                                        ActivityLogger.AKSI_UPDATE,
+                                        ActivityLogger.FITUR_REALISASI,
+                                        "Update tanggal realisasi: " + tanggalRealisasiBaru
+                                                + " | ID Realisasi: " + idRealisasi,
+                                        "LihatDataRealisasiActivity",
+                                        idRealisasi,
+                                        null
+                                );
+                                // =============================================
+
                                 Toast.makeText(LihatDataRealisasiActivity.this,
                                         "✅ Tanggal realisasi berhasil diupdate!", Toast.LENGTH_LONG).show();
                                 // Refresh data setelah berhasil update
@@ -369,24 +379,22 @@ public class LihatDataRealisasiActivity extends AppCompatActivity {
         }
 
         try {
-            // Coba format dengan time
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
             SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
             Date date = inputFormat.parse(dateString);
             return outputFormat.format(date);
         } catch (Exception e) {
             try {
-                // Coba format tanpa time
                 SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                 SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
                 Date date = inputFormat.parse(dateString);
                 return outputFormat.format(date);
             } catch (Exception ex) {
-                // Jika semua gagal, return string asli
                 return dateString;
             }
         }
     }
+
     @Override
     protected void onResume() {
         super.onResume();

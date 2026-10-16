@@ -16,7 +16,6 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -36,7 +35,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class InputNipActivity extends AppCompatActivity {
+public class InputNipActivity extends BaseActivity {
 
     // UI Components
     private MaterialToolbar topAppBar;
@@ -69,7 +68,7 @@ public class InputNipActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_input_nip_activity); // Pastikan XML sudah pakai ScrollView
+        setContentView(R.layout.activity_input_nip_activity);
 
         currentUserLevel = getIntent().getStringExtra("user_level");
         if (currentUserLevel == null) currentUserLevel = "";
@@ -243,7 +242,6 @@ public class InputNipActivity extends AppCompatActivity {
         String prefix = LEVEL_PREFIX_MAP.get(trimmed);
         if (prefix == null) {
             Log.e("NIP_DEBUG", "Tidak ditemukan prefix untuk: '" + levelName + "'");
-            // Fallback: coba cocokkan dengan contains (untuk berjaga-jaga jika ada karakter tak terlihat)
             for (Map.Entry<String, String> entry : LEVEL_PREFIX_MAP.entrySet()) {
                 if (trimmed.contains(entry.getKey()) || entry.getKey().contains(trimmed)) {
                     prefix = entry.getValue();
@@ -252,7 +250,7 @@ public class InputNipActivity extends AppCompatActivity {
                 }
             }
             if (prefix == null) {
-                return ""; // akan menyebabkan NIP tidak tergenerate
+                return "";
             }
         }
         return prefix;
@@ -340,6 +338,11 @@ public class InputNipActivity extends AppCompatActivity {
             }
         }
 
+        // ✅ BARU: Assign ke variabel final untuk inner class (Callback)
+        final String finalUsername = username;
+        final String finalPassword = password;
+        final String finalEmail = email;
+
         showLoading(true);
 
         ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
@@ -347,7 +350,7 @@ public class InputNipActivity extends AppCompatActivity {
         NipRequest request;
         if (createUser) {
             request = new NipRequest(noNIP, selectedDateOut, username, password, email,
-                    selectedLevelItem.getLevel(), // NAMA level, bukan kode
+                    selectedLevelItem.getLevel(),
                     selectedLevelItem.getDivisi());
         } else {
             request = new NipRequest(noNIP, selectedDateOut, selectedLevelItem.getDivisi());
@@ -361,6 +364,26 @@ public class InputNipActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     BasicResponse basicResponse = response.body();
                     if (basicResponse.isSuccess()) {
+
+                        // ✅ BARU: Log aksi CREATE NIP (pakai finalUsername agar aman di inner class)
+                        try {
+                            ActivityLogger.log(
+                                    InputNipActivity.this,
+                                    ActivityLogger.AKSI_CREATE,
+                                    ActivityLogger.FITUR_USER,
+                                    "Tambah NIP baru: " + noNIP
+                                            + " | Level: " + levelName
+                                            + " | Divisi: " + selectedLevelItem.getDivisi()
+                                            + (createUser ? " | User: " + finalUsername : ""),
+                                    "InputNipActivity",
+                                    null,
+                                    noNIP
+                            );
+                        } catch (Exception logEx) {
+                            Log.e("InputNipActivity", "Error saat log NIP: " + logEx.getMessage());
+                        }
+                        // ===============================================
+
                         Toast.makeText(InputNipActivity.this, basicResponse.getMessage(), Toast.LENGTH_SHORT).show();
                         editTextNoNIP.setText("");
                         selectedDateOut = null;

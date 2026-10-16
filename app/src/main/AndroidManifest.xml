@@ -76,6 +76,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
+            android:name=".LogAktivitasActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar" />
+
+        <activity
             android:name=".EditDataKavlingActivity"
             android:exported="false" />
         <activity
@@ -117,9 +122,7 @@
         <activity
             android:name=".LihatDataHunianActivity"
             android:exported="false" />
-        <activity
-            android:name=".StatusAkunActivity"
-            android:exported="false" />
+
         <activity
             android:name=".InputNipActivity"
             android:exported="false" />
@@ -136,6 +139,10 @@
             android:name=".TambahFasilitasProyekActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".StatusAkunActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar" />
         <activity
             android:name=".EditFasilitasHunianActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />

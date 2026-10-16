@@ -13,8 +13,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -25,7 +23,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class TambahUserpActivity extends AppCompatActivity {
+public class TambahUserpActivity extends BaseActivity {
 
     private static final String TAG = "TambahUserpActivity";
 
@@ -47,6 +45,12 @@ public class TambahUserpActivity extends AppCompatActivity {
 
     private ApiService apiService;
     private SharedPreferences sharedPreferences;
+
+    // ✅ BARU: Simpan data booking sementara untuk log (tidak mengganggu kode lain)
+    private String pendingLogNama = "";
+    private String pendingLogProyek = "";
+    private String pendingLogHunian = "";
+    private String pendingLogTipe = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +84,7 @@ public class TambahUserpActivity extends AppCompatActivity {
         spinnerProyek = findViewById(R.id.spinnerRoleRefrensiProyek);
         spinnerHunian = findViewById(R.id.hunian);
         spinnerTipeUnit = findViewById(R.id.spinnerTipeUnit);
-        spinnerStatusSPS = findViewById(R.id.spinnerStatusSPS); // TAMBAH: Spinner Status SPS
+        spinnerStatusSPS = findViewById(R.id.spinnerStatusSPS);
         editTextPenginput = findViewById(R.id.editTextPenginput);
         editTextNama = findViewById(R.id.editTextNama);
         editTextEmail = findViewById(R.id.editTextEmail);
@@ -107,8 +111,7 @@ public class TambahUserpActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerStatusSPS.setAdapter(adapter);
 
-        // Set default value
-        spinnerStatusSPS.setSelection(0); // Default: "Pilih Status SPS"
+        spinnerStatusSPS.setSelection(0);
     }
 
     // === METHOD PROYEK ===
@@ -207,7 +210,6 @@ public class TambahUserpActivity extends AppCompatActivity {
                         kavlingList.addAll(kavlingResponse.getData());
                         Log.d(TAG, "Data kavling berhasil dimuat: " + kavlingList.size() + " item");
 
-                        // Filter hunian yang tersedia
                         filterHunianData();
                     } else {
                         Log.e(TAG, "Response tidak success atau data null");
@@ -237,7 +239,6 @@ public class TambahUserpActivity extends AppCompatActivity {
         hunianList.clear();
         tipeUnitList.clear();
 
-        // PERBAIKAN: Hanya tampilkan hunian yang masih memiliki unit dengan status "On Progress"
         for (Kavling kavling : kavlingList) {
             if ("On Progress".equalsIgnoreCase(kavling.getStatusPenjualan())) {
                 if (!hunianList.contains(kavling.getHunian())) {
@@ -247,11 +248,9 @@ public class TambahUserpActivity extends AppCompatActivity {
             }
         }
 
-        // PERBAIKAN: Jika tidak ada hunian dengan status "On Progress", tampilkan pesan
         if (hunianList.isEmpty()) {
             Log.d(TAG, "Tidak ada hunian dengan status On Progress");
 
-            // Cek apakah ada hunian yang sudah terjual semua
             for (Kavling kavling : kavlingList) {
                 if (!hunianList.contains(kavling.getHunian())) {
                     hunianList.add(kavling.getHunian() + " (SOLD OUT)");
@@ -282,16 +281,13 @@ public class TambahUserpActivity extends AppCompatActivity {
             return;
         }
 
-        // PERBAIKAN: Hapus "(SOLD OUT)" dari nama hunian untuk pencarian
         String cleanHunian = hunian.replace(" (SOLD OUT)", "").trim();
 
         tipeUnitList.clear();
 
-        // PERBAIKAN: Cek apakah hunian ini sold out
         boolean isHunianSoldOut = hunian.contains("(SOLD OUT)");
 
         if (isHunianSoldOut) {
-            // Jika hunian sold out, tampilkan semua tipe unit dengan status sold out
             for (Kavling kavling : kavlingList) {
                 if (cleanHunian.equals(kavling.getHunian())) {
                     if (!tipeUnitList.contains(kavling.getTipeHunian() + " (SOLD OUT)")) {
@@ -301,7 +297,6 @@ public class TambahUserpActivity extends AppCompatActivity {
                 }
             }
         } else {
-            // Jika hunian masih available, hanya tampilkan tipe unit dengan status "On Progress"
             for (Kavling kavling : kavlingList) {
                 if (cleanHunian.equals(kavling.getHunian()) &&
                         "On Progress".equalsIgnoreCase(kavling.getStatusPenjualan())) {
@@ -312,7 +307,6 @@ public class TambahUserpActivity extends AppCompatActivity {
                 }
             }
 
-            // PERBAIKAN: Jika tidak ada tipe unit dengan status "On Progress", tampilkan yang sold out
             if (tipeUnitList.isEmpty()) {
                 for (Kavling kavling : kavlingList) {
                     if (cleanHunian.equals(kavling.getHunian())) {
@@ -334,7 +328,6 @@ public class TambahUserpActivity extends AppCompatActivity {
             } else {
                 Log.d(TAG, "Tipe unit berhasil dimuat: " + tipeUnitList.size() + " item");
 
-                // PERBAIKAN: Nonaktifkan spinner jika semua tipe unit sold out
                 if (isHunianSoldOut || (tipeUnitList.size() > 0 && tipeUnitList.get(0).contains("(SOLD OUT)"))) {
                     spinnerTipeUnit.setEnabled(false);
                     Toast.makeText(TambahUserpActivity.this,
@@ -650,7 +643,6 @@ public class TambahUserpActivity extends AppCompatActivity {
                     selectedHunian = hunianList.get(position - 1);
                     Log.d(TAG, "Hunian selected: " + selectedHunian);
 
-                    // PERBAIKAN: Nonaktifkan spinner tipe unit jika hunian sold out
                     if (selectedHunian.contains("(SOLD OUT)")) {
                         setTipeUnitSpinnerEnabled(false);
                         clearTipeUnitSpinner();
@@ -682,7 +674,6 @@ public class TambahUserpActivity extends AppCompatActivity {
                     selectedTipeUnit = tipeUnitList.get(position - 1);
                     Log.d(TAG, "Tipe Unit selected: " + selectedTipeUnit);
 
-                    // PERBAIKAN: Validasi jika tipe unit sold out
                     if (selectedTipeUnit.contains("(SOLD OUT)")) {
                         Toast.makeText(TambahUserpActivity.this,
                                 "Tipe unit ini sudah terjual", Toast.LENGTH_SHORT).show();
@@ -718,7 +709,6 @@ public class TambahUserpActivity extends AppCompatActivity {
             }
         });
 
-        // TAMBAH: Listener untuk Status SPS
         spinnerStatusSPS.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -812,13 +802,11 @@ public class TambahUserpActivity extends AppCompatActivity {
             return;
         }
 
-        // TAMBAH: Validasi Status SPS
         if (selectedStatusSPS.isEmpty() || selectedStatusSPS.equals("Pilih Status SPS")) {
             Toast.makeText(this, "Pilih status SPS terlebih dahulu", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // PERBAIKAN: Validasi tambahan untuk hunian dan tipe unit yang sold out
         if (selectedHunian.contains("(SOLD OUT)")) {
             Toast.makeText(this, "Hunian ini sudah terjual semua", Toast.LENGTH_SHORT).show();
             return;
@@ -848,11 +836,15 @@ public class TambahUserpActivity extends AppCompatActivity {
 
         String email = editTextEmail.getText().toString().trim();
 
-        // PERBAIKAN: Bersihkan nama hunian dan tipe unit dari label "SOLD OUT"
         String cleanHunian = selectedHunian.replace(" (SOLD OUT)", "").trim();
         String cleanTipeUnit = selectedTipeUnit.replace(" (SOLD OUT)", "").trim();
 
-        // TAMBAH: Update constructor tanpa DP, tambah Status SPS
+        // ✅ BARU: Simpan data untuk log BOOKING (tidak mengganggu data lain)
+        pendingLogNama = nama;
+        pendingLogProyek = selectedProyek;
+        pendingLogHunian = cleanHunian;
+        pendingLogTipe = cleanTipeUnit;
+
         UserProspekData userData = new UserProspekData(
                 selectedProspekId,
                 nama,
@@ -865,7 +857,7 @@ public class TambahUserpActivity extends AppCompatActivity {
                 cleanTipeUnit,
                 selectedProspekBPJS,
                 selectedProspekNPWP,
-                selectedStatusSPS  // TAMBAH: Status SPS
+                selectedStatusSPS
         );
 
         UserProspekRequest request = new UserProspekRequest("addUserProspek", userData);
@@ -889,6 +881,26 @@ public class TambahUserpActivity extends AppCompatActivity {
                         Log.d(TAG, "Response body - Message: " + basicResponse.getMessage());
 
                         if (basicResponse.isSuccess()) {
+
+                            // ✅ BARU: Log aksi BOOKING (tambah user prospek)
+                            try {
+                                ActivityLogger.log(
+                                        TambahUserpActivity.this,
+                                        ActivityLogger.AKSI_BOOKING,
+                                        ActivityLogger.FITUR_BOOKING,
+                                        "Booking unit: " + pendingLogNama
+                                                + " | Proyek: " + pendingLogProyek
+                                                + " | Hunian: " + pendingLogHunian
+                                                + " | Tipe: " + pendingLogTipe,
+                                        "TambahUserpActivity",
+                                        null,
+                                        pendingLogNama
+                                );
+                            } catch (Exception logEx) {
+                                Log.e(TAG, "Error saat log booking: " + logEx.getMessage());
+                            }
+                            // ===============================================
+
                             Toast.makeText(TambahUserpActivity.this,
                                     "Data berhasil ditambahkan ke user prospek", Toast.LENGTH_SHORT).show();
                             updateStatusKavling();
@@ -922,7 +934,6 @@ public class TambahUserpActivity extends AppCompatActivity {
         Log.d(TAG, "updateStatusKavling: Mengupdate status kavling");
         Log.d(TAG, "Proyek: " + selectedProyek + ", Hunian: " + selectedHunian + ", Tipe: " + selectedTipeUnit);
 
-        // Validasi
         if (selectedProyek == null || selectedProyek.isEmpty() ||
                 selectedHunian == null || selectedHunian.isEmpty() ||
                 selectedTipeUnit == null || selectedTipeUnit.isEmpty()) {
@@ -930,15 +941,12 @@ public class TambahUserpActivity extends AppCompatActivity {
             return;
         }
 
-        // PERBAIKAN: Bersihkan nama hunian dan tipe unit dari label "SOLD OUT"
         String cleanHunian = selectedHunian.replace(" (SOLD OUT)", "").trim();
         String cleanTipeUnit = selectedTipeUnit.replace(" (SOLD OUT)", "").trim();
 
-        // Show loading
         btnSimpan.setEnabled(false);
         btnSimpan.setText("Mengupdate...");
 
-        // Debug log
         Log.d(TAG, "Mengirim request update dengan parameter:");
         Log.d(TAG, "Proyek: " + selectedProyek);
         Log.d(TAG, "Hunian: " + cleanHunian);

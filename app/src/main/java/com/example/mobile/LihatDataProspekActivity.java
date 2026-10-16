@@ -12,22 +12,25 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
+
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class LihatDataProspekActivity extends AppCompatActivity {
+public class LihatDataProspekActivity extends BaseActivity {
 
     MaterialToolbar TopAppBar;
     BottomNavigationView bottomNavigationView;
@@ -136,7 +139,6 @@ public class LihatDataProspekActivity extends AppCompatActivity {
     }
 
     private void setupFilterSpinner() {
-        // Buat array untuk opsi filter
         String[] statusOptions = {"Semua", "Cold", "Follow up", "Kunjungan", "Batal"};
 
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this,
@@ -150,7 +152,6 @@ public class LihatDataProspekActivity extends AppCompatActivity {
                 String selectedStatus = parent.getItemAtPosition(position).toString();
                 adapter.filterByStatus(selectedStatus);
 
-                // Tampilkan jumlah data
                 int itemCount = adapter.getItemCount();
                 String filterText = selectedStatus.equals("Semua") ?
                         "Menampilkan semua data (" + itemCount + " item)" :
@@ -161,7 +162,6 @@ public class LihatDataProspekActivity extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                // Default filter "Semua"
                 adapter.filterByStatus("Semua");
             }
         });
@@ -196,13 +196,9 @@ public class LihatDataProspekActivity extends AppCompatActivity {
                         Log.d("LihatDataProspek", "Data count: " + (data != null ? data.size() : "null"));
 
                         if (data != null) {
-                            // Update adapter dengan data baru
                             adapter.updateData(new ArrayList<>(data));
-
-                            // Reset filter ke "Semua"
                             filterStatusSpinner.setSelection(0);
 
-                            // Tampilkan toast berdasarkan level
                             if (data.isEmpty()) {
                                 if ("Admin".equals(userLevel)) {
                                     Toast.makeText(LihatDataProspekActivity.this,

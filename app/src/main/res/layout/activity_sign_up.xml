@@ -76,7 +76,6 @@
                         android:hint="Masukkan Username"
                         android:padding="12dp" />
 
-                    <!-- TAMBAHKAN EDIT TEXT EMAIL DI SINI -->
                     <EditText
                         android:id="@+id/email"
                         android:layout_width="match_parent"
@@ -86,10 +85,30 @@
                         android:layout_marginRight="15dp"
                         android:textColor="@android:color/black"
                         android:background="@android:drawable/edit_text"
-                        android:drawableStart="@drawable/ic_request" 
+                        android:drawableStart="@drawable/ic_request"
                         android:drawablePadding="8dp"
                         android:hint="Masukkan Email"
                         android:inputType="textEmailAddress"
+                        android:padding="12dp" />
+
+                    <!-- ============================================= -->
+                    <!-- NIP DIDAHULUKAN (di atas spinner divisi)      -->
+                    <!-- inputType diubah ke textCapCharacters karena   -->
+                    <!-- NIP bisa berisi huruf (MI/MF/AO)              -->
+                    <!-- ============================================= -->
+                    <EditText
+                        android:id="@+id/noNip"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:textColor="@android:color/black"
+                        android:background="@android:drawable/edit_text"
+                        android:drawableStart="@drawable/ic_nip"
+                        android:drawablePadding="8dp"
+                        android:hint="Masukkan No. NIP (contoh: MI4123 / MF4123 / AO4123)"
+                        android:inputType="textCapCharacters"
                         android:padding="12dp" />
 
                     <Spinner
@@ -103,21 +122,6 @@
                         android:padding="12dp"
                         android:background="@android:drawable/edit_text"
                         android:entries="@array/opsi_spinner" />
-
-                    <EditText
-                        android:id="@+id/noNip"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:layout_marginLeft="15dp"
-                        android:layout_marginRight="15dp"
-                        android:textColor="@android:color/black"
-                        android:background="@android:drawable/edit_text"
-                        android:drawableStart="@drawable/ic_nip"
-                        android:drawablePadding="8dp"
-                        android:hint="Masukkan No. NIP"
-                        android:inputType="number"
-                        android:padding="12dp" />
 
                     <EditText
                         android:id="@+id/password"

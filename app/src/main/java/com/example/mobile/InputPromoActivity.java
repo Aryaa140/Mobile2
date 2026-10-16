@@ -20,7 +20,6 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -44,7 +43,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class InputPromoActivity extends AppCompatActivity {
+public class InputPromoActivity extends BaseActivity {
 
     private static final int PICK_IMAGE_REQUEST = 1;
     private static final String TAG = "InputPromoActivity";
@@ -499,6 +498,24 @@ public class InputPromoActivity extends AppCompatActivity {
                         BasicResponse basicResponse = response.body();
                         if (basicResponse.isSuccess()) {
                             Log.d(TAG, "Promo berhasil disimpan: " + namaPromo);
+
+                            // ✅ BARU: Log aksi CREATE promo
+                            try {
+                                ActivityLogger.log(
+                                        InputPromoActivity.this,
+                                        ActivityLogger.AKSI_CREATE,
+                                        ActivityLogger.FITUR_PROMO,
+                                        "Menambah promo: " + namaPromo
+                                                + " | Proyek: " + referensiProyek
+                                                + " | Kadaluwarsa: " + kadaluwarsa,
+                                        "InputPromoActivity",
+                                        null,
+                                        namaPromo
+                                );
+                            } catch (Exception logEx) {
+                                Log.e(TAG, "Error saat log promo: " + logEx.getMessage());
+                            }
+                            // ===============================================
 
                             runOnUiThread(() -> {
                                 Toast.makeText(InputPromoActivity.this,
